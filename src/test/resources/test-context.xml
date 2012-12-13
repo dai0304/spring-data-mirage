@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:mirage="http://www.springframework.org/schema/data/mirage"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/data/mirage http://www.springframework.org/schema/data/mirage/spring-mirage-1.0.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+  <context:annotation-config />
+  <context:property-placeholder location="classpath:/jdbc.properties" />
+  <context:component-scan base-package="org.springframework.data.mirage.repository" />
+
+  <bean id="sqlManager" class="jp.sf.amateras.mirage.SqlManagerImpl">
+    <property name="dialect" ref="dialect" />
+    <property name="nameConverter" ref="nameConverter"/>
+    <property name="connectionProvider" ref="connectionProvider" />
+  </bean>
+
+  <bean id="nameConverter" class="jp.sf.amateras.mirage.naming.RailsLikeNameConverter"/>
+  <bean id="dialect" class="jp.sf.amateras.mirage.dialect.MySQLDialect"/>
+  <bean id="connectionProvider" class="jp.sf.amateras.mirage.integration.spring.SpringConnectionProvider">
+    <property name="transactionManager" ref="transactionManager" />
+  </bean>
+
+  <tx:annotation-driven transaction-manager="transactionManager" />
+  <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+    <property name="dataSource" ref="dataSource"/>
+  </bean>
+
+  <bean id="dataSource" class="org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy">
+    <constructor-arg>
+      <bean class="net.sf.log4jdbc.Log4jdbcProxyDataSource">
+        <constructor-arg>
+          <bean class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+            <property name="driverClassName" value="${jdbc.driver}"/>
+            <property name="url" value="${jdbc.url}"/>
+            <property name="username" value="${jdbc.user}"/>
+            <property name="password" value="${jdbc.password}"/>
+          </bean>
+        </constructor-arg>
+      </bean>
+    </constructor-arg>
+  </bean>
+
+  <mirage:repositories base-package="org.springframework.data.mirage.repository.example" sql-manager-ref="sqlManager" />
+  <bean class="org.springframework.data.mirage.repository.support.MiragePersistenceExceptionTranslator" />
+  <bean class="org.springframework.data.mirage.repository.support.FieldPropertyExtractorInitializer"/>
+  <bean class="org.springframework.data.mirage.repository.support.EnableSLF4JBridgeHandler" />
+
+</beans>

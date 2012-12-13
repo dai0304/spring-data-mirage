@@ -1,0 +1,2 @@
+http\://www.springframework.org/schema/data/mirage/spring-mirage-1.0.xsd=org/springframework/data/mirage/repository/config/spring-mirage-1.0.xsd
+http\://www.springframework.org/schema/data/mirage/spring-mirage.xsd=org/springframework/data/mirage/repository/config/spring-mirage-1.0.xsd

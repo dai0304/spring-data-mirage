@@ -1,0 +1,33 @@
+<configuration>
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <Target>System.out</Target>
+    <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+      <Pattern>%d{HH:mm:ss} %-5level %logger{36} %msg%n</Pattern>
+    </encoder>
+  </appender>
+  <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>target/logs/.log</file>
+    <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+      <Pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} %msg%n</Pattern>
+    </encoder>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <FileNamePattern>target/log/%d{yyyy-MM-dd}.log</FileNamePattern>
+    </rollingPolicy>
+  </appender>
+
+  <logger name="org.springframework" level="INFO" />
+  <logger name="org.springframework.data.mirage" level="DEBUG" />
+
+  <logger name="jp.sf.amateras.mirage" level="WARN" />
+
+  <logger name="jdbc" level="WARN" />
+  <logger name="jdbc.sqltiming" level="INFO" />
+  <!--
+  <logger name="jdbc.resultsettable" level="INFO" />
+  <logger name="jdbc.audit" level="INFO" />
+  -->
+
+  <root level="INFO">
+    <appender-ref ref="STDOUT" />
+  </root>
+</configuration>

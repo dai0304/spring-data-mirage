@@ -1,0 +1,1 @@
+http\://www.springframework.org/schema/data/mirage=org.springframework.data.mirage.repository.config.MirageRepositoryNameSpaceHandler

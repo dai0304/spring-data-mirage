@@ -1,0 +1,4 @@
+# Tooling related information for the MIRAGE namespace
+http\://www.springframework.org/schema/data/mirage@name=Mirage Namespace
+http\://www.springframework.org/schema/data/mirage@prefix=mirage
+http\://www.springframework.org/schema/data/mirage@icon=org/springframework/jdbc/config/spring-jdbc.gif
