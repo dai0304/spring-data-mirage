@@ -26,7 +26,7 @@ import org.springframework.util.Assert;
 /**
  * {@link SqlResource}のデフォルト実装クラス。
  * 
- * @since 1.0.0
+ * @since 1.0
  * @version $Id$
  * @author daisuke
  */
@@ -73,16 +73,55 @@ public class SimpleSqlResource implements SqlResource {
 	 * 
 	 * @param scope 
 	 * @param name
-	 * @throws IllegalArgumentException 引数に{@code null}を与えた場合 
+	 * @throws NoSuchSqlResourceException 
+	 * @throws IllegalArgumentException 引数に{@code null}を与えた場合
+	 * @since 1.0
 	 */
-	public SimpleSqlResource(Class<?> scope, final String name) {
-		Assert.notNull(name);
+	public SimpleSqlResource(Class<?> scope, String name) {
+		this(scope, new String[] {
+			name
+		});
+	}
+	
+	/**
+	 * インスタンスを生成する。
+	 * 
+	 * @param scope 
+	 * @param names
+	 * @throws NoSuchSqlResourceException 
+	 * @throws IllegalArgumentException 引数に{@code null}を与えた場合
+	 * @since 1.0
+	 */
+	public SimpleSqlResource(Class<?> scope, String[] names) {
+		Assert.notNull(scope);
+		Assert.notNull(names);
+		Assert.noNullElements(names);
 		String packageName = scope != null ? scope.getPackage().getName() : "";
-		absolutePath = toAbsolutePath(packageName, name);
+		
+		String targetName = null;
+		for (String name : names) {
+			if (existsResource(toAbsolutePath(packageName, name))) {
+				targetName = name;
+				break;
+			}
+		}
+		if (targetName != null) {
+			absolutePath = toAbsolutePath(packageName, targetName);
+		} else {
+			throw new NoSuchSqlResourceException(scope, names);
+		}
 	}
 	
 	@Override
 	public String getAbsolutePath() {
 		return absolutePath;
+	}
+	
+	private boolean existsResource(String absolutePath) {
+		if (absolutePath == null) {
+			return false;
+		}
+		ClassLoader cl = Thread.currentThread().getContextClassLoader();
+		return cl.getResource(absolutePath) != null;
 	}
 }

@@ -21,6 +21,7 @@ import java.util.Map;
 
 import jp.sf.amateras.mirage.SqlManager;
 
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.mirage.repository.SimpleSqlResource;
 import org.springframework.data.mirage.repository.SqlResource;
 import org.springframework.data.repository.query.Parameter;
@@ -50,7 +51,7 @@ public class MirageQuery implements RepositoryQuery {
 	 * @param sqlManager {@link SqlManager}
 	 * @throws IllegalArgumentException if the argument is {@code null}
 	 */
-	public MirageQuery(MirageQueryMethod mirageQueryMethod, SqlManager sqlManager) {
+	public MirageQuery(ResourceLoader resourceLoader, MirageQueryMethod mirageQueryMethod, SqlManager sqlManager) {
 		Assert.notNull(mirageQueryMethod, "MirageQueryMethod must not to be null");
 		Assert.notNull(sqlManager, "SqlManager must not to be null");
 		this.mirageQueryMethod = mirageQueryMethod;
@@ -59,12 +60,21 @@ public class MirageQuery implements RepositoryQuery {
 	
 	@Override
 	public Object execute(Object[] parameters) {
+		String[] names;
+		
 		Class<?> declaringClass = mirageQueryMethod.getDeclaringClass();
 		String name = mirageQueryMethod.getAnnotatedQuery();
-		if (name == null) {
-			name = declaringClass.getSimpleName() + "_" + mirageQueryMethod.getName() + ".sql";
+		if (name != null) {
+			names = new String[] {
+				name
+			};
+		} else {
+			names = new String[] {
+				declaringClass.getSimpleName() + "_" + mirageQueryMethod.getName() + ".sql",
+				declaringClass.getSimpleName() + ".sql"
+			};
 		}
-		SqlResource sqlResource = new SimpleSqlResource(declaringClass, name);
+		SqlResource sqlResource = new SimpleSqlResource(declaringClass, names);
 		
 		Map<String, Object> parameterMap = new HashMap<String, Object>();
 		parameterMap.put("orders", null);
