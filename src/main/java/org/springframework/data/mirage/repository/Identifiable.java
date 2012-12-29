@@ -26,9 +26,9 @@ package org.springframework.data.mirage.repository;
 public interface Identifiable {
 	
 	/**
-	 * IDを返す。
+	 * Returns the ID of this entity.
 	 * 
-	 * @return ID
+	 * @return the ID
 	 * @since 1.0
 	 */
 	long getId();

@@ -30,6 +30,7 @@ public interface SqlResource {
 	 * 
 	 * @return
 	 * @since 1.0
+	 * @see ClassLoader#getResourceAsStream(String)
 	 */
 	String getAbsolutePath();
 	

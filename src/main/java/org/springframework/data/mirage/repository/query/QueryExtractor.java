@@ -19,16 +19,11 @@ package org.springframework.data.mirage.repository.query;
 import org.springframework.data.mirage.repository.SqlResource;
 
 /**
- * TODO for daisuke
+ * Interface to hide different implementations to extract the original Mirage query string from a {@link Query}.
  * 
- * @since 1.2
+ * @since 1.0
  * @version $Id$
  * @author daisuke
- */
-/**
- * Interface to hide different implementations to extract the original JPA query string from a {@link Query}.
- * 
- * @author Oliver Gierke
  */
 public interface QueryExtractor {
 	

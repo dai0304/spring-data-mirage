@@ -34,8 +34,18 @@ import java.lang.annotation.Target;
 @Documented
 public @interface Query {
 	
+	/**
+	 * 
+	 * @return
+	 * @since 1.0
+	 */
 	String countQuery() default "";
 	
+	/**
+	 * 
+	 * @return
+	 * @since 1.0
+	 */
 	String value() default "";
 	
 }

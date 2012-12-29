@@ -82,7 +82,7 @@ public abstract class MirageQueryLookupStrategy implements QueryLookupStrategy {
 	 * TODO for daisuke
 	 * 
 	 * @param method
-	 * @param sqlManager
+	 * @param sqlManager {@link SqlManager}
 	 * @param namedQueries
 	 * @return
 	 * @since 1.0
@@ -92,10 +92,8 @@ public abstract class MirageQueryLookupStrategy implements QueryLookupStrategy {
 	
 	
 	/**
-	 * {@link QueryLookupStrategy} to try to detect a declared query first ( {@link Query}, JPA named query). In case none
+	 * {@link QueryLookupStrategy} to try to detect a declared query first ( {@link Query}, Mirage named query). In case none
 	 * is found we fall back on query creation.
-	 * 
-	 * @author Oliver Gierke
 	 */
 	private static class CreateIfNotFoundQueryLookupStrategy extends MirageQueryLookupStrategy {
 		
@@ -123,8 +121,6 @@ public abstract class MirageQueryLookupStrategy implements QueryLookupStrategy {
 	
 	/**
 	 * {@link QueryLookupStrategy} to create a query from the method name.
-	 * 
-	 * @author Oliver Gierke
 	 */
 	private static class CreateQueryLookupStrategy extends MirageQueryLookupStrategy {
 		
@@ -141,9 +137,7 @@ public abstract class MirageQueryLookupStrategy implements QueryLookupStrategy {
 	
 	/**
 	 * {@link QueryLookupStrategy} that tries to detect a declared query declared via {@link Query} annotation followed by
-	 * a JPA named query lookup.
-	 * 
-	 * @author Oliver Gierke
+	 * a Mirage named query lookup.
 	 */
 	private static class DeclaredQueryLookupStrategy extends MirageQueryLookupStrategy {
 		
