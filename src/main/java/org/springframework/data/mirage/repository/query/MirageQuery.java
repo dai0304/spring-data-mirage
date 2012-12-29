@@ -21,7 +21,6 @@ import java.util.Map;
 
 import jp.sf.amateras.mirage.SqlManager;
 
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.mirage.repository.SimpleSqlResource;
 import org.springframework.data.mirage.repository.SqlResource;
 import org.springframework.data.repository.query.Parameter;
@@ -51,7 +50,7 @@ public class MirageQuery implements RepositoryQuery {
 	 * @param sqlManager {@link SqlManager}
 	 * @throws IllegalArgumentException if the argument is {@code null}
 	 */
-	public MirageQuery(ResourceLoader resourceLoader, MirageQueryMethod mirageQueryMethod, SqlManager sqlManager) {
+	public MirageQuery(MirageQueryMethod mirageQueryMethod, SqlManager sqlManager) {
 		Assert.notNull(mirageQueryMethod, "MirageQueryMethod must not to be null");
 		Assert.notNull(sqlManager, "SqlManager must not to be null");
 		this.mirageQueryMethod = mirageQueryMethod;
