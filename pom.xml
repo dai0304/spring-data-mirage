@@ -202,6 +202,20 @@
       <url>http://maven.jiemamy.org/release</url>
     </repository>
   </repositories>
+  <distributionManagement>
+    <repository>
+      <id>maven.xet.jp</id>
+      <url>scp://maven.xet.jp/var/www/maven.xet.jp/release</url>
+    </repository>
+    <snapshotRepository>
+      <id>maven.xet.jp</id>
+      <url>scp://maven.xet.jp/var/www/maven.xet.jp/snapshot</url>
+    </snapshotRepository>
+    <site>
+      <id>maven.xet.jp</id>
+      <url>scp://maven.xet.jp/var/www/maven.xet.jp/site/${project.artifactId}/${project.version}</url>
+    </site>
+  </distributionManagement>
   <properties>
     <slf4j-version>[1.6.2,1.7.0)</slf4j-version>
     <logback-version>[1.0.0,1.1.0)</logback-version>
