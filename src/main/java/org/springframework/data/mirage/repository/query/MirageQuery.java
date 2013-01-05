@@ -24,7 +24,6 @@ import jp.sf.amateras.mirage.SqlManager;
 import org.springframework.data.mirage.repository.SimpleSqlResource;
 import org.springframework.data.mirage.repository.SqlResource;
 import org.springframework.data.repository.query.Parameter;
-import org.springframework.data.repository.query.Parameters;
 import org.springframework.data.repository.query.QueryMethod;
 import org.springframework.data.repository.query.RepositoryQuery;
 import org.springframework.util.Assert;
@@ -77,9 +76,13 @@ public class MirageQuery implements RepositoryQuery {
 		
 		Map<String, Object> parameterMap = new HashMap<String, Object>();
 		parameterMap.put("orders", null);
-		Parameters params = mirageQueryMethod.getParameters();
+		Iterable<Parameter> params = mirageQueryMethod.getParameters();
 		for (Parameter p : params) {
 			parameterMap.put(p.getName(), parameters[p.getIndex()]);
+		}
+		Iterable<StaticParam> staticParams = mirageQueryMethod.getStaticParameters();
+		for (StaticParam p : staticParams) {
+			parameterMap.put(p.key(), p.value());
 		}
 		
 		String absolutePath = sqlResource.getAbsolutePath();

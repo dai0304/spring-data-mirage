@@ -17,6 +17,9 @@
 package org.springframework.data.mirage.repository.query;
 
 import java.lang.reflect.Method;
+import java.util.List;
+
+import com.google.common.collect.Lists;
 
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.data.repository.core.RepositoryMetadata;
@@ -54,6 +57,29 @@ public class MirageQueryMethod extends QueryMethod {
 	}
 	
 	/**
+	 * TODO for daisuke
+	 * 
+	 * @return
+	 * @since 1.0
+	 */
+	public Iterable<StaticParam> getStaticParameters() {
+		StaticParams staticParams = method.getAnnotation(StaticParams.class);
+		StaticParam staticParam = method.getAnnotation(StaticParam.class);
+		List<StaticParam> result =
+				Lists.newArrayListWithCapacity(((staticParams == null) ? 0 : staticParams.value().length)
+						+ ((staticParam == null) ? 0 : 1));
+		if (staticParams != null) {
+			for (StaticParam param : staticParams.value()) {
+				result.add(param);
+			}
+		}
+		if (staticParam != null) {
+			result.add(staticParam);
+		}
+		return result;
+	}
+	
+	/**
 	 * Returns whether the finder is a modifying one.
 	 * 
 	 * @return {@code true} if the finder is a modifying one
@@ -82,7 +108,7 @@ public class MirageQueryMethod extends QueryMethod {
 	 * Returns the countQuery string declared in a {@link Query} annotation or {@code null} if neither the annotation
 	 * found nor the attribute was specified.
 	 * 
-	 * @return
+	 * @return countQuery string
 	 */
 	String getCountQuery() {
 		Query queryAnnotation = getQueryAnnotation();
@@ -100,7 +126,7 @@ public class MirageQueryMethod extends QueryMethod {
 	/**
 	 * Returns the actual return type of the method.
 	 * 
-	 * @return
+	 * @return {@link Class}
 	 */
 	Class<?> getReturnType() {
 		return method.getReturnType();
@@ -109,7 +135,7 @@ public class MirageQueryMethod extends QueryMethod {
 	/**
 	 * Returns the {@link Query} annotation that is applied to the method or {@code null} if none available.
 	 * 
-	 * @return
+	 * @return {@link Query}
 	 */
 	private Query getQueryAnnotation() {
 		return method.getAnnotation(Query.class);
