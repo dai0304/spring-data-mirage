@@ -16,6 +16,10 @@
  */
 package org.springframework.data.mirage.repository;
 
+import java.util.Arrays;
+
+import org.springframework.util.Assert;
+
 /**
  * TODO for daisuke
  * 
@@ -25,6 +29,12 @@ package org.springframework.data.mirage.repository;
  */
 @SuppressWarnings("serial")
 public class NoSuchSqlResourceException extends RuntimeException {
+	
+	private static <T>T notNull(T target) {
+		Assert.notNull(target);
+		return target;
+	}
+	
 	
 	private final Class<?> scope;
 	
@@ -36,8 +46,10 @@ public class NoSuchSqlResourceException extends RuntimeException {
 	 * 
 	 * @param scope
 	 * @param names
+	 * @throws IllegalArgumentException 引数に{@code null}を与えた場合
 	 */
 	public NoSuchSqlResourceException(Class<?> scope, String[] names) {
+		super(String.format("%s:%s", notNull(scope).getName(), Arrays.toString(notNull(names))));
 		this.scope = scope;
 		this.names = names;
 	}

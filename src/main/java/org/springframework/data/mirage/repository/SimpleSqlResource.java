@@ -21,6 +21,8 @@ import java.util.List;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
 /**
@@ -31,6 +33,9 @@ import org.springframework.util.Assert;
  * @author daisuke
  */
 public class SimpleSqlResource implements SqlResource {
+	
+	private static Logger logger = LoggerFactory.getLogger(SimpleSqlResource.class);
+	
 	
 	static String toAbsolutePath(final String packageName, final String relativePath) {
 		// Is path already absolute?
@@ -100,9 +105,12 @@ public class SimpleSqlResource implements SqlResource {
 		
 		String targetName = null;
 		for (String name : names) {
-			if (existsResource(toAbsolutePath(packageName, name))) {
+			String currentPath = toAbsolutePath(packageName, name);
+			if (existsResource(currentPath)) {
 				targetName = name;
 				break;
+			} else {
+				logger.debug("{} not exists", currentPath);
 			}
 		}
 		if (targetName != null) {

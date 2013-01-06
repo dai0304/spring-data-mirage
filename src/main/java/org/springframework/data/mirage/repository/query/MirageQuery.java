@@ -21,6 +21,8 @@ import java.util.Map;
 
 import jp.sf.amateras.mirage.SqlManager;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.mirage.repository.SimpleSqlResource;
 import org.springframework.data.mirage.repository.SqlResource;
 import org.springframework.data.repository.query.Parameter;
@@ -36,6 +38,8 @@ import org.springframework.util.Assert;
  * @author daisuke
  */
 public class MirageQuery implements RepositoryQuery {
+	
+	private static Logger logger = LoggerFactory.getLogger(MirageQuery.class);
 	
 	private final MirageQueryMethod mirageQueryMethod;
 	
@@ -78,7 +82,12 @@ public class MirageQuery implements RepositoryQuery {
 		parameterMap.put("orders", null);
 		Iterable<Parameter> params = mirageQueryMethod.getParameters();
 		for (Parameter p : params) {
-			parameterMap.put(p.getName(), parameters[p.getIndex()]);
+			String parameterName = p.getName();
+			if (parameterName == null) {
+				logger.warn("null name parameter [{}] is ignored", p);
+			} else {
+				parameterMap.put(parameterName, parameters[p.getIndex()]);
+			}
 		}
 		Iterable<StaticParam> staticParams = mirageQueryMethod.getStaticParameters();
 		for (StaticParam p : staticParams) {
