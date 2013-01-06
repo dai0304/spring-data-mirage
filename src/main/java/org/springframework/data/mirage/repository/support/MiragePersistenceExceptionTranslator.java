@@ -31,7 +31,7 @@ public class MiragePersistenceExceptionTranslator implements PersistenceExceptio
 	@SuppressWarnings("serial")
 	@Override
 	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
-		if (ex.getClass().getPackage().getName().startsWith("jp.sf.jp.sf.amateras.mirage.exception")) {
+		if (ex.getClass().getPackage().getName().startsWith("jp.sf.amateras.mirage.exception")) {
 			// TODO
 			return new DataAccessException("", ex) {
 			};
