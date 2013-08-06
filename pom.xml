@@ -312,16 +312,18 @@
       <name>Spring Maven Release Repository</name>
       <url>http://repo.springsource.org/release</url>
     </repository>
+    <!--
     <repository>
       <id>spring-milestone</id>
       <name>Spring Maven MILESTONE Repository</name>
-      <url>http://repo.springframework.org/milestone</url>
+      <url>http://repo.springsource.org/milestone</url>
     </repository>
     <repository>
       <id>spring-snapshot</id>
       <name>Spring Maven SNAPSHOT Repository</name>
-      <url>http://repo.springframework.org/snapshot</url>
+      <url>http://repo.springsource.org/snapshot</url>
     </repository>
+    -->
 
     <repository>
       <id>jiemamy.org-release</id>
