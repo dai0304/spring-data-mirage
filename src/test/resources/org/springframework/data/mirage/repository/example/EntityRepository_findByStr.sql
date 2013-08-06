@@ -1,21 +1,21 @@
 -- EntityRepository_findByStr.sql
 
 SELECT *
-	FROM samples
-	
-	WHERE str = /*str*/'abc'
-	
-	/*IF orders != null*/
-	ORDER BY /*$orders*/id
+FROM samples
+
+WHERE str = /*str*/'abc'
+
+/*IF orders != null*/
+ORDER BY /*$orders*/id
+/*END*/
+
+/*BEGIN*/
+LIMIT
+	/*IF offset != null*/
+	/*offset*/0,
 	/*END*/
 
-	/*BEGIN*/
-	LIMIT
-		/*IF offset != null*/
-		/*offset*/0,
-		/*END*/
-
-		/*IF size != null*/
-		/*size*/10
-		/*END*/
+	/*IF size != null*/
+	/*size*/10
 	/*END*/
+/*END*/

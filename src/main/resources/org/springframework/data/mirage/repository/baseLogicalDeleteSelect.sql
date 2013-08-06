@@ -3,8 +3,12 @@ FROM /*$table*/some_table
 
 /*BEGIN*/
 WHERE
+	/*IF include_logical_deleted != null && include_logical_deleted == false*/
+	/*$id_column_name*/id > 0
+	/*END*/
+
 	/*IF id != null*/
-	/*$id_column_name*/id = /*id*/10
+	AND /*$id_column_name*/id = /*id*/10
 	/*END*/
 
 	/*IF absid != null*/

@@ -138,6 +138,11 @@ public class SimpleSqlResource implements SqlResource {
 		return absolutePath;
 	}
 	
+	@Override
+	public String toString() {
+		return "SimpleSqlResource [absolutePath=" + absolutePath + "]";
+	}
+	
 	private boolean existsResource(String absolutePath) {
 		if (absolutePath == null) {
 			return false;

@@ -52,6 +52,7 @@ public class SimpleLogicalDeleteMirageRepositoryTest {
 	public void test_crud() {
 		RepositoryFactorySupport factory = new MirageRepositoryFactory(sqlManager);
 		EntityRepository repos = factory.getRepository(EntityRepository.class);
+		
 		Entity entity = new Entity("foo");
 		assertThat(repos.count(), is(0L));
 		

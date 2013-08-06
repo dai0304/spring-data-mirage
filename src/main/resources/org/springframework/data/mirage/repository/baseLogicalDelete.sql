@@ -1,5 +1,3 @@
 UPDATE /*$table*/some_table
-	SET
-		id = id * -1
-	WHERE
-		id = /*id*/10
+SET /*$id_column_name*/id = /*$id_column_name*/id * -1
+WHERE /*$id_column_name*/id = /*id*/10
