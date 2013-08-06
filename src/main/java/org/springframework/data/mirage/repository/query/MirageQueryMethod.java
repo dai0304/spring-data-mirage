@@ -17,9 +17,8 @@
 package org.springframework.data.mirage.repository.query;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
-
-import com.google.common.collect.Lists;
 
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.data.repository.core.RepositoryMetadata;
@@ -66,7 +65,7 @@ public class MirageQueryMethod extends QueryMethod {
 		StaticParams staticParams = method.getAnnotation(StaticParams.class);
 		StaticParam staticParam = method.getAnnotation(StaticParam.class);
 		List<StaticParam> result =
-				Lists.newArrayListWithCapacity(((staticParams == null) ? 0 : staticParams.value().length)
+				new ArrayList<StaticParam>(((staticParams == null) ? 0 : staticParams.value().length)
 						+ ((staticParam == null) ? 0 : 1));
 		if (staticParams != null) {
 			for (StaticParam param : staticParams.value()) {
@@ -85,7 +84,7 @@ public class MirageQueryMethod extends QueryMethod {
 	 * @return {@code true} if the finder is a modifying one
 	 */
 	@Override
-	protected boolean isModifyingQuery() {
+	public boolean isModifyingQuery() {
 		return method.getAnnotation(Modifying.class) != null;
 	}
 	

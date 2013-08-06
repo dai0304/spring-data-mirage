@@ -112,20 +112,20 @@ public interface JdbcRepository<E, ID extends Serializable> extends PagingAndSor
 	/**
 	 * {@inheritDoc}
 	 * 
+	 * @throws DataAccessException データアクセスエラーが発生した場合
+	 * @since 1.0
+	 */
+	@Override
+	<S extends E>Iterable<S> save(Iterable<S> entities);
+	
+	/**
+	 * {@inheritDoc}
+	 * 
 	 * <p>{@code entity}として{@code null}を渡した場合、何もせずに{@code null}を返す。</p>
 	 * 
 	 * @throws DataAccessException データアクセスエラーが発生した場合
 	 * @since 1.0
 	 */
 	@Override
-	E save(E entity);
-	
-	/**
-	 * {@inheritDoc}
-	 * 
-	 * @throws DataAccessException データアクセスエラーが発生した場合
-	 * @since 1.0
-	 */
-	@Override
-	Iterable<E> save(Iterable<? extends E> entities);
+	<S extends E>S save(S entity);
 }

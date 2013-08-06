@@ -16,10 +16,10 @@
  */
 package org.springframework.data.mirage.repository;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
-
-import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +43,7 @@ public class SimpleSqlResource implements SqlResource {
 			return relativePath;
 		} else {
 			// Break package into list of package names
-			List<String> absolutePath = Lists.newArrayList(packageName.split("\\."));
+			List<String> absolutePath = new ArrayList<String>(Arrays.asList(packageName.split("\\.")));
 			
 			// Break path into folders
 			final String[] folders = relativePath.split("[/\\\\]");
@@ -65,8 +65,21 @@ public class SimpleSqlResource implements SqlResource {
 			}
 			
 			// Return absolute path
-			return Joiner.on("/").join(absolutePath);
+			return join(absolutePath);
 		}
+	}
+	
+	private static String join(List<String> list) {
+		StringBuilder sb = new StringBuilder();
+		Iterator<String> parts = list.iterator();
+		if (parts.hasNext()) {
+			sb.append(parts.next());
+			while (parts.hasNext()) {
+				sb.append("/");
+				sb.append(parts.next());
+			}
+		}
+		return sb.toString();
 	}
 	
 	

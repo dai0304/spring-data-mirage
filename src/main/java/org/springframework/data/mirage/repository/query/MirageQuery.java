@@ -95,34 +95,18 @@ public class MirageQuery implements RepositoryQuery {
 		}
 		
 		String absolutePath = sqlResource.getAbsolutePath();
-		switch (mirageQueryMethod.getType()) {
-			case SINGLE_ENTITY:
-				return getSqlManager().getSingleResult(mirageQueryMethod.getReturnType(), absolutePath, parameterMap);
-				
-			case PAGING:
-			case COLLECTION:
-				return getSqlManager().getResultList(mirageQueryMethod.getReturnType(), absolutePath, parameterMap);
-				
-			case MODIFYING:
-				return getSqlManager().executeUpdate(absolutePath, parameterMap);
-				
-			default:
-				return null;
+		
+		if (mirageQueryMethod.isModifyingQuery()) {
+			return sqlManager.executeUpdate(absolutePath, parameterMap);
+		} else if (mirageQueryMethod.isPageQuery() || mirageQueryMethod.isCollectionQuery()) {
+			return sqlManager.getResultList(mirageQueryMethod.getReturnType(), absolutePath, parameterMap);
+		} else {
+			return sqlManager.getSingleResult(mirageQueryMethod.getReturnType(), absolutePath, parameterMap);
 		}
 	}
 	
 	@Override
 	public QueryMethod getQueryMethod() {
 		return mirageQueryMethod;
-	}
-	
-	/**
-	 * TODO for daisuke
-	 * 
-	 * @return {@link SqlManager}
-	 * @since 1.0
-	 */
-	protected SqlManager getSqlManager() {
-		return sqlManager;
 	}
 }

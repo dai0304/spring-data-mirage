@@ -21,8 +21,6 @@ import java.util.Map;
 import jp.sf.amateras.mirage.SqlManager;
 import jp.sf.amateras.mirage.exception.SQLRuntimeException;
 
-import com.google.common.base.Preconditions;
-
 import org.springframework.data.repository.core.EntityInformation;
 
 /**
@@ -62,7 +60,9 @@ public class LogicalDeleteMirageRepository<E extends Identifiable> extends Ident
 	
 	@Override
 	public void delete(E entity) {
-		Preconditions.checkNotNull(entity);
+		if (entity == null) {
+			throw new NullPointerException("entity is null"); //$NON-NLS-1$
+		}
 		delete(entity.getId());
 	}
 	
@@ -171,7 +171,7 @@ public class LogicalDeleteMirageRepository<E extends Identifiable> extends Ident
 	}
 	
 	@Override
-	public E save(E entity) {
+	public <S extends E>S save(S entity) {
 		if (entity == null) {
 			return null;
 		}

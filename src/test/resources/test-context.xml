@@ -7,8 +7,8 @@
 	xsi:schemaLocation="
 		http://www.springframework.org/schema/data/mirage http://www.springframework.org/schema/data/mirage/spring-mirage-1.0.xsd
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
-		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
   <context:annotation-config />
   <context:property-placeholder location="classpath:/jdbc.properties" />

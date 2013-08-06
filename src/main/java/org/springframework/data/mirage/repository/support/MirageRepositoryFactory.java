@@ -87,7 +87,7 @@ public class MirageRepositoryFactory extends RepositoryFactorySupport {
 	})
 	protected Object getTargetRepository(RepositoryMetadata metadata) {
 		Class<?> repositoryInterface = metadata.getRepositoryInterface();
-		EntityInformation<?, Serializable> entityInformation = getEntityInformation(metadata.getDomainClass());
+		EntityInformation<?, Serializable> entityInformation = getEntityInformation(metadata.getDomainType());
 		
 		if (isLogicalDeleteJdbcRepository(repositoryInterface)) {
 			return new LogicalDeleteMirageRepository(entityInformation, sqlManager);

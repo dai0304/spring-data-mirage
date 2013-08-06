@@ -34,10 +34,6 @@ import jp.sf.amateras.mirage.naming.NameConverter;
 import jp.sf.amateras.mirage.util.MirageUtil;
 import jp.sf.amateras.mirage.util.Validate;
 
-import com.google.common.base.Joiner;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.domain.Page;
@@ -77,6 +73,27 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 	public static SqlResource newSqlResource(Class<?> scope, String filename) {
 		Validate.notNull(filename);
 		return new SimpleSqlResource(scope, filename);
+	}
+	
+	private static String join(List<String> orders) {
+		StringBuilder sb = new StringBuilder();
+		Iterator<String> parts = orders.iterator();
+		if (parts.hasNext()) {
+			sb.append(parts.next());
+			while (parts.hasNext()) {
+				sb.append(", ");
+				sb.append(parts.next());
+			}
+		}
+		return sb.toString();
+	}
+	
+	private static <E>List<E> newArrayList(Iterable<E> iterable) {
+		List<E> list = new ArrayList<E>();
+		for (E element : iterable) {
+			list.add(element);
+		}
+		return list;
 	}
 	
 	
@@ -124,7 +141,9 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 	
 	@Override
 	public void delete(E entity) {
-		Preconditions.checkNotNull(entity);
+		if (entity == null) {
+			throw new NullPointerException("entity is null"); //$NON-NLS-1$
+		}
 		try {
 			sqlManager.deleteEntity(entity);
 		} catch (SQLRuntimeException e) {
@@ -146,9 +165,13 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 	
 	@Override
 	public void delete(Iterable<? extends E> entities) {
-		Preconditions.checkNotNull(entities);
+		if (entities == null) {
+			throw new NullPointerException("entities is null"); //$NON-NLS-1$
+		}
 		for (E entity : entities) {
-			Preconditions.checkNotNull(entity);
+			if (entity == null) {
+				throw new NullPointerException("entity is null"); //$NON-NLS-1$
+			}
 		}
 		for (E entity : entities) {
 			try {
@@ -198,9 +221,23 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 	}
 	
 	@Override
+	public Iterable<E> findAll(Iterable<ID> ids) {
+		Assert.notNull(ids, "ids must not be null");
+		
+		Map<String, Object> params = createParams();
+		params.put("ids", ids); // TODO
+		params.put("include_logical_deleted", true);
+		try {
+			return getResultList(getBaseSelectSqlResource(), params);
+		} catch (SQLRuntimeException e) {
+			throw getExceptionTranslator().translate("findAll", null, e.getCause());
+		}
+	}
+	
+	@Override
 	public Page<E> findAll(Pageable pageable) {
 		if (null == pageable) {
-			return new PageImpl<E>(Lists.newArrayList(findAll()));
+			return new PageImpl<E>(newArrayList(findAll()));
 		}
 		
 		try {
@@ -257,24 +294,7 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 	}
 	
 	@Override
-	public E save(E entity) {
-		if (entity == null) {
-			return null;
-		}
-		try {
-			if (exists(getId(entity))) {
-				sqlManager.updateEntity(entity);
-			} else {
-				sqlManager.insertEntity(entity);
-			}
-		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("save", null, e.getCause());
-		}
-		return entity;
-	}
-	
-	@Override
-	public Iterable<E> save(Iterable<? extends E> entities) {
+	public <S extends E>Iterable<S> save(Iterable<S> entities) {
 		if (entities == null) {
 			return Collections.emptyList();
 		}
@@ -294,10 +314,27 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 			}
 			sqlManager.updateBatch(toUpdate);
 			sqlManager.insertBatch(toInsert);
-			return Lists.newArrayList(entities);
+			return newArrayList(entities);
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("save", null, e.getCause());
 		}
+	}
+	
+	@Override
+	public <S extends E>S save(S entity) {
+		if (entity == null) {
+			return null;
+		}
+		try {
+			if (exists(getId(entity))) {
+				sqlManager.updateEntity(entity);
+			} else {
+				sqlManager.insertEntity(entity);
+			}
+		} catch (SQLRuntimeException e) {
+			throw getExceptionTranslator().translate("save", null, e.getCause());
+		}
+		return entity;
 	}
 	
 	/**
@@ -801,13 +838,13 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 		params.put("offset", pageable == null ? null : pageable.getOffset());
 		params.put("size", pageable == null ? null : pageable.getPageSize());
 		if (pageable != null && pageable.getSort() != null) {
-			List<String> orders = Lists.newArrayList();
+			List<String> orders = new ArrayList<String>();
 			Sort sort = pageable.getSort();
 			for (Order order : sort) {
 				orders.add(String.format("%s %s", order.getProperty(), order.getDirection().name()));
 			}
 			if (orders.size() != 0) {
-				params.put("orders", Joiner.on(", ").join(orders));
+				params.put("orders", join(orders));
 			}
 		}
 	}
@@ -825,7 +862,7 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 			}
 		}
 		if (list.isEmpty() == false) {
-			params.put("orders", Joiner.on(", ").join(list));
+			params.put("orders", join(list));
 		}
 	}
 }
