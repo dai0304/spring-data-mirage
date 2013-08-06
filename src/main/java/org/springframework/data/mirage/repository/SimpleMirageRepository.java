@@ -29,6 +29,7 @@ import javax.sql.DataSource;
 
 import jp.sf.amateras.mirage.IterationCallback;
 import jp.sf.amateras.mirage.SqlManager;
+import jp.sf.amateras.mirage.annotation.Column;
 import jp.sf.amateras.mirage.exception.SQLRuntimeException;
 import jp.sf.amateras.mirage.naming.NameConverter;
 import jp.sf.amateras.mirage.util.MirageUtil;
@@ -226,7 +227,6 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 		
 		Map<String, Object> params = createParams();
 		params.put("ids", ids); // TODO
-		params.put("include_logical_deleted", true);
 		try {
 			return getResultList(getBaseSelectSqlResource(), params);
 		} catch (SQLRuntimeException e) {
@@ -263,7 +263,6 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 		Assert.notNull(id, "id must not be null");
 		
 		Map<String, Object> params = createParams(id);
-		params.put("include_logical_deleted", true);
 		try {
 			return getSingleResult(getBaseSelectSqlResource(), params);
 		} catch (SQLRuntimeException e) {
@@ -413,6 +412,8 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("table", MirageUtil.getTableName(entityClass, nameConverter));
 		params.put("id", null); // 何故これが要るのだろう。無いとコケる
+		params.put("id_column_name", findIdColumnName());
+		
 		return params;
 	}
 	
@@ -864,5 +865,21 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 		if (list.isEmpty() == false) {
 			params.put("orders", join(list));
 		}
+	}
+	
+	private String findIdColumnName() {
+		Class<?> c = entityClass;
+		while (c != null && c != Object.class) {
+			Field[] declaredFields = c.getDeclaredFields();
+			for (Field field : declaredFields) {
+				Id idAnnotation = field.getAnnotation(Id.class);
+				if (idAnnotation != null) {
+					Column columnAnnotation = field.getAnnotation(Column.class);
+					return columnAnnotation.name();
+				}
+			}
+			c = c.getSuperclass();
+		}
+		return null;
 	}
 }

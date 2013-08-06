@@ -56,9 +56,9 @@ public class LogicalDeleteMirageRepositoryTest {
 		RepositoryFactorySupport factory = new MirageRepositoryFactory(sqlManager);
 		EntityRepository repos = factory.getRepository(EntityRepository.class);
 		
-		Entity entity = new Entity("foo");
 		assertThat(repos.count(), is(0L));
 		
+		Entity entity = new Entity("foo");
 		Entity saved = repos.save(entity); // insert
 		assertThat(saved.getId(), is(not(0L)));
 		assertThat(repos.count(), is(1L));

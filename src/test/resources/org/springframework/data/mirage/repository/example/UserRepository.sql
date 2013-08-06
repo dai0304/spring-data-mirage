@@ -1,9 +1,17 @@
--- EntityRepository_findByStr.sql
+-- UserRepository.sql
 
 SELECT *
-FROM samples
+FROM users
 
-WHERE str LIKE concat(/*str*/'abc', '%')
+/*BEGIN*/
+WHERE
+	/*IF orders != null*/
+	username = /*username*/'abc'
+	/*END*/
+	/*IF id != null*/
+	AND username = /*id*/'abc'
+	/*END*/
+/*END*/
 
 /*IF orders != null*/
 ORDER BY /*$orders*/id

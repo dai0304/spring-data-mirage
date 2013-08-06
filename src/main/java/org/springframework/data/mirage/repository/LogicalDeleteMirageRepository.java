@@ -22,6 +22,7 @@ import jp.sf.amateras.mirage.SqlManager;
 import jp.sf.amateras.mirage.exception.SQLRuntimeException;
 
 import org.springframework.data.repository.core.EntityInformation;
+import org.springframework.util.Assert;
 
 /**
  * Mirageフレームワークを利用した {@link LogicalDeleteJdbcRepository} の実装クラス。
@@ -34,7 +35,10 @@ import org.springframework.data.repository.core.EntityInformation;
 public class LogicalDeleteMirageRepository<E extends Identifiable> extends IdentifiableMirageRepository<E> implements
 		LogicalDeleteJdbcRepository<E> {
 	
-	static final SqlResource BASE_LOGICAL_DELETE = new SimpleSqlResource(SimpleMirageRepository.class,
+	static final SqlResource BASE_SELECT_SQL = new SimpleSqlResource(LogicalDeleteMirageRepository.class,
+			"baseLogicalDeleteSelect.sql");
+	
+	static final SqlResource BASE_LOGICAL_DELETE = new SimpleSqlResource(LogicalDeleteMirageRepository.class,
 			"baseLogicalDelete.sql");
 	
 	
@@ -56,6 +60,13 @@ public class LogicalDeleteMirageRepository<E extends Identifiable> extends Ident
 	 */
 	public LogicalDeleteMirageRepository(EntityInformation<E, Long> entityInformation, SqlManager sqlManager) {
 		super(entityInformation, sqlManager);
+	}
+	
+	@Override
+	public long count() {
+		Map<String, Object> params = createParams();
+		params.put("include_logical_deleted", false);
+		return getCount(getBaseSelectSqlResource(), params);
 	}
 	
 	@Override
@@ -95,6 +106,33 @@ public class LogicalDeleteMirageRepository<E extends Identifiable> extends Ident
 			return getCount(getBaseSelectSqlResource(), params) > 0;
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("exists", null, e.getCause());
+		}
+	}
+	
+	@Override
+	public Iterable<E> findAll(Iterable<Long> ids) {
+		Assert.notNull(ids, "ids must not be null");
+		
+		Map<String, Object> params = createParams();
+		params.put("ids", ids); // TODO
+		params.put("include_logical_deleted", true);
+		try {
+			return getResultList(getBaseSelectSqlResource(), params);
+		} catch (SQLRuntimeException e) {
+			throw getExceptionTranslator().translate("findAll", null, e.getCause());
+		}
+	}
+	
+	@Override
+	public E findOne(Long id) {
+		Assert.notNull(id, "id must not be null");
+		
+		Map<String, Object> params = createParams(id);
+		params.put("include_logical_deleted", true);
+		try {
+			return getSingleResult(getBaseSelectSqlResource(), params);
+		} catch (SQLRuntimeException e) {
+			throw getExceptionTranslator().translate("findOne", null, e.getCause());
 		}
 	}
 	
@@ -192,5 +230,10 @@ public class LogicalDeleteMirageRepository<E extends Identifiable> extends Ident
 			throw getExceptionTranslator().translate("save", null, e.getCause());
 		}
 		return entity;
+	}
+	
+	@Override
+	protected SqlResource getBaseSelectSqlResource() {
+		return BASE_SELECT_SQL;
 	}
 }
