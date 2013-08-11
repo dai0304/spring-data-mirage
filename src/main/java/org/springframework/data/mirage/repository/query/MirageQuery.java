@@ -16,16 +16,25 @@
  */
 package org.springframework.data.mirage.repository.query;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import jp.sf.amateras.mirage.SqlManager;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.mirage.repository.SimpleSqlResource;
 import org.springframework.data.mirage.repository.SqlResource;
 import org.springframework.data.repository.query.Parameter;
+import org.springframework.data.repository.query.ParameterAccessor;
+import org.springframework.data.repository.query.ParametersParameterAccessor;
 import org.springframework.data.repository.query.QueryMethod;
 import org.springframework.data.repository.query.RepositoryQuery;
 import org.springframework.util.Assert;
@@ -40,6 +49,36 @@ import org.springframework.util.Assert;
 public class MirageQuery implements RepositoryQuery {
 	
 	private static Logger logger = LoggerFactory.getLogger(MirageQuery.class);
+	
+	
+	private static void addPageParam(Map<String, Object> params, Pageable pageable) {
+		params.put("offset", pageable == null ? null : pageable.getOffset());
+		params.put("size", pageable == null ? null : pageable.getPageSize());
+		if (pageable != null && pageable.getSort() != null) {
+			List<String> orders = new ArrayList<String>();
+			Sort sort = pageable.getSort();
+			for (Order order : sort) {
+				orders.add(String.format("%s %s", order.getProperty(), order.getDirection().name()));
+			}
+			if (orders.size() != 0) {
+				params.put("orders", join(orders));
+			}
+		}
+	}
+	
+	private static String join(List<String> orders) {
+		StringBuilder sb = new StringBuilder();
+		Iterator<String> parts = orders.iterator();
+		if (parts.hasNext()) {
+			sb.append(parts.next());
+			while (parts.hasNext()) {
+				sb.append(", ");
+				sb.append(parts.next());
+			}
+		}
+		return sb.toString();
+	}
+	
 	
 	private final MirageQueryMethod mirageQueryMethod;
 	
@@ -62,29 +101,53 @@ public class MirageQuery implements RepositoryQuery {
 	
 	@Override
 	public Object execute(Object[] parameters) {
-		String[] names;
+		SqlResource sqlResource = createSqlResource();
+		Map<String, Object> parameterMap = createParameterMap(parameters);
 		
-		Class<?> declaringClass = mirageQueryMethod.getDeclaringClass();
-		String name = mirageQueryMethod.getAnnotatedQuery();
-		if (name != null) {
-			names = new String[] {
-				name
-			};
+		String absolutePath = sqlResource.getAbsolutePath();
+		Class<?> returnedDomainType = mirageQueryMethod.getReturnedObjectType();
+		if (mirageQueryMethod.isModifyingQuery()) {
+			return sqlManager.executeUpdate(absolutePath, parameterMap);
+		} else if (mirageQueryMethod.isCollectionQuery()) {
+			return sqlManager.getResultList(returnedDomainType, absolutePath, parameterMap);
+		} else if (mirageQueryMethod.isPageQuery()) {
+			ParameterAccessor accessor = new ParametersParameterAccessor(mirageQueryMethod.getParameters(), parameters);
+			Pageable pageable = accessor.getPageable();
+			addPageParam(parameterMap, pageable);
+			List<?> resultList = sqlManager.getResultList(returnedDomainType, absolutePath, parameterMap);
+			int totalCount;
+			/*if (query.contains("SQL_CALC_FOUND_ROWS")) { */
+			totalCount = sqlManager.getCountBySql("SELECT FOUND_ROWS();"); // TODO MySQL固有処理
+			/*} else {
+				totalCount = ...; // TODO
+			}
+			*/
+			
+			@SuppressWarnings({
+				"rawtypes",
+				"unchecked"
+			})
+			PageImpl<?> page = new PageImpl(resultList, pageable, totalCount);
+			return page;
 		} else {
-			names = new String[] {
-				declaringClass.getSimpleName() + "_" + mirageQueryMethod.getName() + ".sql",
-				declaringClass.getSimpleName() + ".sql"
-			};
+			return sqlManager.getSingleResult(returnedDomainType, absolutePath, parameterMap);
 		}
-		SqlResource sqlResource = new SimpleSqlResource(declaringClass, names);
-		
+	}
+	
+	@Override
+	public QueryMethod getQueryMethod() {
+		return mirageQueryMethod;
+	}
+	
+	private Map<String, Object> createParameterMap(Object[] parameters) {
 		Map<String, Object> parameterMap = new HashMap<String, Object>();
 		parameterMap.put("orders", null);
-		Iterable<Parameter> params = mirageQueryMethod.getParameters();
-		for (Parameter p : params) {
+		for (Parameter p : mirageQueryMethod.getParameters()) {
 			String parameterName = p.getName();
 			if (parameterName == null) {
-				logger.warn("null name parameter [{}] is ignored", p);
+				if (Pageable.class.isAssignableFrom(p.getType()) == false) {
+					logger.warn("null name parameter [{}] is ignored", p);
+				}
 			} else {
 				parameterMap.put(parameterName, parameters[p.getIndex()]);
 			}
@@ -93,20 +156,24 @@ public class MirageQuery implements RepositoryQuery {
 		for (StaticParam p : staticParams) {
 			parameterMap.put(p.key(), p.value());
 		}
-		
-		String absolutePath = sqlResource.getAbsolutePath();
-		
-		if (mirageQueryMethod.isModifyingQuery()) {
-			return sqlManager.executeUpdate(absolutePath, parameterMap);
-		} else if (mirageQueryMethod.isPageQuery() || mirageQueryMethod.isCollectionQuery()) {
-			return sqlManager.getResultList(mirageQueryMethod.getReturnType(), absolutePath, parameterMap);
-		} else {
-			return sqlManager.getSingleResult(mirageQueryMethod.getReturnType(), absolutePath, parameterMap);
-		}
+		return parameterMap;
 	}
 	
-	@Override
-	public QueryMethod getQueryMethod() {
-		return mirageQueryMethod;
+	private SqlResource createSqlResource() {
+		String[] names;
+		Class<?> declaringClass = mirageQueryMethod.getDeclaringClass();
+		String name = mirageQueryMethod.getAnnotatedQuery();
+		if (name != null) {
+			names = new String[] {
+				name
+			};
+		} else {
+			String simpleName = declaringClass.getSimpleName();
+			names = new String[] {
+				simpleName + "_" + mirageQueryMethod.getName() + ".sql",
+				simpleName + ".sql"
+			};
+		}
+		return new SimpleSqlResource(declaringClass, names);
 	}
 }

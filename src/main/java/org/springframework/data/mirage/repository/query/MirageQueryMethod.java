@@ -63,10 +63,13 @@ public class MirageQueryMethod extends QueryMethod {
 	 */
 	public Iterable<StaticParam> getStaticParameters() {
 		StaticParams staticParams = method.getAnnotation(StaticParams.class);
+		int capacity = (staticParams == null) ? 0 : staticParams.value().length;
 		StaticParam staticParam = method.getAnnotation(StaticParam.class);
-		List<StaticParam> result =
-				new ArrayList<StaticParam>(((staticParams == null) ? 0 : staticParams.value().length)
-						+ ((staticParam == null) ? 0 : 1));
+		if (staticParam != null) {
+			capacity++;
+		}
+		
+		List<StaticParam> result = new ArrayList<StaticParam>(capacity);
 		if (staticParams != null) {
 			for (StaticParam param : staticParams.value()) {
 				result.add(param);
