@@ -2,20 +2,20 @@ Spring Data Mirage SQL
 ======================
 
 The primary goal of the [Spring Data](http://www.springsource.org/spring-data) project is to make it easier to build
-Spring-powered applications that use data access technologies. This module deals with enhanced support for 
+Spring-powered applications that use data access technologies. This module deals with enhanced support for
 [Mirage SQL](https://github.com/takezoe/mirage) based data access layers.
 
 ## Features ##
-This project defines a `JdbcRepository` base interface  : 
+This project defines a `JdbcRepository` base interface  :
 
 ```java
 public interface JdbcRepository<E, ID extends Serializable> extends PagingAndSortingRepository<E, ID> {
-	T findOne(ID id);
-	List<T> findAll();
-	boolean exists(ID id);
-	long count();
-	<S extends E>S save(S entity);
-	// ...
+  T findOne(ID id);
+  List<T> findAll();
+  boolean exists(ID id);
+  long count();
+  <S extends E>S save(S entity);
+  // ...
 }
 ```
 
@@ -34,7 +34,7 @@ Add the repository definition to your `pom.xml` :
 </repositories>
 ```
 
-Add the jar to your maven project : 
+Add the jar to your maven project :
 
 ```xml
 <dependency>
@@ -44,7 +44,7 @@ Add the jar to your maven project :
 </dependency>
 ```
 
-Configure your infrastructure : 
+Configure your infrastructure :
 
 ```xml
 <bean id="dataSource" ...>
@@ -80,17 +80,17 @@ Create an entity:
 @Table(name = "users")
 public class User {
 
-	@Id
-	@PrimaryKey(generationType = GenerationType.IDENTITY)
-	@Column(name = "user_id")
-	private Long id;
+  @Id
+  @PrimaryKey(generationType = GenerationType.IDENTITY)
+  @Column(name = "user_id")
+  private Long id;
 
-	@Column(name = "first_name")
+  @Column(name = "first_name")
   private String firstname;
 
-	@Column(name = "last_name")
+  @Column(name = "last_name")
   private String lastname;
-       
+
   // Getters and setters
 }
 ```
@@ -100,13 +100,13 @@ Create a repository interface in `com.example.product.repository`:
 ```java
 public interface AppUserRepository extends JdbcRepository<AppUser, Long> {
 
-	List<AppUser> findByFirstname(@Param("first_name") String firstName);
+  List<AppUser> findByFirstname(@Param("first_name") String firstName);
 
   // another query methods...
 }
 ```
 
-Write SQL file `AppUserRepository.sql` and place on the same directory with `AppUserRepository.class` : 
+Write SQL file `AppUserRepository.sql` and place on the same directory with `AppUserRepository.class` :
 
 ```sql
 SELECT *
@@ -145,19 +145,19 @@ Write a test client
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("classpath:/applicationContext.xml")
 public class AppUserRepositoryTest {
-     
+
   @Autowired
   AppUserRepository repos;
-     
+
   @Test
   @TransactionConfiguration
   @Transactional
-  public void sampleTestCase() {         
-	  AppUser user = repos.findOne(1L);
-	  assertThat("user", user, is(notNullValue())); 
-	  List<AppUser> users = customerRepository.findAll();
-	  assertThat("users", users, is(notNullValue()));
-	  assertThat("usersSize", users.size() > 0, is(true));
+  public void sampleTestCase() {
+    AppUser user = repos.findOne(1L);
+    assertThat("user", user, is(notNullValue()));
+    List<AppUser> users = customerRepository.findAll();
+    assertThat("users", users, is(notNullValue()));
+    assertThat("usersSize", users.size() > 0, is(true));
   }
 }
 ```

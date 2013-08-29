@@ -68,6 +68,7 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 	 * @param scope クラスパス上のSQLの位置を表すクラス。無名パッケージの場合は{@code null}
 	 * @param filename クラスパス上のSQLファイル名
 	 * @return {@link SqlResource}
+	 * @throws NoSuchSqlResourceException 指定したリソースが見つからない場合
 	 * @throws IllegalArgumentException 引数{@code filename}に{@code null}を与えた場合
 	 * @since 1.0
 	 */
@@ -97,6 +98,8 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 		return list;
 	}
 	
+	
+	private SqlResource baseSelectSqlResource = BASE_SELECT_SQL;
 	
 	@Autowired
 	SqlManager sqlManager;
@@ -336,6 +339,10 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 		return entity;
 	}
 	
+	public void setBaseSelectSqlResource(SqlResource baseSelectSqlResource) {
+		this.baseSelectSqlResource = baseSelectSqlResource;
+	}
+	
 	/**
 	 * @see SqlManager#call(Class, String)
 	 */
@@ -534,7 +541,7 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 	}
 	
 	protected SqlResource getBaseSelectSqlResource() {
-		return BASE_SELECT_SQL;
+		return baseSelectSqlResource;
 	}
 	
 	/**
