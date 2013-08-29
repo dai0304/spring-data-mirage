@@ -16,8 +16,14 @@
  */
 package org.springframework.data.mirage.repository.support;
 
+import java.sql.SQLException;
+
+import jp.sf.amateras.mirage.exception.SQLRuntimeException;
+
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
+import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
+import org.springframework.jdbc.support.SQLExceptionTranslator;
 
 /**
  * TODO for daisuke
@@ -28,14 +34,33 @@ import org.springframework.dao.support.PersistenceExceptionTranslator;
  */
 public class MiragePersistenceExceptionTranslator implements PersistenceExceptionTranslator {
 	
-	@SuppressWarnings("serial")
+	private SQLExceptionTranslator sqlExceptionTranslator = new SQLErrorCodeSQLExceptionTranslator();
+	
+	
+	public void setSqlExceptionTranslator(SQLExceptionTranslator sqlExceptionTranslator) {
+		this.sqlExceptionTranslator = sqlExceptionTranslator;
+	}
+	
 	@Override
 	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
+		if (ex instanceof SQLRuntimeException && sqlExceptionTranslator != null) {
+			SQLRuntimeException sqlRuntimeException = (SQLRuntimeException) ex;
+			SQLException sqlException = sqlRuntimeException.getCause();
+			return sqlExceptionTranslator.translate("", "", sqlException);
+		}
+		
 		if (ex.getClass().getPackage().getName().startsWith("jp.sf.amateras.mirage.exception")) {
-			// TODO
-			return new DataAccessException("", ex) {
-			};
+			return new MirageDataAccessException(ex);
 		}
 		return null;
+	}
+	
+	
+	@SuppressWarnings("serial")
+	private final class MirageDataAccessException extends DataAccessException {
+		
+		private MirageDataAccessException(Throwable cause) {
+			super("unkwnown", cause);
+		}
 	}
 }
