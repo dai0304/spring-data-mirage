@@ -91,7 +91,7 @@ public class SimpleSqlResource implements SqlResource {
 	 * 
 	 * @param scope 
 	 * @param name
-	 * @throws NoSuchSqlResourceException 
+	 * @throws NoSuchSqlResourceException 指定したリソースが見つからない場合
 	 * @throws IllegalArgumentException 引数に{@code null}を与えた場合
 	 * @since 1.0
 	 */
@@ -106,7 +106,7 @@ public class SimpleSqlResource implements SqlResource {
 	 * 
 	 * @param scope 
 	 * @param names
-	 * @throws NoSuchSqlResourceException 
+	 * @throws NoSuchSqlResourceException 指定したリソースが見つからない場合
 	 * @throws IllegalArgumentException 引数に{@code null}を与えた場合
 	 * @since 1.0
 	 */
