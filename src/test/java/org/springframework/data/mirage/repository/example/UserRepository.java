@@ -17,7 +17,6 @@
 package org.springframework.data.mirage.repository.example;
 
 import org.springframework.data.mirage.repository.JdbcRepository;
-import org.springframework.stereotype.Repository;
 
 /**
  * {@link Entity}用リポジトリインターフェイス。
@@ -26,6 +25,5 @@ import org.springframework.stereotype.Repository;
  * @version $Id$
  * @author daisuke
  */
-@Repository
 public interface UserRepository extends JdbcRepository<User, String> {
 }
