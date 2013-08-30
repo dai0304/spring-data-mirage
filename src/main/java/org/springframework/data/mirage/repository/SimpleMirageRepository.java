@@ -35,6 +35,8 @@ import jp.sf.amateras.mirage.naming.NameConverter;
 import jp.sf.amateras.mirage.util.MirageUtil;
 import jp.sf.amateras.mirage.util.Validate;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.domain.Page;
@@ -58,6 +60,8 @@ import org.springframework.util.Assert;
  * @author daisuke
  */
 public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcRepository<E, ID> {
+	
+	private static Logger logger = LoggerFactory.getLogger(SimpleMirageRepository.class);
 	
 	static final SqlResource BASE_SELECT_SQL = new SimpleSqlResource(SimpleMirageRepository.class, "baseSelect.sql");
 	
@@ -164,6 +168,8 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 			} catch (SQLRuntimeException e) {
 				throw getExceptionTranslator().translate("delete", null, e.getCause());
 			}
+		} else {
+			logger.warn("entity id [{}] not found", id);
 		}
 	}
 	
@@ -330,8 +336,10 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 		try {
 			if (exists(getId(entity))) {
 				sqlManager.updateEntity(entity);
+				logger.debug("entity updated: {}", entity);
 			} else {
 				sqlManager.insertEntity(entity);
+				logger.debug("entity inserted: {}", entity);
 			}
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("save", null, e.getCause());
@@ -340,7 +348,11 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 	}
 	
 	public void setBaseSelectSqlResource(SqlResource baseSelectSqlResource) {
-		this.baseSelectSqlResource = baseSelectSqlResource;
+		if (baseSelectSqlResource == null) {
+			this.baseSelectSqlResource = BASE_SELECT_SQL;
+		} else {
+			this.baseSelectSqlResource = baseSelectSqlResource;
+		}
 	}
 	
 	/**
