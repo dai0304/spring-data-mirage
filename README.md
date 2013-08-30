@@ -34,7 +34,9 @@ public interface MirageRepository<E, ID extends Serializable> extends PagingAndS
 </repositories>
 ```
 
-### Add the jar to your maven project :
+### dependency
+
+Add the jar to your maven project :
 
 ```xml
 <dependency>
@@ -44,7 +46,9 @@ public interface MirageRepository<E, ID extends Serializable> extends PagingAndS
 </dependency>
 ```
 
-### Configure your infrastructure :
+### Spring beans configurations
+
+Configure your infrastructure :
 
 ```xml
 <bean id="dataSource" ...>
@@ -74,7 +78,9 @@ public interface MirageRepository<E, ID extends Serializable> extends PagingAndS
 <mirage:repositories base-package="com.example.product.repository" sql-manager-ref="sqlManager" />
 ```
 
-### Create an mirage entity:
+### Entity classes
+
+Create an mirage entity:
 
 ```java
 @Table(name = "users")
@@ -95,7 +101,9 @@ public class User {
 }
 ```
 
-### Create a repository interface in `com.example.product.repository`:
+### Repository interfaces
+
+Create a repository interface in `com.example.product.repository`:
 
 ```java
 public interface AppUserRepository extends MirageRepository<AppUser, Long> {
@@ -108,7 +116,9 @@ public interface AppUserRepository extends MirageRepository<AppUser, Long> {
 }
 ```
 
-### Write SQL file `AppUserRepository.sql` (that's called 'base-select-SQL') and place on the same directory
+### SQL files
+
+Write SQL file `AppUserRepository.sql` (that's called 'base-select-SQL') and place on the same directory
 with `AppUserRepository.class` :
 
 ```sql
@@ -149,9 +159,8 @@ LIMIT
 This base-select-SQL must support "id", "ids", "orders", "offset" and "size" parameters.  These parameters are used
 by `findOne()`, `findAll(Iterable<ID>)`, `findAll(Pageable)` and the like.
 
-And you can place another 2-way-sql for specific query method (that's called 'method-specific-2-way-sql') like this:
-
-`AppUserRepository_findByComplexCondition.sql`
+And you can place another 2-way-sql for specific query method (that's called 'method-specific-2-way-sql')
+like this: `AppUserRepository_findByComplexCondition.sql`
 
 ```
 SELECT U.*
@@ -166,7 +175,9 @@ WHERE
 If the all additional methods are supported by method-specific-2-way-sql or you don't declare additional query methods,
 you don't need to create base-select-SQL file.
 
-### Write a test client :
+### Clients
+
+Write a test client :
 
 ```java
 @RunWith(SpringJUnit4ClassRunner.class)
