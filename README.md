@@ -22,7 +22,9 @@ public interface MirageRepository<E, ID extends Serializable> extends PagingAndS
 
 ## Quick Start ##
 
-### Add the repository definition to your `pom.xml` :
+### dependency
+
+Add the repository definition to your `pom.xml` :
 
 ```xml
 <repositories>
@@ -33,8 +35,6 @@ public interface MirageRepository<E, ID extends Serializable> extends PagingAndS
   </repository>
 </repositories>
 ```
-
-### dependency
 
 Add the jar to your maven project :
 
