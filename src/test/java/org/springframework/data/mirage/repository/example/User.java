@@ -17,6 +17,8 @@
 package org.springframework.data.mirage.repository.example;
 
 import jp.sf.amateras.mirage.annotation.Column;
+import jp.sf.amateras.mirage.annotation.PrimaryKey;
+import jp.sf.amateras.mirage.annotation.PrimaryKey.GenerationType;
 import jp.sf.amateras.mirage.annotation.Table;
 import jp.sf.amateras.mirage.annotation.Transient;
 
@@ -35,6 +37,7 @@ import org.springframework.data.domain.Persistable;
 public class User implements Persistable<String> {
 	
 	@Id
+	@PrimaryKey(generationType = GenerationType.APPLICATION)
 	@Column(name = "username")
 	private String username;
 	
@@ -60,6 +63,28 @@ public class User implements Persistable<String> {
 	}
 	
 	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		User other = (User) obj;
+		if (username == null) {
+			if (other.username != null) {
+				return false;
+			}
+		} else if (!username.equals(other.username)) {
+			return false;
+		}
+		return true;
+	}
+	
+	@Override
 	public String getId() {
 		return null;
 	}
@@ -73,6 +98,14 @@ public class User implements Persistable<String> {
 	}
 	
 	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((username == null) ? 0 : username.hashCode());
+		return result;
+	}
+	
+	@Override
 	public boolean isNew() {
 		return persisted;
 	}
@@ -83,6 +116,11 @@ public class User implements Persistable<String> {
 	
 	public void setPersisted(boolean persisted) {
 		this.persisted = persisted;
+	}
+	
+	@Override
+	public String toString() {
+		return "User [username=" + username + ", password=" + password + ", persisted=" + persisted + "]";
 	}
 	
 	void setUsername(String username) {

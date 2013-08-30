@@ -229,7 +229,7 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 		Assert.notNull(ids, "ids must not be null");
 		
 		Map<String, Object> params = createParams();
-		params.put("ids", ids); // TODO
+		params.put("ids", ids);
 		try {
 			return getResultList(getBaseSelectSqlResource(), params);
 		} catch (SQLRuntimeException e) {
