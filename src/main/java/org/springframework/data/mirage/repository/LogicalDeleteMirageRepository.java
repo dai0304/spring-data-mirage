@@ -16,225 +16,97 @@
  */
 package org.springframework.data.mirage.repository;
 
-import java.util.Map;
-
-import jp.sf.amateras.mirage.SqlManager;
-import jp.sf.amateras.mirage.SqlResource;
-import jp.sf.amateras.mirage.exception.SQLRuntimeException;
-
-import org.springframework.data.repository.core.EntityInformation;
-import org.springframework.util.Assert;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.repository.NoRepositoryBean;
 
 /**
- * Mirageフレームワークを利用した {@link LogicalDeleteJdbcRepository} の実装クラス。
+ * {@link #delete}操作として論理削除を行うリポジトリインターフェイス。
+ * 
+ * <p>論理削除は、そのエンティティの識別子(ID)、つまりテーブルの主キーの値を負数に反転することによって実現する。
+ * つまり、主キーは数値でなければならず、このインターフェイスでは {@link Long} を採用している。</p>
+ * 
+ * <p>{@link #findAll()}等のクエリ操作では、主キーが負数のもの（及び、関連先が削除されているもの）は選択しない。ただし、
+ * {@link #findOne}だけは例外で、引数に負数を指定すれば論理削除したエンティティも取り出せる。論理削除したエンティティに関しては
+ * {@link #revert}操作で復旧ができる。{@link #revert}メソッドに与えるIDも負数とする。</p>
+ * 
+ * <p>物理削除は{@link #delete}ではなく{@link #physicalDelete}を用いる。</p>
+ * 
+ * <p>テーブル設計においては、主キーの値がUPDATEされることがあるため、このリポジトリに対応するテーブルを参照する外部キーについて、
+ * その{@code ON UPDATE}のreferential actionは{@code CASCADE}である必要がある。</p>
  * 
  * @param <E> the domain type the repository manages
  * @since 1.0
  * @version $Id$
  * @author daisuke
+ * @see <a href="http://bit.ly/qQtt9T">削除フラグのはなし</a>
  */
-public class LogicalDeleteMirageRepository<E extends Identifiable> extends IdentifiableMirageRepository<E> implements
-		LogicalDeleteJdbcRepository<E> {
-	
-	static final SqlResource BASE_SELECT_SQL = new ScopeClasspathSqlResource(LogicalDeleteMirageRepository.class,
-			"baseLogicalDeleteSelect.sql");
-	
-	static final SqlResource BASE_LOGICAL_DELETE = new ScopeClasspathSqlResource(LogicalDeleteMirageRepository.class,
-			"baseLogicalDelete.sql");
-	
+@NoRepositoryBean
+public interface LogicalDeleteMirageRepository<E extends Identifiable> extends MirageRepository<E, Long> {
 	
 	/**
-	 * インスタンスを生成する。
+	 * {@inheritDoc}
 	 * 
-	 * @param entityClass エンティティの型
-	 * @throws IllegalArgumentException 引数に{@code null}を与えた場合
+	 * <p>IDに負数を与えた場合は何もしない。</p>
 	 */
-	public LogicalDeleteMirageRepository(Class<E> entityClass) {
-		super(entityClass);
-	}
+	@Override
+	void delete(Long id);
 	
 	/**
-	 * インスタンスを生成する。
+	 * TODO for daisuke
 	 * 
-	 * @param entityInformation
-	 * @param sqlManager
+	 * @param id
+	 * @return
+	 * @since 1.0
 	 */
-	public LogicalDeleteMirageRepository(EntityInformation<E, Long> entityInformation, SqlManager sqlManager) {
-		super(entityInformation, sqlManager);
-	}
+	E findOneIncludeLogicalDeleted(Long id);
 	
-	@Override
-	public long count() {
-		Map<String, Object> params = createParams();
-		params.put("include_logical_deleted", false);
-		return getCount(getBaseSelectSqlResource(), params);
-	}
+	/**
+	 * Deletes a given entity.
+	 *
+	 * @param entity entity to delete
+	 * @since 1.0
+	 */
+	void physicalDelete(E entity);
 	
-	@Override
-	public void delete(E entity) {
-		if (entity == null) {
-			throw new NullPointerException("entity is null"); //$NON-NLS-1$
-		}
-		delete(entity.getId());
-	}
+	/**
+	 * Deletes the given entities.
+	 *
+	 * @param entities entities to delete
+	 * @since 1.0
+	 */
+	void physicalDelete(Iterable<? extends E> entities);
 	
-	@Override
-	public void delete(Long id) {
-		if (id > 0) {
-			try {
-				executeUpdate(BASE_LOGICAL_DELETE, createParams(id));
-			} catch (SQLRuntimeException e) {
-				throw getExceptionTranslator().translate("delete", null, e.getCause());
-			}
-		}
-	}
+	/**
+	 * Deletes the entity with the given id.
+	 * 
+	 * @param id ID of entity to delete
+	 * @since 1.0
+	 */
+	void physicalDelete(Long id);
 	
-	@Override
-	public void deleteInBatch(Iterable<E> entities) {
-		// THINK これでいいのか…？
-		try {
-			delete(entities);
-		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("deleteInBatch", null, e.getCause());
-		}
-	}
+	/**
+	 * Deletes all entities managed by the repository.
+	 * 
+	 * @since 1.0
+	 */
+	void physicalDeleteAll();
 	
-	@Override
-	public boolean exists(Long id) {
-		try {
-			Map<String, Object> params = createParams(id);
-			params.put("include_logical_deleted", true);
-			return getCount(getBaseSelectSqlResource(), params) > 0;
-		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("exists", null, e.getCause());
-		}
-	}
+	/**
+	 * エンティティのバッチ物理削除を行う。
+	 * 
+	 * @param entities 削除するエンティティ
+	 * @throws DataIntegrityViolationException 整合性違反が発生した場合
+	 * @since 1.0
+	 */
+	void physicalDeleteInBatch(Iterable<E> entities);
 	
-	@Override
-	public Iterable<E> findAll(Iterable<Long> ids) {
-		Assert.notNull(ids, "ids must not be null");
-		
-		Map<String, Object> params = createParams();
-		params.put("ids", ids); // TODO
-		params.put("include_logical_deleted", true);
-		try {
-			return getResultList(getBaseSelectSqlResource(), params);
-		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("findAll", null, e.getCause());
-		}
-	}
-	
-	@Override
-	public E findOne(Long id) {
-		Assert.notNull(id, "id must not be null");
-		
-		Map<String, Object> params = createParams(id);
-		params.put("include_logical_deleted", true);
-		try {
-			return getSingleResult(getBaseSelectSqlResource(), params);
-		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("findOne", null, e.getCause());
-		}
-	}
-	
-	@Override
-	public E findOneIncludeLogicalDeleted(Long id) {
-		Map<String, Object> params = createParams(id);
-		params.remove("id");
-		params.put("absid", id);
-		params.put("include_logical_deleted", true);
-		try {
-			return getSingleResult(getBaseSelectSqlResource(), params);
-		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("findOne", null, e.getCause());
-		}
-	}
-	
-	@Override
-	public void physicalDelete(E entity) {
-		try {
-			sqlManager.deleteEntity(entity);
-		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("physicalDelete", null, e.getCause());
-		}
-	}
-	
-	@Override
-	@SuppressWarnings("unchecked")
-	public void physicalDelete(Iterable<? extends E> entities) {
-		try {
-			sqlManager.deleteBatch(entities);
-		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("physicalDelete", null, e.getCause());
-		}
-	}
-	
-	@Override
-	public void physicalDelete(Long id) {
-		try {
-			sqlManager.deleteEntity(findOne(id));
-		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("physicalDelete", null, e.getCause());
-		}
-	}
-	
-	@Override
-	@SuppressWarnings("unchecked")
-	public void physicalDeleteAll() {
-		try {
-			sqlManager.deleteBatch(findAll());
-		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("physicalDeleteAll", null, e.getCause());
-		}
-	}
-	
-	@Override
-	@SuppressWarnings("unchecked")
-	public void physicalDeleteInBatch(Iterable<E> entities) {
-		try {
-			sqlManager.deleteBatch(entities);
-		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("physicalDeleteInBatch", null, e.getCause());
-		}
-	}
-	
-	@Override
-	public void revert(Long id) {
-		if (id < 0) {
-			try {
-				executeUpdate(BASE_LOGICAL_DELETE, createParams(id));
-			} catch (SQLRuntimeException e) {
-				throw getExceptionTranslator().translate("revert", null, e.getCause());
-			}
-		}
-	}
-	
-	@Override
-	public <S extends E>S save(S entity) {
-		if (entity == null) {
-			return null;
-		}
-		try {
-			long id = entity.getId();
-			E found = null;
-			if (id != 0) {
-				found = findOneIncludeLogicalDeleted(id);
-			}
-			if (found == null) {
-				sqlManager.insertEntity(entity);
-			} else if (found.getId() > 0) {
-				sqlManager.updateEntity(entity);
-			} else {
-				throw new EntityDeletedException(id);
-			}
-		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("save", null, e.getCause());
-		}
-		return entity;
-	}
-	
-	@Override
-	protected SqlResource getBaseSelectSqlResource() {
-		return BASE_SELECT_SQL;
-	}
+	/**
+	 * 論理削除したエンティティを復活させる。
+	 * 
+	 * <p>IDに正数を与えた場合は何もしない。</p>
+	 * 
+	 * @param id エンティティID（負数）
+	 * @since 1.0
+	 */
+	void revert(Long id);
 }

@@ -31,7 +31,7 @@ import org.springframework.util.Assert;
  * @version $Id$
  * @author daisuke
  */
-public class IdentifiableMirageRepository<E extends Identifiable> extends SimpleMirageRepository<E, Long> {
+public class IdentifiableMirageRepository<E extends Identifiable> extends DefaultMirageRepository<E, Long> {
 	
 	/**
 	 * インスタンスを生成する。

@@ -24,10 +24,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.mirage.repository.Identifiable;
 import org.springframework.data.mirage.repository.IdentifiableMirageRepository;
-import org.springframework.data.mirage.repository.LogicalDeleteJdbcRepository;
 import org.springframework.data.mirage.repository.LogicalDeleteMirageRepository;
+import org.springframework.data.mirage.repository.DefaultLogicalDeleteMirageRepository;
 import org.springframework.data.mirage.repository.NoSuchSqlResourceException;
-import org.springframework.data.mirage.repository.SimpleMirageRepository;
+import org.springframework.data.mirage.repository.DefaultMirageRepository;
 import org.springframework.data.mirage.repository.query.MirageQueryLookupStrategy;
 import org.springframework.data.mirage.repository.query.QueryExtractor;
 import org.springframework.data.repository.core.EntityInformation;
@@ -79,9 +79,9 @@ public class MirageRepositoryFactory extends RepositoryFactorySupport {
 	@Override
 	protected Class<?> getRepositoryBaseClass(RepositoryMetadata metadata) {
 		if (isLogicalDeleteJdbcRepository(metadata.getRepositoryInterface())) {
-			return LogicalDeleteMirageRepository.class;
+			return DefaultLogicalDeleteMirageRepository.class;
 		} else {
-			return SimpleMirageRepository.class;
+			return DefaultMirageRepository.class;
 		}
 	}
 	
@@ -94,19 +94,19 @@ public class MirageRepositoryFactory extends RepositoryFactorySupport {
 		Class<?> repositoryInterface = metadata.getRepositoryInterface();
 		EntityInformation<?, Serializable> entityInformation = getEntityInformation(metadata.getDomainType());
 		
-		SimpleMirageRepository repos;
+		DefaultMirageRepository repos;
 		if (isLogicalDeleteJdbcRepository(repositoryInterface)) {
-			repos = new LogicalDeleteMirageRepository(entityInformation, sqlManager);
+			repos = new DefaultLogicalDeleteMirageRepository(entityInformation, sqlManager);
 		} else if (isIdentifiableJdbcRepository(entityInformation)) {
 			repos =
 					new IdentifiableMirageRepository<Identifiable>(
 							(EntityInformation<Identifiable, ? extends Serializable>) entityInformation, sqlManager);
 		} else {
-			repos = new SimpleMirageRepository(entityInformation, sqlManager);
+			repos = new DefaultMirageRepository(entityInformation, sqlManager);
 		}
 		try {
 			String name = repositoryInterface.getSimpleName() + ".sql";
-			repos.setBaseSelectSqlResource(SimpleMirageRepository.newSqlResource(repositoryInterface, name));
+			repos.setBaseSelectSqlResource(DefaultMirageRepository.newSqlResource(repositoryInterface, name));
 		} catch (NoSuchSqlResourceException e) {
 			logger.debug("Repository Default SQL [{}] not found, default used.", repositoryInterface);
 		}
@@ -124,6 +124,6 @@ public class MirageRepositoryFactory extends RepositoryFactorySupport {
 	 * @return
 	 */
 	private boolean isLogicalDeleteJdbcRepository(Class<?> repositoryInterface) {
-		return LogicalDeleteJdbcRepository.class.isAssignableFrom(repositoryInterface);
+		return LogicalDeleteMirageRepository.class.isAssignableFrom(repositoryInterface);
 	}
 }

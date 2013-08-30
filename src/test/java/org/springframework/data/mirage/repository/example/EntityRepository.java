@@ -18,9 +18,8 @@ package org.springframework.data.mirage.repository.example;
 
 import java.util.List;
 
-import org.springframework.data.mirage.repository.LogicalDeleteJdbcRepository;
+import org.springframework.data.mirage.repository.LogicalDeleteMirageRepository;
 import org.springframework.data.mirage.repository.query.StaticParam;
-import org.springframework.data.mirage.repository.query.StaticParams;
 import org.springframework.data.repository.query.Param;
 
 /**
@@ -30,7 +29,7 @@ import org.springframework.data.repository.query.Param;
  * @version $Id$
  * @author daisuke
  */
-public interface EntityRepository extends LogicalDeleteJdbcRepository<Entity> {
+public interface EntityRepository extends LogicalDeleteMirageRepository<Entity> {
 	
 	/**
 	 * TODO for daisuke
@@ -54,8 +53,6 @@ public interface EntityRepository extends LogicalDeleteJdbcRepository<Entity> {
 	 * @return
 	 * @since TODO
 	 */
-	@StaticParams({
-		@StaticParam(key = "str", value = "hoge")
-	})
+	@StaticParam(key = "str", value = "hoge")
 	List<Entity> findXxx();
 }
