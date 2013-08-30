@@ -203,3 +203,46 @@ public class AppUserRepositoryTest {
   }
 }
 ```
+
+
+## Miscellaneous things ##
+
+### Modifying query
+
+You must mark modifying (insert, update and delete) query methods by `@Modifying` annotation:
+
+`FooBarRepository.java`
+```
+public interface FooBarRepository  extends MirageRepository<AppUser, Long> {
+
+	@Modifying
+	void updateFooBar(@Param("foo") String foo, @Param("bar") String bar);
+
+	// ...
+}
+```
+
+`FooBarRepository_updateFooBar.sql`
+```
+UPDATE ...
+```
+
+### Static parameters
+
+If you want to pass parameters to 2-way-sql statically, you can use `@StaticParam` annotation like this:
+
+```
+@StaticParam(key = "id", value = "foo")
+User findFoo();
+```
+
+You can use multiple `@StaticParam` annotations by using `@StaticParams` annotation like this:
+
+```
+@StaticParams({
+	@StaticParam(key = "foo", value = "foovalue"),
+	@StaticParam(key = "bar", value = "barvalue")
+})
+List<User> findXxx();
+```
+
