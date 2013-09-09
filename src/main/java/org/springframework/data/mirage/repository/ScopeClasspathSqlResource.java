@@ -22,14 +22,13 @@ import java.util.Iterator;
 import java.util.List;
 
 import jp.sf.amateras.mirage.ClasspathSqlResource;
-import jp.sf.amateras.mirage.SqlResource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
 /**
- * {@link SqlResource}のデフォルト実装クラス。
+ * TODO daisuke
  * 
  * @since 1.0
  * @version $Id$

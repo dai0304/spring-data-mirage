@@ -50,6 +50,7 @@ import org.springframework.data.repository.core.EntityInformation;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.Assert;
 
 /**
@@ -108,6 +109,9 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 	
 	@Autowired
 	SqlManager sqlManager;
+	
+	@Autowired
+	PlatformTransactionManager transactionManager;
 	
 	@Autowired
 	NameConverter nameConverter;

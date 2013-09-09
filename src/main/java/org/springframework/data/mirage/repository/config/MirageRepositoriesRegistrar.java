@@ -1,6 +1,6 @@
 /*
- * Copyright 2011 Daisuke Miyamoto.
- * Created on 2012/12/09
+ * Copyright 2012 the original author or authors.
+ * Created on 2013/09/10
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,26 +16,28 @@
  */
 package org.springframework.data.mirage.repository.config;
 
-import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
-import org.springframework.data.repository.config.RepositoryBeanDefinitionParser;
+import java.lang.annotation.Annotation;
+
+import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
+import org.springframework.data.repository.config.RepositoryBeanDefinitionRegistrarSupport;
 import org.springframework.data.repository.config.RepositoryConfigurationExtension;
 
 /**
- * Simple namespace handler for {@literal repositories} namespace.
+ * {@link ImportBeanDefinitionRegistrar} to enable {@link EnableMirageRepositories} annotation.
  * 
- * @since 1.0
+ * @since 0.2.0
  * @version $Id$
  * @author daisuke
  */
-public class MirageRepositoryNameSpaceHandler extends NamespaceHandlerSupport {
+class MirageRepositoriesRegistrar extends RepositoryBeanDefinitionRegistrarSupport {
 	
 	@Override
-	public void init() {
-		RepositoryConfigurationExtension extension = new MirageRepositoryConfigExtension();
-		RepositoryBeanDefinitionParser repositoryBeanDefinitionParser = new RepositoryBeanDefinitionParser(extension);
-		
-		registerBeanDefinitionParser("repositories", repositoryBeanDefinitionParser);
-		registerBeanDefinitionParser("auditing", new AuditingBeanDefinitionParser());
-		
+	protected Class<? extends Annotation> getAnnotation() {
+		return EnableMirageRepositories.class;
+	}
+	
+	@Override
+	protected RepositoryConfigurationExtension getExtension() {
+		return new MirageRepositoryConfigExtension();
 	}
 }
