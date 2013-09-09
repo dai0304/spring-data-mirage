@@ -8,9 +8,15 @@ WHERE
 	/*IF orders != null*/
 	username = /*username*/'abc'
 	/*END*/
+
 	/*IF id != null*/
 	AND username = /*id*/'abc'
 	/*END*/
+
+	/*IF ids != null*/
+	AND username IN /*ids*/('abc', 'def', 'ghi')
+	/*END*/
+
 /*END*/
 
 /*IF orders != null*/

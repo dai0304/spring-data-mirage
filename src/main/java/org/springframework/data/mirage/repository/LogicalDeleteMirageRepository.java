@@ -19,6 +19,7 @@ package org.springframework.data.mirage.repository;
 import java.util.Map;
 
 import jp.sf.amateras.mirage.SqlManager;
+import jp.sf.amateras.mirage.SqlResource;
 import jp.sf.amateras.mirage.exception.SQLRuntimeException;
 
 import org.springframework.data.repository.core.EntityInformation;
@@ -35,10 +36,10 @@ import org.springframework.util.Assert;
 public class LogicalDeleteMirageRepository<E extends Identifiable> extends IdentifiableMirageRepository<E> implements
 		LogicalDeleteJdbcRepository<E> {
 	
-	static final SqlResource BASE_SELECT_SQL = new SimpleSqlResource(LogicalDeleteMirageRepository.class,
+	static final SqlResource BASE_SELECT_SQL = new ScopeClasspathSqlResource(LogicalDeleteMirageRepository.class,
 			"baseLogicalDeleteSelect.sql");
 	
-	static final SqlResource BASE_LOGICAL_DELETE = new SimpleSqlResource(LogicalDeleteMirageRepository.class,
+	static final SqlResource BASE_LOGICAL_DELETE = new ScopeClasspathSqlResource(LogicalDeleteMirageRepository.class,
 			"baseLogicalDelete.sql");
 	
 	

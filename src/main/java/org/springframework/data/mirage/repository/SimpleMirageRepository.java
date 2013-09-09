@@ -29,12 +29,16 @@ import javax.sql.DataSource;
 
 import jp.sf.amateras.mirage.IterationCallback;
 import jp.sf.amateras.mirage.SqlManager;
+import jp.sf.amateras.mirage.SqlResource;
+import jp.sf.amateras.mirage.StringSqlResource;
 import jp.sf.amateras.mirage.annotation.Column;
 import jp.sf.amateras.mirage.exception.SQLRuntimeException;
 import jp.sf.amateras.mirage.naming.NameConverter;
 import jp.sf.amateras.mirage.util.MirageUtil;
 import jp.sf.amateras.mirage.util.Validate;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.domain.Page;
@@ -59,7 +63,9 @@ import org.springframework.util.Assert;
  */
 public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcRepository<E, ID> {
 	
-	static final SqlResource BASE_SELECT_SQL = new SimpleSqlResource(SimpleMirageRepository.class, "baseSelect.sql");
+	private static Logger logger = LoggerFactory.getLogger(SimpleMirageRepository.class);
+	
+	static final SqlResource BASE_SELECT_SQL = new ScopeClasspathSqlResource(SimpleMirageRepository.class, "baseSelect.sql");
 	
 	
 	/**
@@ -74,7 +80,7 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 	 */
 	public static SqlResource newSqlResource(Class<?> scope, String filename) {
 		Validate.notNull(filename);
-		return new SimpleSqlResource(scope, filename);
+		return new ScopeClasspathSqlResource(scope, filename);
 	}
 	
 	private static String join(List<String> orders) {
@@ -164,6 +170,8 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 			} catch (SQLRuntimeException e) {
 				throw getExceptionTranslator().translate("delete", null, e.getCause());
 			}
+		} else {
+			logger.warn("entity id [{}] not found", id);
 		}
 	}
 	
@@ -229,7 +237,7 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 		Assert.notNull(ids, "ids must not be null");
 		
 		Map<String, Object> params = createParams();
-		params.put("ids", ids); // TODO
+		params.put("ids", ids);
 		try {
 			return getResultList(getBaseSelectSqlResource(), params);
 		} catch (SQLRuntimeException e) {
@@ -330,8 +338,10 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 		try {
 			if (exists(getId(entity))) {
 				sqlManager.updateEntity(entity);
+				logger.debug("entity updated: {}", entity);
 			} else {
 				sqlManager.insertEntity(entity);
+				logger.debug("entity inserted: {}", entity);
 			}
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("save", null, e.getCause());
@@ -340,7 +350,11 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 	}
 	
 	public void setBaseSelectSqlResource(SqlResource baseSelectSqlResource) {
-		this.baseSelectSqlResource = baseSelectSqlResource;
+		if (baseSelectSqlResource == null) {
+			this.baseSelectSqlResource = BASE_SELECT_SQL;
+		} else {
+			this.baseSelectSqlResource = baseSelectSqlResource;
+		}
 	}
 	
 	/**
@@ -485,7 +499,7 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 	protected int executeUpdate(SqlResource resource) {
 		Assert.notNull(resource);
 		try {
-			return sqlManager.executeUpdate(resource.getAbsolutePath());
+			return sqlManager.executeUpdate(resource);
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("executeUpdate", null, e.getCause());
 		}
@@ -498,7 +512,7 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 	protected int executeUpdate(SqlResource resource, Object param) {
 		Assert.notNull(resource);
 		try {
-			return sqlManager.executeUpdate(resource.getAbsolutePath(), param);
+			return sqlManager.executeUpdate(resource, param);
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("executeUpdate", null, e.getCause());
 		}
@@ -506,11 +520,13 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 	
 	/**
 	 * @see SqlManager#executeUpdateBySql(String)
+	 * @deprecated use {@link #executeUpdate(SqlResource)}
 	 */
+	@Deprecated
 	@SuppressWarnings("javadoc")
 	protected int executeUpdateBySql(String sql) {
 		try {
-			return sqlManager.executeUpdateBySql(sql);
+			return sqlManager.executeUpdate(new StringSqlResource(sql));
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("executeUpdateBySql", sql, e.getCause());
 		}
@@ -518,11 +534,13 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 	
 	/**
 	 * @see SqlManager#executeUpdateBySql(String, Object...)
+	 * @deprecated use {@link #executeUpdate(SqlResource, Object)}
 	 */
+	@Deprecated
 	@SuppressWarnings("javadoc")
 	protected int executeUpdateBySql(String sql, Object... params) {
 		try {
-			return sqlManager.executeUpdateBySql(sql, params);
+			return sqlManager.executeUpdate(new StringSqlResource(sql), params);
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("executeUpdateBySql", sql, e.getCause());
 		}
@@ -551,7 +569,7 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 	protected int getCount(SqlResource resource) {
 		Assert.notNull(resource);
 		try {
-			return sqlManager.getCount(resource.getAbsolutePath());
+			return sqlManager.getCount(resource);
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("getCount", null, e.getCause());
 		}
@@ -564,7 +582,7 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 	protected int getCount(SqlResource resource, Object param) {
 		Assert.notNull(resource);
 		try {
-			return sqlManager.getCount(resource.getAbsolutePath(), param);
+			return sqlManager.getCount(resource, param);
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("getCount", null, e.getCause());
 		}
@@ -572,12 +590,14 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 	
 	/**
 	 * @see SqlManager#getCountBySql(String, Object...)
+	 * @deprecated use {@link #getCount(SqlResource)}
 	 */
+	@Deprecated
 	@SuppressWarnings("javadoc")
 	protected int getCountBySql(String sql) {
 		Assert.notNull(sql);
 		try {
-			return sqlManager.getCountBySql(sql);
+			return sqlManager.getCount(new StringSqlResource(sql));
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("getCountBySql", sql, e.getCause());
 		}
@@ -585,12 +605,14 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 	
 	/**
 	 * @see SqlManager#getCountBySql(String, Object...)
+	 * @deprecated use {@link #getCount(SqlResource, Object)}
 	 */
+	@Deprecated
 	@SuppressWarnings("javadoc")
 	protected int getCountBySql(String sql, Object... params) {
 		Assert.notNull(sql);
 		try {
-			return sqlManager.getCountBySql(sql, params);
+			return sqlManager.getCount(new StringSqlResource(sql), params);
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("getCountBySql", sql, e.getCause());
 		}
@@ -618,7 +640,7 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 	protected List<E> getResultList(SqlResource resource) {
 		Assert.notNull(resource);
 		try {
-			return sqlManager.getResultList(entityClass, resource.getAbsolutePath());
+			return sqlManager.getResultList(entityClass, resource);
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("getResultList", null, e.getCause());
 		}
@@ -632,7 +654,7 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 	protected List<E> getResultList(SqlResource resource, Object param) {
 		Assert.notNull(resource);
 		try {
-			return sqlManager.getResultList(entityClass, resource.getAbsolutePath(), param);
+			return sqlManager.getResultList(entityClass, resource, param);
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("getResultList", null, e.getCause());
 		}
@@ -640,11 +662,13 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 	
 	/**
 	 * @see SqlManager#getResultListBySql(Class, String)
+	 * @deprecated use {@link #getResultList(SqlResource)}
 	 */
+	@Deprecated
 	@SuppressWarnings("javadoc")
 	protected List<E> getResultListBySql(String sql) {
 		try {
-			return sqlManager.getResultListBySql(entityClass, sql);
+			return sqlManager.getResultList(entityClass, new StringSqlResource(sql));
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("getResultListBySql", sql, e.getCause());
 		}
@@ -652,11 +676,13 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 	
 	/**
 	 * @see SqlManager#getResultListBySql(Class, String, Object...)
+	 * @deprecated use {@link #getResultList(SqlResource, Object)}
 	 */
+	@Deprecated
 	@SuppressWarnings("javadoc")
 	protected List<E> getResultListBySql(String sql, Object... params) {
 		try {
-			return sqlManager.getResultListBySql(entityClass, sql, params);
+			return sqlManager.getResultList(entityClass, new StringSqlResource(sql), params);
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("getResultListBySql", sql, e.getCause());
 		}
@@ -669,7 +695,7 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 	protected E getSingleResult(SqlResource resource) {
 		Assert.notNull(resource);
 		try {
-			return sqlManager.getSingleResult(entityClass, resource.getAbsolutePath());
+			return sqlManager.getSingleResult(entityClass, resource);
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("getSingleResult", null, e.getCause());
 		}
@@ -682,7 +708,7 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 	protected E getSingleResult(SqlResource resource, Object param) {
 		Assert.notNull(resource);
 		try {
-			return sqlManager.getSingleResult(entityClass, resource.getAbsolutePath(), param);
+			return sqlManager.getSingleResult(entityClass, resource, param);
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("getSingleResult", null, e.getCause());
 		}
@@ -690,11 +716,13 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 	
 	/**
 	 * @see SqlManager#getSingleResultBySql(Class, String)
+	 * @deprecated use {@link #getSingleResult(SqlResource)}
 	 */
+	@Deprecated
 	@SuppressWarnings("javadoc")
 	protected E getSingleResultBySql(String sql) {
 		try {
-			return sqlManager.getSingleResultBySql(entityClass, sql);
+			return sqlManager.getSingleResult(entityClass, new StringSqlResource(sql));
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("getSingleResultBySql", sql, e.getCause());
 		}
@@ -702,11 +730,13 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 	
 	/**
 	 * @see SqlManager#getSingleResultBySql(Class, String, Object...)
+	 * @deprecated use {@link #getSingleResult(SqlResource, Object)}
 	 */
+	@Deprecated
 	@SuppressWarnings("javadoc")
 	protected E getSingleResultBySql(String sql, Object... params) {
 		try {
-			return sqlManager.getSingleResultBySql(entityClass, sql, params);
+			return sqlManager.getSingleResult(entityClass, new StringSqlResource(sql), params);
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("getSingleResultBySql", sql, e.getCause());
 		}
@@ -759,7 +789,7 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 	protected <R>R iterate(IterationCallback<E, R> callback, SqlResource resource) {
 		Assert.notNull(resource);
 		try {
-			return sqlManager.iterate(entityClass, callback, resource.getAbsolutePath());
+			return sqlManager.iterate(entityClass, callback, resource);
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("iterate", null, e.getCause());
 		}
@@ -772,7 +802,7 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 	protected <R>R iterate(IterationCallback<E, R> callback, SqlResource resource, Object param) {
 		Assert.notNull(resource);
 		try {
-			return sqlManager.iterate(entityClass, callback, resource.getAbsolutePath(), param);
+			return sqlManager.iterate(entityClass, callback, resource, param);
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("iterate", null, e.getCause());
 		}
@@ -780,11 +810,13 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 	
 	/**
 	 * @see SqlManager#iterateBySql(Class, IterationCallback, String)
+	 * @deprecated use {@link #iterate(IterationCallback, SqlResource)}
 	 */
+	@Deprecated
 	@SuppressWarnings("javadoc")
 	protected <R>R iterateBySql(IterationCallback<E, R> callback, String sql) {
 		try {
-			return sqlManager.iterateBySql(entityClass, callback, sql);
+			return sqlManager.iterate(entityClass, callback, new StringSqlResource(sql));
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("iterateBySql", sql, e.getCause());
 		}
@@ -792,11 +824,13 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 	
 	/**
 	 * @see SqlManager#iterateBySql(Class, IterationCallback, String, Object...)
+	 * @deprecated use {@link #iterate(IterationCallback, SqlResource, Object)}
 	 */
+	@Deprecated
 	@SuppressWarnings("javadoc")
 	protected <R>R iterateBySql(IterationCallback<E, R> callback, String sql, Object... params) {
 		try {
-			return sqlManager.iterateBySql(entityClass, callback, sql, params);
+			return sqlManager.iterate(entityClass, callback, new StringSqlResource(sql), params);
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("iterateBySql", sql, e.getCause());
 		}

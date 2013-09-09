@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 
 import jp.sf.amateras.mirage.SqlManager;
+import jp.sf.amateras.mirage.SqlResource;
+import jp.sf.amateras.mirage.StringSqlResource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,8 +32,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
-import org.springframework.data.mirage.repository.SimpleSqlResource;
-import org.springframework.data.mirage.repository.SqlResource;
+import org.springframework.data.mirage.repository.ScopeClasspathSqlResource;
 import org.springframework.data.repository.query.Parameter;
 import org.springframework.data.repository.query.ParameterAccessor;
 import org.springframework.data.repository.query.ParametersParameterAccessor;
@@ -104,20 +105,19 @@ public class MirageQuery implements RepositoryQuery {
 		SqlResource sqlResource = createSqlResource();
 		Map<String, Object> parameterMap = createParameterMap(parameters);
 		
-		String absolutePath = sqlResource.getAbsolutePath();
 		Class<?> returnedDomainType = mirageQueryMethod.getReturnedObjectType();
 		if (mirageQueryMethod.isModifyingQuery()) {
-			return sqlManager.executeUpdate(absolutePath, parameterMap);
+			return sqlManager.executeUpdate(sqlResource, parameterMap);
 		} else if (mirageQueryMethod.isCollectionQuery()) {
-			return sqlManager.getResultList(returnedDomainType, absolutePath, parameterMap);
+			return sqlManager.getResultList(returnedDomainType, sqlResource, parameterMap);
 		} else if (mirageQueryMethod.isPageQuery()) {
 			ParameterAccessor accessor = new ParametersParameterAccessor(mirageQueryMethod.getParameters(), parameters);
 			Pageable pageable = accessor.getPageable();
 			addPageParam(parameterMap, pageable);
-			List<?> resultList = sqlManager.getResultList(returnedDomainType, absolutePath, parameterMap);
+			List<?> resultList = sqlManager.getResultList(returnedDomainType, sqlResource, parameterMap);
 			int totalCount;
 			/*if (query.contains("SQL_CALC_FOUND_ROWS")) { */
-			totalCount = sqlManager.getCountBySql("SELECT FOUND_ROWS();"); // TODO MySQL固有処理
+			totalCount = sqlManager.getCount(new StringSqlResource("SELECT FOUND_ROWS();")); // TODO MySQL固有処理
 			/*} else {
 				totalCount = ...; // TODO
 			}
@@ -130,7 +130,7 @@ public class MirageQuery implements RepositoryQuery {
 			PageImpl<?> page = new PageImpl(resultList, pageable, totalCount);
 			return page;
 		} else {
-			return sqlManager.getSingleResult(returnedDomainType, absolutePath, parameterMap);
+			return sqlManager.getSingleResult(returnedDomainType, sqlResource, parameterMap);
 		}
 	}
 	
@@ -174,6 +174,6 @@ public class MirageQuery implements RepositoryQuery {
 				simpleName + ".sql"
 			};
 		}
-		return new SimpleSqlResource(declaringClass, names);
+		return new ScopeClasspathSqlResource(declaringClass, names);
 	}
 }

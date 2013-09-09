@@ -22,7 +22,6 @@ import org.springframework.data.mirage.repository.LogicalDeleteJdbcRepository;
 import org.springframework.data.mirage.repository.query.StaticParam;
 import org.springframework.data.mirage.repository.query.StaticParams;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 
 /**
  * {@link Entity}用リポジトリインターフェイス。
@@ -31,7 +30,6 @@ import org.springframework.stereotype.Repository;
  * @version $Id$
  * @author daisuke
  */
-@Repository
 public interface EntityRepository extends LogicalDeleteJdbcRepository<Entity> {
 	
 	/**

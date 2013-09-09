@@ -21,6 +21,9 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import jp.sf.amateras.mirage.ClasspathSqlResource;
+import jp.sf.amateras.mirage.SqlResource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
@@ -32,12 +35,56 @@ import org.springframework.util.Assert;
  * @version $Id$
  * @author daisuke
  */
-public class SimpleSqlResource implements SqlResource {
+public class ScopeClasspathSqlResource extends ClasspathSqlResource {
 	
-	private static Logger logger = LoggerFactory.getLogger(SimpleSqlResource.class);
+	private static Logger logger = LoggerFactory.getLogger(ScopeClasspathSqlResource.class);
 	
 	
-	static String toAbsolutePath(final String packageName, final String relativePath) {
+	private static boolean existsResource(String absolutePath) {
+		if (absolutePath == null) {
+			return false;
+		}
+		ClassLoader cl = Thread.currentThread().getContextClassLoader();
+		return cl.getResource(absolutePath) != null;
+	}
+	
+	private static String join(List<String> list) {
+		StringBuilder sb = new StringBuilder();
+		Iterator<String> parts = list.iterator();
+		if (parts.hasNext()) {
+			sb.append(parts.next());
+			while (parts.hasNext()) {
+				sb.append("/");
+				sb.append(parts.next());
+			}
+		}
+		return sb.toString();
+	}
+	
+	private static String toAbsolutePath(Class<?> scope, String[] names) {
+		Assert.notNull(scope);
+		Assert.notNull(names);
+		Assert.noNullElements(names);
+		String packageName = scope != null ? scope.getPackage().getName() : "";
+		
+		String targetName = null;
+		for (String name : names) {
+			String currentPath = toAbsolutePath(packageName, name);
+			if (existsResource(currentPath)) {
+				targetName = name;
+				break;
+			} else {
+				logger.debug("{} not exists", currentPath);
+			}
+		}
+		if (targetName != null) {
+			return toAbsolutePath(packageName, targetName);
+		} else {
+			throw new NoSuchSqlResourceException(scope, names);
+		}
+	}
+	
+	private static String toAbsolutePath(final String packageName, final String relativePath) {
 		// Is path already absolute?
 		if (relativePath.startsWith("/")) {
 			return relativePath;
@@ -69,23 +116,6 @@ public class SimpleSqlResource implements SqlResource {
 		}
 	}
 	
-	private static String join(List<String> list) {
-		StringBuilder sb = new StringBuilder();
-		Iterator<String> parts = list.iterator();
-		if (parts.hasNext()) {
-			sb.append(parts.next());
-			while (parts.hasNext()) {
-				sb.append("/");
-				sb.append(parts.next());
-			}
-		}
-		return sb.toString();
-	}
-	
-	
-	private final String absolutePath;
-	
-	
 	/**
 	 * インスタンスを生成する。
 	 * 
@@ -95,7 +125,7 @@ public class SimpleSqlResource implements SqlResource {
 	 * @throws IllegalArgumentException 引数に{@code null}を与えた場合
 	 * @since 1.0
 	 */
-	public SimpleSqlResource(Class<?> scope, String name) {
+	public ScopeClasspathSqlResource(Class<?> scope, String name) {
 		this(scope, new String[] {
 			name
 		});
@@ -110,44 +140,12 @@ public class SimpleSqlResource implements SqlResource {
 	 * @throws IllegalArgumentException 引数に{@code null}を与えた場合
 	 * @since 1.0
 	 */
-	public SimpleSqlResource(Class<?> scope, String[] names) {
-		Assert.notNull(scope);
-		Assert.notNull(names);
-		Assert.noNullElements(names);
-		String packageName = scope != null ? scope.getPackage().getName() : "";
-		
-		String targetName = null;
-		for (String name : names) {
-			String currentPath = toAbsolutePath(packageName, name);
-			if (existsResource(currentPath)) {
-				targetName = name;
-				break;
-			} else {
-				logger.debug("{} not exists", currentPath);
-			}
-		}
-		if (targetName != null) {
-			absolutePath = toAbsolutePath(packageName, targetName);
-		} else {
-			throw new NoSuchSqlResourceException(scope, names);
-		}
-	}
-	
-	@Override
-	public String getAbsolutePath() {
-		return absolutePath;
+	public ScopeClasspathSqlResource(Class<?> scope, String[] names) {
+		super(toAbsolutePath(scope, names));
 	}
 	
 	@Override
 	public String toString() {
-		return "SimpleSqlResource [absolutePath=" + absolutePath + "]";
-	}
-	
-	private boolean existsResource(String absolutePath) {
-		if (absolutePath == null) {
-			return false;
-		}
-		ClassLoader cl = Thread.currentThread().getContextClassLoader();
-		return cl.getResource(absolutePath) != null;
+		return "SimpleSqlResource " + super.toString().substring(20);
 	}
 }

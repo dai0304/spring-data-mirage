@@ -83,6 +83,6 @@ public class LogicalDeleteMirageRepositoryTest {
 		assertThat(repos.findOne(found.getId()), is(notNullValue())); // found
 		
 		List<Entity> x = repos.findByStr("foo");
-		System.out.println(x);
+		logger.info("{}", x);
 	}
 }

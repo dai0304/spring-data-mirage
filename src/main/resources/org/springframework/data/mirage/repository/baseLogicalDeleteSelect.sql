@@ -11,6 +11,10 @@ WHERE
 	AND /*$id_column_name*/id = /*id*/10
 	/*END*/
 
+	/*IF ids != null*/
+	/*$id_column_name*/id IN /*ids*/(10, 20, 30)
+	/*END*/
+
 	/*IF absid != null*/
 	AND ABS(/*$id_column_name*/id) = /*absid*/10
 	/*END*/

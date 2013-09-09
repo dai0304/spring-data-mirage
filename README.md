@@ -6,10 +6,10 @@ Spring-powered applications that use data access technologies. This module deals
 [Mirage SQL](https://github.com/takezoe/mirage) based data access layers.
 
 ## Features ##
-This project defines a `JdbcRepository` base interface  :
+This project defines a `MirageRepository` base interface  :
 
 ```java
-public interface JdbcRepository<E, ID extends Serializable> extends PagingAndSortingRepository<E, ID> {
+public interface MirageRepository<E, ID extends Serializable> extends PagingAndSortingRepository<E, ID> {
   T findOne(ID id);
   List<T> findAll();
   boolean exists(ID id);
@@ -21,6 +21,8 @@ public interface JdbcRepository<E, ID extends Serializable> extends PagingAndSor
 
 
 ## Quick Start ##
+
+### dependency
 
 Add the repository definition to your `pom.xml` :
 
@@ -43,6 +45,8 @@ Add the jar to your maven project :
   <version>0.1.2.RELEASE</version>
 </dependency>
 ```
+
+### Spring beans configurations
 
 Configure your infrastructure :
 
@@ -74,7 +78,9 @@ Configure your infrastructure :
 <mirage:repositories base-package="com.example.product.repository" sql-manager-ref="sqlManager" />
 ```
 
-Create an entity:
+### Entity classes
+
+Create an mirage entity:
 
 ```java
 @Table(name = "users")
@@ -95,18 +101,25 @@ public class User {
 }
 ```
 
+### Repository interfaces
+
 Create a repository interface in `com.example.product.repository`:
 
 ```java
-public interface AppUserRepository extends JdbcRepository<AppUser, Long> {
+public interface AppUserRepository extends MirageRepository<AppUser, Long> {
 
   List<AppUser> findByFirstname(@Param("first_name") String firstName);
+
+  List<AppUser> findByComplexCondition(@Param("complex_param1") String cp1, @Param("complex_param2") int cp2);
 
   // another query methods...
 }
 ```
 
-Write SQL file `AppUserRepository.sql` and place on the same directory with `AppUserRepository.class` :
+### SQL files
+
+Write SQL file `AppUserRepository.sql` (that's called 'base-select-SQL') and place on the same directory
+with `AppUserRepository.class` :
 
 ```sql
 SELECT *
@@ -116,6 +129,10 @@ FROM users
 WHERE
 	/*IF id != null*/
 	user_id = /*id*/1
+	/*END*/
+
+	/*IF ids != null*/
+	AND user_id IN /*ids*/(1, 2, 3)
 	/*END*/
 
 	/*IF first_name != null*/
@@ -139,7 +156,28 @@ LIMIT
 /*END*/
 ```
 
-Write a test client
+This base-select-SQL must support "id", "ids", "orders", "offset" and "size" parameters.  These parameters are used
+by `findOne()`, `findAll(Iterable<ID>)`, `findAll(Pageable)` and the like.
+
+And you can place another 2-way-sql for specific query method (that's called 'method-specific-2-way-sql')
+like this: `AppUserRepository_findByComplexCondition.sql`
+
+```
+SELECT U.*
+FROM users U
+	JOIN blahblah B ON U.username = B.username
+WHERE
+	B.complex_param1 LIKE /*complex_param1*/'%foobar%'
+	OR
+	B.complex_param2 > /*complex_param2*/10
+```
+
+If the all additional methods are supported by method-specific-2-way-sql or you don't declare additional query methods,
+you don't need to create base-select-SQL file.
+
+### Clients
+
+Write a test client :
 
 ```java
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -153,11 +191,58 @@ public class AppUserRepositoryTest {
   @TransactionConfiguration
   @Transactional
   public void sampleTestCase() {
-    AppUser user = repos.findOne(1L);
+    AppUser user = repos.findOne(1L); // SELECT * FROM users WHERE user_id = 1
     assertThat("user", user, is(notNullValue()));
-    List<AppUser> users = customerRepository.findAll();
+    List<AppUser> users = customerRepository.findAll(); // SELECT * FROM users
     assertThat("users", users, is(notNullValue()));
     assertThat("usersSize", users.size() > 0, is(true));
+    
+    List<AppUser> complex = customerRepository.findByComplexCondition("xy%z", 2);
+    // SELECT U.* FROM users U JOIN blahblah B ON U.username = B.username
+    // WHERE B.complex_param1 LIKE 'xy%z' OR B.complex_param2 > 2
   }
 }
 ```
+
+
+## Miscellaneous things ##
+
+### Modifying query
+
+You must mark modifying (insert, update and delete) query methods by `@Modifying` annotation:
+
+`FooBarRepository.java`
+```
+public interface FooBarRepository  extends MirageRepository<AppUser, Long> {
+
+	@Modifying
+	void updateFooBar(@Param("foo") String foo, @Param("bar") String bar);
+
+	// ...
+}
+```
+
+`FooBarRepository_updateFooBar.sql`
+```
+UPDATE ...
+```
+
+### Static parameters
+
+If you want to pass parameters to 2-way-sql statically, you can use `@StaticParam` annotation like this:
+
+```
+@StaticParam(key = "id", value = "foo")
+User findFoo();
+```
+
+You can use multiple `@StaticParam` annotations by using `@StaticParams` annotation like this:
+
+```
+@StaticParams({
+	@StaticParam(key = "foo", value = "foovalue"),
+	@StaticParam(key = "bar", value = "barvalue")
+})
+List<User> findXxx();
+```
+
