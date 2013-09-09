@@ -16,7 +16,7 @@
  */
 package org.springframework.data.mirage.repository.query;
 
-import org.springframework.data.mirage.repository.SqlResource;
+import jp.sf.amateras.mirage.SqlResource;
 
 /**
  * Interface to hide different implementations to extract the original Mirage query string from a {@link Query}.
