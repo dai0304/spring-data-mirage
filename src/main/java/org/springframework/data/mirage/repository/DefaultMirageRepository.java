@@ -50,10 +50,11 @@ import org.springframework.data.repository.core.EntityInformation;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.Assert;
 
 /**
- * Mirageフレームワークを利用した {@link JdbcRepository} の実装クラス。
+ * Mirageフレームワークを利用した {@link MirageRepository} の実装クラス。
  * 
  * @param <E> the domain type the repository manages
  * @param <ID> the type of the id of the entity the repository manages
@@ -61,11 +62,12 @@ import org.springframework.util.Assert;
  * @version $Id: SimpleMirageRepository.java 161 2011-10-21 10:08:21Z daisuke $
  * @author daisuke
  */
-public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcRepository<E, ID> {
+public class DefaultMirageRepository<E, ID extends Serializable> implements MirageRepository<E, ID> {
 	
-	private static Logger logger = LoggerFactory.getLogger(SimpleMirageRepository.class);
+	private static Logger logger = LoggerFactory.getLogger(DefaultMirageRepository.class);
 	
-	static final SqlResource BASE_SELECT_SQL = new ScopeClasspathSqlResource(SimpleMirageRepository.class, "baseSelect.sql");
+	static final SqlResource BASE_SELECT_SQL = new ScopeClasspathSqlResource(DefaultMirageRepository.class,
+			"baseSelect.sql");
 	
 	
 	/**
@@ -105,16 +107,19 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 	}
 	
 	
-	private SqlResource baseSelectSqlResource = BASE_SELECT_SQL;
-	
 	@Autowired
 	SqlManager sqlManager;
+	
+	@Autowired
+	PlatformTransactionManager transactionManager;
 	
 	@Autowired
 	NameConverter nameConverter;
 	
 	@Autowired(required = false)
 	DataSource dataSource;
+	
+	private SqlResource baseSelectSqlResource = BASE_SELECT_SQL;
 	
 	private transient SQLExceptionTranslator exceptionTranslator;
 	
@@ -127,7 +132,7 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 	 * @param entityClass エンティティの型
 	 * @throws IllegalArgumentException 引数に{@code null}を与えた場合
 	 */
-	public SimpleMirageRepository(Class<E> entityClass) {
+	public DefaultMirageRepository(Class<E> entityClass) {
 		Assert.notNull(entityClass);
 		this.entityClass = entityClass;
 	}
@@ -138,7 +143,7 @@ public class SimpleMirageRepository<E, ID extends Serializable> implements JdbcR
 	 * @param entityInformation
 	 * @param sqlManager {@link SqlManager}
 	 */
-	public SimpleMirageRepository(EntityInformation<E, ? extends Serializable> entityInformation, SqlManager sqlManager) {
+	public DefaultMirageRepository(EntityInformation<E, ? extends Serializable> entityInformation, SqlManager sqlManager) {
 		Assert.notNull(entityInformation);
 		this.entityClass = entityInformation.getJavaType();
 		this.sqlManager = sqlManager;

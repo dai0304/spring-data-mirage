@@ -34,7 +34,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
  * @author daisuke
  */
 @NoRepositoryBean
-public interface JdbcRepository<E, ID extends Serializable> extends PagingAndSortingRepository<E, ID> {
+public interface MirageRepository<E, ID extends Serializable> extends PagingAndSortingRepository<E, ID> {
 	
 	/**
 	 * {@inheritDoc}
