@@ -16,7 +16,7 @@
  */
 package org.springframework.data.mirage.repository.example;
 
-import org.springframework.data.mirage.repository.JdbcRepository;
+import org.springframework.data.mirage.repository.MirageRepository;
 
 /**
  * {@link Entity}用リポジトリインターフェイス。
@@ -25,5 +25,5 @@ import org.springframework.data.mirage.repository.JdbcRepository;
  * @version $Id$
  * @author daisuke
  */
-public interface UserRepository extends JdbcRepository<User, String> {
+public interface UserRepository extends MirageRepository<User, String> {
 }
