@@ -16,6 +16,9 @@
  */
 package org.springframework.data.mirage.repository.query;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -25,6 +28,10 @@ import java.util.Map;
 import jp.sf.amateras.mirage.SqlManager;
 import jp.sf.amateras.mirage.SqlResource;
 import jp.sf.amateras.mirage.StringSqlResource;
+
+import com.google.common.base.Charsets;
+import com.google.common.io.CharStreams;
+import com.google.common.io.Closeables;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,17 +60,27 @@ public class MirageQuery implements RepositoryQuery {
 	
 	
 	private static void addPageParam(Map<String, Object> params, Pageable pageable) {
-		params.put("offset", pageable == null ? null : pageable.getOffset());
-		params.put("size", pageable == null ? null : pageable.getPageSize());
-		if (pageable != null && pageable.getSort() != null) {
-			List<String> orders = new ArrayList<String>();
+		if (pageable == null) {
+			return;
+		}
+		params.put("offset", pageable.getOffset());
+		params.put("size", pageable.getPageSize());
+		if (pageable.getSort() != null) {
 			Sort sort = pageable.getSort();
-			for (Order order : sort) {
-				orders.add(String.format("%s %s", order.getProperty(), order.getDirection().name()));
-			}
-			if (orders.size() != 0) {
-				params.put("orders", join(orders));
-			}
+			addSortParam(params, sort);
+		}
+	}
+	
+	private static void addSortParam(Map<String, Object> params, Sort sort) {
+		if (sort == null) {
+			return;
+		}
+		List<String> orders = new ArrayList<String>();
+		for (Order order : sort) {
+			orders.add(String.format("%s %s", order.getProperty(), order.getDirection().name()));
+		}
+		if (orders.size() != 0) {
+			params.put("orders", join(orders));
 		}
 	}
 	
@@ -113,15 +130,14 @@ public class MirageQuery implements RepositoryQuery {
 		} else if (mirageQueryMethod.isPageQuery()) {
 			ParameterAccessor accessor = new ParametersParameterAccessor(mirageQueryMethod.getParameters(), parameters);
 			Pageable pageable = accessor.getPageable();
-			addPageParam(parameterMap, pageable);
-			List<?> resultList = sqlManager.getResultList(returnedDomainType, sqlResource, parameterMap);
-			int totalCount;
-			/*if (query.contains("SQL_CALC_FOUND_ROWS")) { */
-			totalCount = sqlManager.getCount(new StringSqlResource("SELECT FOUND_ROWS();")); // TODO MySQL固有処理
-			/*} else {
-				totalCount = ...; // TODO
+			if (pageable != null) {
+				addPageParam(parameterMap, pageable);
+			} else if (accessor.getSort() != null) {
+				Sort sort = accessor.getSort();
+				addSortParam(parameterMap, sort);
 			}
-			*/
+			List<?> resultList = sqlManager.getResultList(returnedDomainType, sqlResource, parameterMap);
+			int totalCount = getTotalCount(sqlResource);
 			
 			@SuppressWarnings({
 				"rawtypes",
@@ -175,5 +191,22 @@ public class MirageQuery implements RepositoryQuery {
 			};
 		}
 		return new ScopeClasspathSqlResource(declaringClass, names);
+	}
+	
+	@SuppressWarnings("deprecation")
+	private int getTotalCount(SqlResource sqlResource) {
+		Reader r = null;
+		try {
+			r = new InputStreamReader(sqlResource.getInputStream(), Charsets.UTF_8);
+			String query = CharStreams.toString(r);
+			if (query.contains("SQL_CALC_FOUND_ROWS")) { // TODO MySQL固有処理
+				return sqlManager.getSingleResult(Integer.class, new StringSqlResource("SELECT FOUND_ROWS()"));
+			}
+		} catch (IOException e) {
+			logger.error("IOException", e);
+		} finally {
+			Closeables.closeQuietly(r);
+		}
+		return 0; // TODO
 	}
 }
