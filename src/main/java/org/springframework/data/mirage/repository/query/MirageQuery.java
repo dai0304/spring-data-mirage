@@ -30,6 +30,9 @@ import jp.sf.amateras.mirage.SqlResource;
 import jp.sf.amateras.mirage.StringSqlResource;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Function;
+import com.google.common.base.Joiner;
+import com.google.common.collect.Iterables;
 import com.google.common.io.CharStreams;
 import com.google.common.io.Closeables;
 
@@ -175,22 +178,39 @@ public class MirageQuery implements RepositoryQuery {
 		return parameterMap;
 	}
 	
-	private SqlResource createSqlResource() {
-		String[] names;
+	private String[] createQueryNameCandidates() {
 		Class<?> declaringClass = mirageQueryMethod.getDeclaringClass();
 		String name = mirageQueryMethod.getAnnotatedQuery();
 		if (name != null) {
-			names = new String[] {
+			return new String[] {
 				name
 			};
-		} else {
-			String simpleName = declaringClass.getSimpleName();
-			names = new String[] {
-				simpleName + "_" + mirageQueryMethod.getName() + ".sql",
-				simpleName + ".sql"
-			};
 		}
-		return new ScopeClasspathSqlResource(declaringClass, names);
+		String simpleName = declaringClass.getSimpleName();
+		String args =
+				String.format(
+						"(%s)",
+						Joiner.on(",").join(
+								Iterables.transform(mirageQueryMethod.getParameters(),
+										new Function<Parameter, String>() {
+											
+											@Override
+											public String apply(Parameter input) {
+												return input.getType().getSimpleName();
+											}
+										})));
+		return new String[] {
+			simpleName + "#" + mirageQueryMethod.getName() + args + ".sql",
+			simpleName + "_" + mirageQueryMethod.getName() + args + ".sql",
+			simpleName + "#" + mirageQueryMethod.getName() + ".sql",
+			simpleName + "_" + mirageQueryMethod.getName() + ".sql",
+			simpleName + ".sql"
+		};
+	}
+	
+	private SqlResource createSqlResource() {
+		String[] names = createQueryNameCandidates();
+		return new ScopeClasspathSqlResource(mirageQueryMethod.getDeclaringClass(), names);
 	}
 	
 	@SuppressWarnings("deprecation")
