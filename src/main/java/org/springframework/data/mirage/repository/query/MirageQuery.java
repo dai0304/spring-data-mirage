@@ -183,6 +183,11 @@ public class MirageQuery implements RepositoryQuery {
 				addSortParam(parameterMap, sort);
 			}
 			List<?> resultList = sqlManager.getResultList(returnedDomainType, sqlResource, parameterMap);
+			
+			if (Iterable.class.isAssignableFrom(mirageQueryMethod.getReturnType())) {
+				return resultList;
+			}
+			
 			int totalCount = getTotalCount(sqlResource);
 			
 			@SuppressWarnings({
