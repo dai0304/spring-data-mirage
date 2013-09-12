@@ -22,14 +22,13 @@ import jp.sf.amateras.mirage.SqlManager;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.mirage.repository.DefaultLogicalDeleteMirageRepository;
+import org.springframework.data.mirage.repository.DefaultMirageRepository;
 import org.springframework.data.mirage.repository.Identifiable;
 import org.springframework.data.mirage.repository.IdentifiableMirageRepository;
 import org.springframework.data.mirage.repository.LogicalDeleteMirageRepository;
-import org.springframework.data.mirage.repository.DefaultLogicalDeleteMirageRepository;
 import org.springframework.data.mirage.repository.NoSuchSqlResourceException;
-import org.springframework.data.mirage.repository.DefaultMirageRepository;
 import org.springframework.data.mirage.repository.query.MirageQueryLookupStrategy;
-import org.springframework.data.mirage.repository.query.QueryExtractor;
 import org.springframework.data.repository.core.EntityInformation;
 import org.springframework.data.repository.core.RepositoryMetadata;
 import org.springframework.data.repository.core.support.RepositoryFactorySupport;
@@ -50,8 +49,6 @@ public class MirageRepositoryFactory extends RepositoryFactorySupport {
 	
 	private final SqlManager sqlManager;
 	
-	private final QueryExtractor extractor;
-	
 	
 	/**
 	 * インスタンスを生成する。
@@ -62,7 +59,6 @@ public class MirageRepositoryFactory extends RepositoryFactorySupport {
 	public MirageRepositoryFactory(SqlManager sqlManager) {
 		Assert.notNull(sqlManager);
 		this.sqlManager = sqlManager;
-		extractor = null; // TODO
 	}
 	
 	@Override
@@ -73,7 +69,7 @@ public class MirageRepositoryFactory extends RepositoryFactorySupport {
 	
 	@Override
 	protected QueryLookupStrategy getQueryLookupStrategy(Key key) {
-		return MirageQueryLookupStrategy.create(sqlManager, key, extractor);
+		return MirageQueryLookupStrategy.create(sqlManager, key);
 	}
 	
 	@Override

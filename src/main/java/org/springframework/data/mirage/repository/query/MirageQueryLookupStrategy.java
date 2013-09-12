@@ -42,21 +42,20 @@ public abstract class MirageQueryLookupStrategy implements QueryLookupStrategy {
 	 * 
 	 * @param sqlManager {@link SqlManager}
 	 * @param key
-	 * @param extractor 
 	 * @return
 	 */
-	public static QueryLookupStrategy create(SqlManager sqlManager, Key key, QueryExtractor extractor) {
+	public static QueryLookupStrategy create(SqlManager sqlManager, Key key) {
 		if (key == null) {
-			return new CreateIfNotFoundQueryLookupStrategy(sqlManager, extractor);
+			return new CreateIfNotFoundQueryLookupStrategy(sqlManager);
 		}
 		
 		switch (key) {
 			case CREATE:
-				return new CreateQueryLookupStrategy(sqlManager, extractor);
+				return new CreateQueryLookupStrategy(sqlManager);
 			case USE_DECLARED_QUERY:
-				return new DeclaredQueryLookupStrategy(sqlManager, extractor);
+				return new DeclaredQueryLookupStrategy(sqlManager);
 			case CREATE_IF_NOT_FOUND:
-				return new CreateIfNotFoundQueryLookupStrategy(sqlManager, extractor);
+				return new CreateIfNotFoundQueryLookupStrategy(sqlManager);
 			default:
 				throw new IllegalArgumentException(String.format("Unsupported query lookup strategy %s!", key));
 		}
@@ -65,17 +64,14 @@ public abstract class MirageQueryLookupStrategy implements QueryLookupStrategy {
 	
 	private final SqlManager sqlManager;
 	
-	private final QueryExtractor extractor;
 	
-	
-	MirageQueryLookupStrategy(SqlManager sqlManager, QueryExtractor extractor) {
+	MirageQueryLookupStrategy(SqlManager sqlManager) {
 		this.sqlManager = sqlManager;
-		this.extractor = extractor;
 	}
 	
 	@Override
 	public final RepositoryQuery resolveQuery(Method method, RepositoryMetadata metadata, NamedQueries namedQueries) {
-		return resolveQuery(new MirageQueryMethod(method, metadata, extractor), sqlManager, namedQueries);
+		return resolveQuery(new MirageQueryMethod(method, metadata), sqlManager, namedQueries);
 	}
 	
 	/**
@@ -102,10 +98,10 @@ public abstract class MirageQueryLookupStrategy implements QueryLookupStrategy {
 		private final CreateQueryLookupStrategy createStrategy;
 		
 		
-		public CreateIfNotFoundQueryLookupStrategy(SqlManager sqlManager, QueryExtractor extractor) {
-			super(sqlManager, extractor);
-			strategy = new DeclaredQueryLookupStrategy(sqlManager, extractor);
-			createStrategy = new CreateQueryLookupStrategy(sqlManager, extractor);
+		public CreateIfNotFoundQueryLookupStrategy(SqlManager sqlManager) {
+			super(sqlManager);
+			strategy = new DeclaredQueryLookupStrategy(sqlManager);
+			createStrategy = new CreateQueryLookupStrategy(sqlManager);
 		}
 		
 		@Override
@@ -124,8 +120,8 @@ public abstract class MirageQueryLookupStrategy implements QueryLookupStrategy {
 	 */
 	private static class CreateQueryLookupStrategy extends MirageQueryLookupStrategy {
 		
-		public CreateQueryLookupStrategy(SqlManager sqlManager, QueryExtractor extractor) {
-			super(sqlManager, extractor);
+		public CreateQueryLookupStrategy(SqlManager sqlManager) {
+			super(sqlManager);
 		}
 		
 		@Override
@@ -141,8 +137,8 @@ public abstract class MirageQueryLookupStrategy implements QueryLookupStrategy {
 	 */
 	private static class DeclaredQueryLookupStrategy extends MirageQueryLookupStrategy {
 		
-		public DeclaredQueryLookupStrategy(SqlManager sqlManager, QueryExtractor extractor) {
-			super(sqlManager, extractor);
+		public DeclaredQueryLookupStrategy(SqlManager sqlManager) {
+			super(sqlManager);
 		}
 		
 		@Override

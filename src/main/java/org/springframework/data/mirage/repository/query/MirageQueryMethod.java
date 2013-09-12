@@ -46,7 +46,7 @@ public class MirageQueryMethod extends QueryMethod {
 	 * @param metadata
 	 * @param provider 
 	 */
-	public MirageQueryMethod(Method method, RepositoryMetadata metadata, QueryExtractor provider) {
+	public MirageQueryMethod(Method method, RepositoryMetadata metadata) {
 		super(method, metadata);
 		Assert.notNull(method, "Method must not be null!");
 		this.method = method;
@@ -95,7 +95,7 @@ public class MirageQueryMethod extends QueryMethod {
 	 * Returns the query string declared in a {@link Query} annotation or {@code null} if neither the annotation found
 	 * nor the attribute was specified.
 	 * 
-	 * @return
+	 * @return annotated query or {@code null} if none
 	 */
 	String getAnnotatedQuery() {
 		Query queryAnnotation = getQueryAnnotation();
