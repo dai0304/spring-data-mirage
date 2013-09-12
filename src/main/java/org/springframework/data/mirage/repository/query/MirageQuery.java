@@ -109,7 +109,7 @@ public class MirageQuery implements RepositoryQuery {
 	/**
 	 * インスタンスを生成する。
 	 * 
-	 * @param mirageQueryMethod 
+	 * @param mirageQueryMethod {@link MirageQueryMethod}
 	 * @param sqlManager {@link SqlManager}
 	 * @throws IllegalArgumentException if the argument is {@code null}
 	 */
@@ -126,12 +126,17 @@ public class MirageQuery implements RepositoryQuery {
 		Map<String, Object> parameterMap = createParameterMap(parameters);
 		
 		Class<?> returnedDomainType = mirageQueryMethod.getReturnedObjectType();
+		ParameterAccessor accessor = new ParametersParameterAccessor(mirageQueryMethod.getParameters(), parameters);
+		
 		if (mirageQueryMethod.isModifyingQuery()) {
 			return sqlManager.executeUpdate(sqlResource, parameterMap);
 		} else if (mirageQueryMethod.isCollectionQuery()) {
+			Sort sort = accessor.getSort();
+			if (sort != null) {
+				addSortParam(parameterMap, sort);
+			}
 			return sqlManager.getResultList(returnedDomainType, sqlResource, parameterMap);
 		} else if (mirageQueryMethod.isPageQuery()) {
-			ParameterAccessor accessor = new ParametersParameterAccessor(mirageQueryMethod.getParameters(), parameters);
 			Pageable pageable = accessor.getPageable();
 			if (pageable != null) {
 				addPageParam(parameterMap, pageable);
