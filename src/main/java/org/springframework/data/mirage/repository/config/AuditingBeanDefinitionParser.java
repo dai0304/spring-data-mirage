@@ -78,7 +78,7 @@ public class AuditingBeanDefinitionParser implements BeanDefinitionParser {
 	/**
 	 * Copied code of SpringConfiguredBeanDefinitionParser until this class gets public.
 	 * 
-	 * @see http://jira.springframework.org/browse/SPR-7340
+	 * @see <a href="http://jira.springframework.org/browse/SPR-7340">Make SpringConfiguredBeanDefinitionParser public</a>
 	 * @author Juergen Hoeller
 	 */
 	private static class SpringConfiguredBeanDefinitionParser implements BeanDefinitionParser {

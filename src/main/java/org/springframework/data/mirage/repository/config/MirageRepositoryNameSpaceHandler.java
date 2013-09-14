@@ -36,6 +36,5 @@ public class MirageRepositoryNameSpaceHandler extends NamespaceHandlerSupport {
 		
 		registerBeanDefinitionParser("repositories", repositoryBeanDefinitionParser);
 		registerBeanDefinitionParser("auditing", new AuditingBeanDefinitionParser());
-		
 	}
 }

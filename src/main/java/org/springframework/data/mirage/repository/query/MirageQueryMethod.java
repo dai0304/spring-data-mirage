@@ -42,17 +42,26 @@ public class MirageQueryMethod extends QueryMethod {
 	/**
 	 * インスタンスを生成する。
 	 * 
-	 * @param method
+	 * @param method {@link Method} object of repository interface.
 	 * @param metadata
-	 * @param provider 
 	 */
-	public MirageQueryMethod(Method method, RepositoryMetadata metadata, QueryExtractor provider) {
+	public MirageQueryMethod(Method method, RepositoryMetadata metadata) {
 		super(method, metadata);
 		Assert.notNull(method, "Method must not be null!");
 		this.method = method;
 		
 		Assert.isTrue((isModifyingQuery() && getParameters().hasSpecialParameter()) == false,
 				String.format("Modifying method must not contain %s!", Parameters.TYPES));
+	}
+	
+	/**
+	 * Retunrs as {@link Method}.
+	 * 
+	 * @return the method
+	 * @since 0.2.1
+	 */
+	public Method asMethod() {
+		return method;
 	}
 	
 	/**
@@ -95,7 +104,7 @@ public class MirageQueryMethod extends QueryMethod {
 	 * Returns the query string declared in a {@link Query} annotation or {@code null} if neither the annotation found
 	 * nor the attribute was specified.
 	 * 
-	 * @return
+	 * @return annotated query or {@code null} if none
 	 */
 	String getAnnotatedQuery() {
 		Query queryAnnotation = getQueryAnnotation();
