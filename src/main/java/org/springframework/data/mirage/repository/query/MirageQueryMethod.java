@@ -42,9 +42,8 @@ public class MirageQueryMethod extends QueryMethod {
 	/**
 	 * インスタンスを生成する。
 	 * 
-	 * @param method
+	 * @param method {@link Method} object of repository interface.
 	 * @param metadata
-	 * @param provider 
 	 */
 	public MirageQueryMethod(Method method, RepositoryMetadata metadata) {
 		super(method, metadata);
@@ -53,6 +52,16 @@ public class MirageQueryMethod extends QueryMethod {
 		
 		Assert.isTrue((isModifyingQuery() && getParameters().hasSpecialParameter()) == false,
 				String.format("Modifying method must not contain %s!", Parameters.TYPES));
+	}
+	
+	/**
+	 * Retunrs as {@link Method}.
+	 * 
+	 * @return the method
+	 * @since 0.2.1
+	 */
+	public Method asMethod() {
+		return method;
 	}
 	
 	/**

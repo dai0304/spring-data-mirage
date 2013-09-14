@@ -19,6 +19,7 @@ package org.springframework.data.mirage.repository.query;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -30,9 +31,6 @@ import jp.sf.amateras.mirage.SqlResource;
 import jp.sf.amateras.mirage.StringSqlResource;
 
 import com.google.common.base.Charsets;
-import com.google.common.base.Function;
-import com.google.common.base.Joiner;
-import com.google.common.collect.Iterables;
 import com.google.common.io.CharStreams;
 import com.google.common.io.Closeables;
 
@@ -53,7 +51,7 @@ import org.springframework.util.Assert;
 /**
  * TODO for daisuke
  * 
- * @since 1.2
+ * @since 0.1
  * @version $Id$
  * @author daisuke
  */
@@ -61,6 +59,24 @@ public class MirageQuery implements RepositoryQuery {
 	
 	private static Logger logger = LoggerFactory.getLogger(MirageQuery.class);
 	
+	
+	static String getArgsPartOfSignature(Method method) {
+		try {
+			StringBuilder sb = new StringBuilder();
+			sb.append('(');
+			Class<?>[] params = method.getParameterTypes(); // avoid clone
+			for (int j = 0; j < params.length; j++) {
+				sb.append(getTypeName(params[j]));
+				if (j < (params.length - 1)) {
+					sb.append(',');
+				}
+			}
+			sb.append(')');
+			return sb.toString();
+		} catch (Exception e) {
+			return "<" + e + ">";
+		}
+	}
 	
 	private static void addPageParam(Map<String, Object> params, Pageable pageable) {
 		if (pageable == null) {
@@ -85,6 +101,28 @@ public class MirageQuery implements RepositoryQuery {
 		if (orders.size() != 0) {
 			params.put("orders", join(orders));
 		}
+	}
+	
+	private static String getTypeName(Class<?> type) {
+		if (type.isArray()) {
+			try {
+				Class<?> cl = type;
+				int dimensions = 0;
+				while (cl.isArray()) {
+					dimensions++;
+					cl = cl.getComponentType();
+				}
+				StringBuffer sb = new StringBuffer();
+				sb.append(cl.getName());
+				for (int i = 0; i < dimensions; i++) {
+					sb.append("[]");
+				}
+				return sb.toString();
+			} catch (Throwable e) {
+				//$FALL-THROUGH$
+			}
+		}
+		return type.getName();
 	}
 	
 	private static String join(List<String> orders) {
@@ -192,22 +230,11 @@ public class MirageQuery implements RepositoryQuery {
 			};
 		}
 		String simpleName = declaringClass.getSimpleName();
-		String args =
-				String.format(
-						"(%s)",
-						Joiner.on(",").join(
-								Iterables.transform(mirageQueryMethod.getParameters(),
-										new Function<Parameter, String>() {
-											
-											@Override
-											public String apply(Parameter input) {
-												return input.getType().getSimpleName();
-											}
-										})));
+		String args = getArgsPartOfSignature(mirageQueryMethod.asMethod());
 		return new String[] {
 			simpleName + "#" + mirageQueryMethod.getName() + args + ".sql",
-			simpleName + "_" + mirageQueryMethod.getName() + args + ".sql",
 			simpleName + "#" + mirageQueryMethod.getName() + ".sql",
+			simpleName + "_" + mirageQueryMethod.getName() + args + ".sql",
 			simpleName + "_" + mirageQueryMethod.getName() + ".sql",
 			simpleName + ".sql"
 		};
