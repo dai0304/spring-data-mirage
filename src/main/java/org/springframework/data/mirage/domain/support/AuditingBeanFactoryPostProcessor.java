@@ -54,8 +54,8 @@ public class AuditingBeanFactoryPostProcessor implements BeanFactoryPostProcesso
 	/**
 	 * Returns whether we have a bean factory for which {@code &lt;context:spring-configured&gt;} was activated.
 	 * 
-	 * @param factory
-	 * @return
+	 * @param factory {@link BeanFactory}
+	 * @return {@code true} if {@code context:spring-configured} was activated
 	 */
 	private boolean isSpringConfigured(BeanFactory factory) {
 		

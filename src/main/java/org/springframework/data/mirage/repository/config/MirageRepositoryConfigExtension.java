@@ -30,7 +30,7 @@ import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 
 /**
- * JPA specific configuration extension parsing custom attributes from the XML namespace and
+ * Mirage specific configuration extension parsing custom attributes from the XML namespace and
  * {@link EnableMirageRepositories} annotation.
  * 
  * @author Oliver Gierke
