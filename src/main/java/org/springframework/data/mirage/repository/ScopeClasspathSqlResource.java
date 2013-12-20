@@ -73,7 +73,7 @@ public class ScopeClasspathSqlResource extends ClasspathSqlResource {
 				targetName = name;
 				break;
 			} else {
-				logger.debug("{} not exists", currentPath);
+				logger.trace("{} not exists", currentPath);
 			}
 		}
 		if (targetName != null) {
