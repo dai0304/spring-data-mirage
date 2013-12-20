@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.lang.reflect.Method;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -29,10 +30,6 @@ import java.util.Map;
 import jp.sf.amateras.mirage.SqlManager;
 import jp.sf.amateras.mirage.SqlResource;
 import jp.sf.amateras.mirage.StringSqlResource;
-
-import com.google.common.base.Charsets;
-import com.google.common.io.CharStreams;
-import com.google.common.io.Closeables;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,6 +55,10 @@ import org.springframework.util.Assert;
 public class MirageQuery implements RepositoryQuery {
 	
 	private static Logger logger = LoggerFactory.getLogger(MirageQuery.class);
+	
+	private static final Charset UTF_8 = Charset.forName("UTF-8");
+	
+	private static final int BUFFER_SIZE = 1024 * 4;
 	
 	
 	static String getArgsPartOfSignature(Method method) {
@@ -250,20 +251,35 @@ public class MirageQuery implements RepositoryQuery {
 		return new ScopeClasspathSqlResource(mirageQueryMethod.getDeclaringClass(), names);
 	}
 	
-	@SuppressWarnings("deprecation")
 	private int getTotalCount(SqlResource sqlResource) {
-		Reader r = null;
+		Reader reader = null;
 		try {
-			r = new InputStreamReader(sqlResource.getInputStream(), Charsets.UTF_8);
-			String query = CharStreams.toString(r);
+			reader = new InputStreamReader(sqlResource.getInputStream(), UTF_8);
+			String query = toString(reader);
 			if (query.contains("SQL_CALC_FOUND_ROWS")) { // TODO MySQL固有処理
 				return sqlManager.getSingleResult(Integer.class, new StringSqlResource("SELECT FOUND_ROWS()"));
 			}
 		} catch (IOException e) {
 			logger.error("IOException", e);
 		} finally {
-			Closeables.closeQuietly(r);
+			if (reader != null) {
+				try {
+					reader.close();
+				} catch (IOException e) {
+					// ignore
+				}
+			}
 		}
 		return 0; // TODO
+	}
+	
+	private String toString(Reader input) throws IOException {
+		StringBuffer sb = new StringBuffer();
+		char[] buffer = new char[BUFFER_SIZE];
+		int n = 0;
+		while ((n = input.read(buffer)) != -1) {
+			sb.append(buffer, 0, n);
+		}
+		return sb.toString();
 	}
 }
