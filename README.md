@@ -72,6 +72,13 @@ Configure your infrastructure :
   <property name="connectionProvider" ref="connectionProvider" />
   <property name="dialect" ref="dialect" />
   <property name="nameConverter" ref="railsLikeNameConverter" />
+  <property name="beanDescFactory">
+    <bean class="jp.sf.amateras.mirage.bean.BeanDescFactory">
+      <property name="propertyExtractor">
+        <bean class="jp.sf.amateras.mirage.bean.FieldPropertyExtractor" />
+      </property>
+    </bean>
+  </property>
   <!-- ... -->
 </bean>
 
