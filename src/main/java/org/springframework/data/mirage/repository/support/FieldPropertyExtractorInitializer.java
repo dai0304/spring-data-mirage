@@ -25,10 +25,12 @@ import jp.sf.amateras.mirage.bean.FieldPropertyExtractor;
  * @since 1.0
  * @version $Id: FieldPropertyExtractorInitializer.java 160 2011-10-21 09:49:56Z daisuke $
  * @author daisuke
+ * @deprecated use {@link BeanDescFactory#setPropertyExtractor(jp.sf.amateras.mirage.bean.PropertyExtractor)} instead.
  */
+@Deprecated
 public class FieldPropertyExtractorInitializer {
 	
-	static {
-		BeanDescFactory.setPropertyExtractor(new FieldPropertyExtractor());
-	}
+//	static {
+//		BeanDescFactory.setPropertyExtractor(new FieldPropertyExtractor());
+//	}
 }
