@@ -29,7 +29,7 @@ import org.springframework.util.StringUtils;
  * 
  * @param <T> 
  * @param <ID> 
- * @since 1.0
+ * @since 0.1
  * @version $Id$
  * @author daisuke
  */
@@ -42,6 +42,7 @@ public class MirageEntityInformationSupport<T, ID extends Serializable> extends 
 	 * @param domainClass
 	 * @param sqlManager {@link SqlManager}
 	 * @return
+	 * @since 0.1
 	 */
 	public static <T>MirageEntityInformation<T, ?> getMetadata(Class<T> domainClass, SqlManager sqlManager) {
 		return new MirageEntityInformationSupport<T, Serializable>(domainClass);
@@ -51,6 +52,7 @@ public class MirageEntityInformationSupport<T, ID extends Serializable> extends 
 	 * Creates a new {@link MirageEntityInformationSupport} with the given domain class.
 	 * 
 	 * @param domainClass
+	 * @since 0.1
 	 */
 	public MirageEntityInformationSupport(Class<T> domainClass) {
 		super(domainClass);

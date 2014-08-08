@@ -23,7 +23,7 @@ import org.springframework.data.repository.config.RepositoryConfigurationExtensi
 /**
  * Simple namespace handler for {@literal repositories} namespace.
  * 
- * @since 1.0
+ * @since 0.1
  * @version $Id$
  * @author daisuke
  */

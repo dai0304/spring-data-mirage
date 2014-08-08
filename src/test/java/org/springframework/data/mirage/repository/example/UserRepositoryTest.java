@@ -28,10 +28,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * TODO for daisuke
+ * Test for {@link UserRepository}.
  * 
- * @since 1.0
- * @version $Id$
  * @author daisuke
  */
 @RunWith(SpringJUnit4ClassRunner.class)

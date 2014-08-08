@@ -39,7 +39,7 @@ import org.springframework.util.Assert;
 /**
  * TODO for daisuke
  * 
- * @since 1.0
+ * @since 0.1
  * @version $Id$
  * @author daisuke
  */
@@ -55,6 +55,7 @@ public class MirageRepositoryFactory extends RepositoryFactorySupport {
 	 * 
 	 * @param sqlManager {@link SqlManager}
 	 * @throws IllegalArgumentException if the argument is {@code null} 
+	 * @since 0.1
 	 */
 	public MirageRepositoryFactory(SqlManager sqlManager) {
 		Assert.notNull(sqlManager);
@@ -115,10 +116,8 @@ public class MirageRepositoryFactory extends RepositoryFactorySupport {
 	
 	/**
 	 * Returns whether the given repository interface requires a QueryDsl specific implementation to be chosen.
-	 * 
-	 * @param repositoryInterface
-	 * @return
 	 */
+	@SuppressWarnings("javadoc")
 	private boolean isLogicalDeleteJdbcRepository(Class<?> repositoryInterface) {
 		return LogicalDeleteMirageRepository.class.isAssignableFrom(repositoryInterface);
 	}

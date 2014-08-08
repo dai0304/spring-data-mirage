@@ -25,7 +25,7 @@ import java.lang.annotation.Target;
 /**
  * TODO for daisuke
  * 
- * @since 1.0
+ * @since 0.1
  * @version $Id$
  * @author daisuke
  */
@@ -40,14 +40,14 @@ public @interface StaticParam {
 	/**
 	 * 
 	 * @return
-	 * @since 1.0
+	 * @since 0.1
 	 */
 	String key();
 	
 	/**
 	 * 
 	 * @return
-	 * @since 1.0
+	 * @since 0.1
 	 */
 	String value();
 }

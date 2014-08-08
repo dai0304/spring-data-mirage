@@ -27,7 +27,7 @@ import org.springframework.util.Assert;
  * TODO for daisuke
  * 
  * @param <E> the domain type the repository manages
- * @since 1.0
+ * @since 0.1
  * @version $Id$
  * @author daisuke
  */
@@ -38,7 +38,7 @@ public class IdentifiableMirageRepository<E extends Identifiable> extends Defaul
 	 * 
 	 * @param entityClass エンティティの型
 	 * @throws IllegalArgumentException 引数に{@code null}を与えた場合
-	 * @since 1.0
+	 * @since 0.1
 	 */
 	public IdentifiableMirageRepository(Class<E> entityClass) {
 		super(entityClass);
@@ -49,7 +49,7 @@ public class IdentifiableMirageRepository<E extends Identifiable> extends Defaul
 	 * 
 	 * @param entityInformation
 	 * @param sqlManager {@link SqlManager}
-	 * @since 1.0
+	 * @since 0.1
 	 */
 	public IdentifiableMirageRepository(EntityInformation<E, ? extends Serializable> entityInformation,
 			SqlManager sqlManager) {

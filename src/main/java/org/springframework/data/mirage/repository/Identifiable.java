@@ -19,7 +19,7 @@ package org.springframework.data.mirage.repository;
 /**
  * エンティティ（IDを持つオブジェクト）を表すインターフェイス。
  * 
- * @since 1.0
+ * @since 0.1
  * @version $Id$
  * @author daisuke
  */
@@ -29,7 +29,7 @@ public interface Identifiable {
 	 * Returns the ID of this entity.
 	 * 
 	 * @return the ID
-	 * @since 1.0
+	 * @since 0.1
 	 */
 	long getId();
 }

@@ -25,7 +25,7 @@ import java.lang.annotation.Target;
 /**
  * Annotation to declare finder queries directly on repository methods.
  * 
- * @since 1.0
+ * @since 0.1
  * @version $Id$
  * @author daisuke
  */
@@ -37,14 +37,14 @@ public @interface Query {
 	/**
 	 * 
 	 * @return
-	 * @since 1.0
+	 * @since 0.1
 	 */
 	String countQuery() default "";
 	
 	/**
 	 * 
 	 * @return
-	 * @since 1.0
+	 * @since 0.1
 	 */
 	String value() default "";
 	

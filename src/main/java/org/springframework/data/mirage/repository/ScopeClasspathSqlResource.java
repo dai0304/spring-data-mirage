@@ -30,7 +30,7 @@ import org.springframework.util.Assert;
 /**
  * TODO daisuke
  * 
- * @since 1.0
+ * @since 0.1
  * @version $Id$
  * @author daisuke
  */
@@ -60,6 +60,7 @@ public class ScopeClasspathSqlResource extends ClasspathSqlResource {
 		return sb.toString();
 	}
 	
+	@Deprecated
 	private static String toAbsolutePath(Class<?> scope, String[] names) {
 		Assert.notNull(scope);
 		Assert.notNull(names);
@@ -81,6 +82,23 @@ public class ScopeClasspathSqlResource extends ClasspathSqlResource {
 		} else {
 			throw new NoSuchSqlResourceException(scope, names);
 		}
+	}
+	
+	private static String toAbsolutePath(SqlResourceCandidate[] candidates) {
+		Assert.noNullElements(candidates);
+		
+		for (SqlResourceCandidate candidate : candidates) {
+			Class<?> scope = candidate.getScope();
+			String name = candidate.getName();
+			String packageName = scope != null ? scope.getPackage().getName() : "";
+			String currentPath = toAbsolutePath(packageName, name);
+			if (existsResource(currentPath)) {
+				return toAbsolutePath(packageName, name);
+			} else {
+				logger.trace("{} not exists", currentPath);
+			}
+		}
+		throw new NoSuchSqlResourceException(candidates);
 	}
 	
 	private static String toAbsolutePath(final String packageName, final String relativePath) {
@@ -122,12 +140,10 @@ public class ScopeClasspathSqlResource extends ClasspathSqlResource {
 	 * @param name
 	 * @throws NoSuchSqlResourceException 指定したリソースが見つからない場合
 	 * @throws IllegalArgumentException 引数に{@code null}を与えた場合
-	 * @since 1.0
+	 * @since 0.1
 	 */
 	public ScopeClasspathSqlResource(Class<?> scope, String name) {
-		this(scope, new String[] {
-			name
-		});
+		this(new SqlResourceCandidate(scope, name));
 	}
 	
 	/**
@@ -137,10 +153,33 @@ public class ScopeClasspathSqlResource extends ClasspathSqlResource {
 	 * @param names
 	 * @throws NoSuchSqlResourceException 指定したリソースが見つからない場合
 	 * @throws IllegalArgumentException 引数に{@code null}を与えた場合
-	 * @since 1.0
+	 * @since 0.1
 	 */
+	@Deprecated
 	public ScopeClasspathSqlResource(Class<?> scope, String[] names) {
 		super(toAbsolutePath(scope, names));
+	}
+	
+	/**
+	 * インスタンスを生成する。
+	 * 
+	 * @param candidate
+	 * @since 0.2.5
+	 */
+	public ScopeClasspathSqlResource(SqlResourceCandidate candidate) {
+		this(new SqlResourceCandidate[] {
+			candidate
+		});
+	}
+	
+	/**
+	 * インスタンスを生成する。
+	 * 
+	 * @param candidates
+	 * @since 0.2.5
+	 */
+	public ScopeClasspathSqlResource(SqlResourceCandidate[] candidates) {
+		super(toAbsolutePath(candidates));
 	}
 	
 	@Override

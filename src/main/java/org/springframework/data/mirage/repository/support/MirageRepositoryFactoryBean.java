@@ -32,7 +32,7 @@ import org.springframework.util.Assert;
  * @param <T> 
  * @param <S> 
  * @param <ID> 
- * @since 1.0
+ * @since 0.1
  * @version $Id$
  * @author daisuke
  */
@@ -52,7 +52,7 @@ public class MirageRepositoryFactoryBean<T extends MirageRepository<S, ID>, S, I
 	 * TODO for daisuke
 	 * 
 	 * @param sqlManager {@link SqlManager}
-	 * @since 1.0
+	 * @since 0.1
 	 */
 	@Autowired
 	public void setSqlManager(SqlManager sqlManager) {

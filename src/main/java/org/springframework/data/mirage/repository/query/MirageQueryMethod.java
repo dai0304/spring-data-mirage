@@ -30,7 +30,7 @@ import org.springframework.util.StringUtils;
 /**
  * TODO for daisuke
  * 
- * @since 1.0
+ * @since 0.1
  * @version $Id$
  * @author daisuke
  */
@@ -38,17 +38,20 @@ public class MirageQueryMethod extends QueryMethod {
 	
 	final Method method;
 	
+	final RepositoryMetadata metadata;
+	
 	
 	/**
 	 * インスタンスを生成する。
 	 * 
 	 * @param method {@link Method} object of repository interface.
 	 * @param metadata
+	 * @since 0.1
 	 */
 	public MirageQueryMethod(Method method, RepositoryMetadata metadata) {
 		super(method, metadata);
-		Assert.notNull(method, "Method must not be null!");
 		this.method = method;
+		this.metadata = metadata;
 		
 		Assert.isTrue((isModifyingQuery() && getParameters().hasSpecialParameter()) == false,
 				String.format("Modifying method must not contain %s!", Parameters.TYPES));
@@ -68,7 +71,7 @@ public class MirageQueryMethod extends QueryMethod {
 	 * TODO for daisuke
 	 * 
 	 * @return
-	 * @since 1.0
+	 * @since 0.1
 	 */
 	public Iterable<StaticParam> getStaticParameters() {
 		StaticParams staticParams = method.getAnnotation(StaticParams.class);
@@ -132,6 +135,10 @@ public class MirageQueryMethod extends QueryMethod {
 	
 	Class<?> getDeclaringClass() {
 		return method.getDeclaringClass();
+	}
+	
+	Class<?> getRepositoryInterface() {
+		return metadata.getRepositoryInterface();
 	}
 	
 	/**

@@ -26,7 +26,7 @@ import org.slf4j.bridge.SLF4JBridgeHandler;
  * 
  * <p>コンストラクタ内で、{@link SLF4JBridgeHandler} のインストールを行う。DIコンテナ等によるインスタンス化を行うことを想定している。</p>
  * 
- * @since 1.0
+ * @since 0.1
  * @version $Id: FieldPropertyExtractorInitializer.java 160 2011-10-21 09:49:56Z daisuke $
  * @author daisuke
  * @see <a href="http://blog.cn-consult.dk/2009/03/bridging-javautillogging-to-slf4j.html"
@@ -36,6 +36,8 @@ public class EnableSLF4JBridgeHandler {
 	
 	/**
 	 * インスタンスを生成する。
+	 * 
+	 * @since 0.1
 	 */
 	public EnableSLF4JBridgeHandler() {
 		init();
@@ -44,7 +46,7 @@ public class EnableSLF4JBridgeHandler {
 	/**
 	 * {@link java.util.logging.Logger}によるログを SLF4J で扱うように設定する。
 	 * 
-	 * @since 1.0
+	 * @since 0.1
 	 */
 	public void init() {
 		java.util.logging.Logger rootLogger = LogManager.getLogManager().getLogger("");

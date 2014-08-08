@@ -58,7 +58,7 @@ import org.springframework.util.Assert;
  * 
  * @param <E> the domain type the repository manages
  * @param <ID> the type of the id of the entity the repository manages
- * @since 1.0
+ * @since 0.1
  * @version $Id: SimpleMirageRepository.java 161 2011-10-21 10:08:21Z daisuke $
  * @author daisuke
  */
@@ -78,7 +78,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 	 * @return {@link SqlResource}
 	 * @throws NoSuchSqlResourceException 指定したリソースが見つからない場合
 	 * @throws IllegalArgumentException 引数{@code filename}に{@code null}を与えた場合
-	 * @since 1.0
+	 * @since 0.1
 	 */
 	public static SqlResource newSqlResource(Class<?> scope, String filename) {
 		Validate.notNull(filename);
@@ -131,6 +131,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 	 * 
 	 * @param entityClass エンティティの型
 	 * @throws IllegalArgumentException 引数に{@code null}を与えた場合
+	 * @since 0.1
 	 */
 	public DefaultMirageRepository(Class<E> entityClass) {
 		Assert.notNull(entityClass);
@@ -142,6 +143,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 	 * 
 	 * @param entityInformation
 	 * @param sqlManager {@link SqlManager}
+	 * @since 0.1
 	 */
 	public DefaultMirageRepository(EntityInformation<E, ? extends Serializable> entityInformation, SqlManager sqlManager) {
 		Assert.notNull(entityInformation);
@@ -443,18 +445,39 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 		return params;
 	}
 	
+	/**
+	 * TODO for daisuke
+	 * 
+	 * @param id
+	 * @return
+	 * @since 0.1
+	 */
 	protected Map<String, Object> createParams(ID id) {
 		Map<String, Object> params = createParams();
 		addIdParam(params, id);
 		return params;
 	}
 	
+	/**
+	 * TODO for daisuke
+	 * 
+	 * @param pageable
+	 * @return
+	 * @since 0.1
+	 */
 	protected Map<String, Object> createParams(Pageable pageable) {
 		Map<String, Object> params = createParams();
 		addPageParam(params, pageable);
 		return params;
 	}
 	
+	/**
+	 * TODO for daisuke
+	 * 
+	 * @param sort
+	 * @return
+	 * @since 0.1
+	 */
 	protected Map<String, Object> createParams(Sort sort) {
 		Map<String, Object> params = createParams();
 		addSortParam(params, sort);
@@ -563,6 +586,12 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 		}
 	}
 	
+	/**
+	 * TODO for daisuke
+	 * 
+	 * @return
+	 * @since 0.1
+	 */
 	protected SqlResource getBaseSelectSqlResource() {
 		return baseSelectSqlResource;
 	}
@@ -623,6 +652,12 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 		}
 	}
 	
+	/**
+	 * TODO for daisuke
+	 * 
+	 * @return
+	 * @since 0.1
+	 */
 	protected synchronized SQLExceptionTranslator getExceptionTranslator() {
 		if (this.exceptionTranslator == null) {
 			if (dataSource != null) {
@@ -634,6 +669,12 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 		return this.exceptionTranslator;
 	}
 	
+	/**
+	 * TODO for daisuke
+	 * 
+	 * @return
+	 * @since 0.1
+	 */
 	protected Long getFoundRows() {
 		return null;
 	}
@@ -747,6 +788,12 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 		}
 	}
 	
+	/**
+	 * TODO for daisuke
+	 * 
+	 * @return
+	 * @since 0.1
+	 */
 	protected SqlManager getSqlManager() {
 		return sqlManager;
 	}
