@@ -16,7 +16,9 @@
  */
 package org.springframework.data.mirage.repository;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.springframework.util.Assert;
 
@@ -36,9 +38,7 @@ public class NoSuchSqlResourceException extends RuntimeException {
 	}
 	
 	
-	private final Class<?> scope;
-	
-	private final String[] names;
+	private final SqlResourceCandidate[] candidates;
 	
 	
 	/**
@@ -47,11 +47,28 @@ public class NoSuchSqlResourceException extends RuntimeException {
 	 * @param scope
 	 * @param names
 	 * @throws IllegalArgumentException 引数に{@code null}を与えた場合
+	 * @since 1.0
 	 */
+	@Deprecated
 	public NoSuchSqlResourceException(Class<?> scope, String[] names) {
 		super(String.format("%s:%s", notNull(scope).getName(), Arrays.toString(notNull(names))));
-		this.scope = scope;
-		this.names = names;
+		
+		List<SqlResourceCandidate> c = new ArrayList<SqlResourceCandidate>();
+		for (String name : names) {
+			c.add(new SqlResourceCandidate(scope, name));
+		}
+		candidates = c.toArray(new SqlResourceCandidate[c.size()]);
+	}
+	
+	/**
+	 * インスタンスを生成する。
+	 * 
+	 * @param candidates
+	 * @since 0.2.1
+	 */
+	public NoSuchSqlResourceException(SqlResourceCandidate[] candidates) {
+		super(Arrays.toString(candidates));
+		this.candidates = candidates;
 	}
 	
 	/**
@@ -60,7 +77,12 @@ public class NoSuchSqlResourceException extends RuntimeException {
 	 * @return the names
 	 * @since 1.0
 	 */
+	@Deprecated
 	public String[] getNames() {
+		String[] names = new String[candidates.length];
+		for (int i = 0; i < candidates.length; i++) {
+			names[i] = candidates[i].getName();
+		}
 		return names;
 	}
 	
@@ -70,7 +92,8 @@ public class NoSuchSqlResourceException extends RuntimeException {
 	 * @return the scope
 	 * @since 1.0
 	 */
+	@Deprecated
 	public Class<?> getScope() {
-		return scope;
+		return candidates[0].getScope();
 	}
 }

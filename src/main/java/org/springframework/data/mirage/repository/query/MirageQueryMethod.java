@@ -38,6 +38,8 @@ public class MirageQueryMethod extends QueryMethod {
 	
 	final Method method;
 	
+	final RepositoryMetadata metadata;
+	
 	
 	/**
 	 * インスタンスを生成する。
@@ -47,8 +49,8 @@ public class MirageQueryMethod extends QueryMethod {
 	 */
 	public MirageQueryMethod(Method method, RepositoryMetadata metadata) {
 		super(method, metadata);
-		Assert.notNull(method, "Method must not be null!");
 		this.method = method;
+		this.metadata = metadata;
 		
 		Assert.isTrue((isModifyingQuery() && getParameters().hasSpecialParameter()) == false,
 				String.format("Modifying method must not contain %s!", Parameters.TYPES));
@@ -132,6 +134,10 @@ public class MirageQueryMethod extends QueryMethod {
 	
 	Class<?> getDeclaringClass() {
 		return method.getDeclaringClass();
+	}
+	
+	Class<?> getRepositoryInterface() {
+		return metadata.getRepositoryInterface();
 	}
 	
 	/**
