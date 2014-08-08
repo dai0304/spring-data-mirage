@@ -35,7 +35,7 @@ import org.springframework.data.repository.NoRepositoryBean;
  * その{@code ON UPDATE}のreferential actionは{@code CASCADE}である必要がある。</p>
  * 
  * @param <E> the domain type the repository manages
- * @since 1.0
+ * @since 0.1
  * @version $Id$
  * @author daisuke
  * @see <a href="http://bit.ly/qQtt9T">削除フラグのはなし</a>
@@ -56,7 +56,7 @@ public interface LogicalDeleteMirageRepository<E extends Identifiable> extends M
 	 * 
 	 * @param id
 	 * @return
-	 * @since 1.0
+	 * @since 0.1
 	 */
 	E findOneIncludeLogicalDeleted(Long id);
 	
@@ -64,7 +64,7 @@ public interface LogicalDeleteMirageRepository<E extends Identifiable> extends M
 	 * Deletes a given entity.
 	 *
 	 * @param entity entity to delete
-	 * @since 1.0
+	 * @since 0.1
 	 */
 	void physicalDelete(E entity);
 	
@@ -72,7 +72,7 @@ public interface LogicalDeleteMirageRepository<E extends Identifiable> extends M
 	 * Deletes the given entities.
 	 *
 	 * @param entities entities to delete
-	 * @since 1.0
+	 * @since 0.1
 	 */
 	void physicalDelete(Iterable<? extends E> entities);
 	
@@ -80,14 +80,14 @@ public interface LogicalDeleteMirageRepository<E extends Identifiable> extends M
 	 * Deletes the entity with the given id.
 	 * 
 	 * @param id ID of entity to delete
-	 * @since 1.0
+	 * @since 0.1
 	 */
 	void physicalDelete(Long id);
 	
 	/**
 	 * Deletes all entities managed by the repository.
 	 * 
-	 * @since 1.0
+	 * @since 0.1
 	 */
 	void physicalDeleteAll();
 	
@@ -96,7 +96,7 @@ public interface LogicalDeleteMirageRepository<E extends Identifiable> extends M
 	 * 
 	 * @param entities 削除するエンティティ
 	 * @throws DataIntegrityViolationException 整合性違反が発生した場合
-	 * @since 1.0
+	 * @since 0.1
 	 */
 	void physicalDeleteInBatch(Iterable<E> entities);
 	
@@ -106,7 +106,7 @@ public interface LogicalDeleteMirageRepository<E extends Identifiable> extends M
 	 * <p>IDに正数を与えた場合は何もしない。</p>
 	 * 
 	 * @param id エンティティID（負数）
-	 * @since 1.0
+	 * @since 0.1
 	 */
 	void revert(Long id);
 }

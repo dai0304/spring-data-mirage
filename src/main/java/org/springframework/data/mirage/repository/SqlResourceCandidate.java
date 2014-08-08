@@ -1,6 +1,6 @@
 /*
- * Copyright 2011 Daisuke Miyamoto.
- * Created on 2012/03/11
+ * Copyright 2012 the original author or authors.
+ * Created on 2014/08/07
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,55 @@
  */
 package org.springframework.data.mirage.repository;
 
-import org.springframework.dao.DataAccessException;
-
 /**
  * TODO for daisuke
  * 
- * @since 0.1
+ * @since 0.2.5
  * @version $Id$
  * @author daisuke
  */
-@SuppressWarnings("serial")
-public class EntityDeletedException extends DataAccessException {
+public class SqlResourceCandidate {
+	
+	private final Class<?> scope;
+	
+	private final String name;
+	
 	
 	/**
 	 * インスタンスを生成する。
 	 * 
-	 * @param id
-	 * @since 0.1
+	 * @param scope
+	 * @param name
+	 * @since 0.2.5
 	 */
-	public EntityDeletedException(long id) {
-		super("id = " + id);
+	public SqlResourceCandidate(Class<?> scope, String name) {
+		super();
+		this.scope = scope;
+		this.name = name;
+	}
+	
+	/**
+	 * TODO for daisuke
+	 * 
+	 * @return
+	 * @since 0.2.5
+	 */
+	public String getName() {
+		return name;
+	}
+	
+	/**
+	 * TODO for daisuke
+	 * 
+	 * @return
+	 * @since 0.2.5
+	 */
+	public Class<?> getScope() {
+		return scope;
+	}
+	
+	@Override
+	public String toString() {
+		return "SqlResourceCandidate [scope=" + scope + ", name=" + name + "]";
 	}
 }

@@ -25,7 +25,7 @@ import org.springframework.data.repository.core.EntityInformation;
  * 
  * @param <T> 
  * @param <ID> 
- * @since 1.0
+ * @since 0.1
  * @version $Id$
  * @author daisuke
  */
@@ -35,13 +35,8 @@ public interface MirageEntityInformation<T, ID extends Serializable> extends Ent
 	 * Returns the Mirage entity name.
 	 * 
 	 * @return the Mirage entity name.
+	 * @since 0.1
 	 */
 	String getEntityName();
 	
-//	/**
-//	 * Returns the id attribute of the entity.
-//	 * 
-//	 * @return
-//	 */
-//	SingularAttribute<? super T, ?> getIdAttribute();
 }

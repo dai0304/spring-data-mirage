@@ -26,10 +26,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.domain.Persistable;
 
 /**
- * ユーザを表すエンティティクラス。
+ * User entity.
  * 
- * @since 1.0
- * @version $Id$
  * @author daisuke
  */
 @Table(name = "users")
@@ -49,10 +47,10 @@ public class User implements Persistable<String> {
 	
 	
 	/**
-	* インスタンスを生成する。
+	* Create user.
 	* 
-	* @param username 
-	* @param password 
+	* @param username username
+	* @param password password
 	*/
 	public User(String username, String password) {
 		this.username = username;
@@ -89,10 +87,20 @@ public class User implements Persistable<String> {
 		return null;
 	}
 	
+	/**
+	 * Return the password.
+	 * 
+	 * @return the password
+	 */
 	public String getPassword() {
 		return password;
 	}
 	
+	/**
+	 * Return the username.
+	 * 
+	 * @return the username
+	 */
 	public String getUsername() {
 		return username;
 	}
@@ -110,6 +118,11 @@ public class User implements Persistable<String> {
 		return persisted;
 	}
 	
+	/**
+	 * Set the password.
+	 * 
+	 * @param password password
+	 */
 	public void setPassword(String password) {
 		this.password = password;
 	}

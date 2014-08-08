@@ -22,6 +22,7 @@ import java.io.Reader;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -38,6 +39,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.mirage.repository.ScopeClasspathSqlResource;
+import org.springframework.data.mirage.repository.SqlResourceCandidate;
 import org.springframework.data.repository.query.Parameter;
 import org.springframework.data.repository.query.ParameterAccessor;
 import org.springframework.data.repository.query.ParametersParameterAccessor;
@@ -46,7 +48,7 @@ import org.springframework.data.repository.query.RepositoryQuery;
 import org.springframework.util.Assert;
 
 /**
- * TODO for daisuke
+ * {@link RepositoryQuery} implementation for spring-data-mirage.
  * 
  * @since 0.1
  * @version $Id$
@@ -227,28 +229,35 @@ public class MirageQuery implements RepositoryQuery {
 		return parameterMap;
 	}
 	
-	private String[] createQueryNameCandidates() {
-		Class<?> declaringClass = mirageQueryMethod.getDeclaringClass();
+	private SqlResourceCandidate[] createQueryNameCandidates() {
 		String name = mirageQueryMethod.getAnnotatedQuery();
 		if (name != null) {
-			return new String[] {
-				name
+			return new SqlResourceCandidate[] {
+				new SqlResourceCandidate(mirageQueryMethod.getDeclaringClass(), name)
 			};
 		}
-		String simpleName = declaringClass.getSimpleName();
-		String args = getArgsPartOfSignature(mirageQueryMethod.asMethod());
-		return new String[] {
-			simpleName + "#" + mirageQueryMethod.getName() + args + ".sql",
-			simpleName + "#" + mirageQueryMethod.getName() + ".sql",
-			simpleName + "_" + mirageQueryMethod.getName() + args + ".sql",
-			simpleName + "_" + mirageQueryMethod.getName() + ".sql",
-			simpleName + ".sql"
-		};
+		
+		List<SqlResourceCandidate> candidates = new ArrayList<SqlResourceCandidate>();
+		for (Class<?> clazz : new Class[] {
+			mirageQueryMethod.getRepositoryInterface(),
+			mirageQueryMethod.getDeclaringClass()
+		}) {
+			String simpleName = clazz.getSimpleName();
+			String args = getArgsPartOfSignature(mirageQueryMethod.asMethod());
+			candidates.addAll(Arrays.asList(new SqlResourceCandidate[] {
+				new SqlResourceCandidate(clazz, simpleName + "#" + mirageQueryMethod.getName() + args + ".sql"),
+				new SqlResourceCandidate(clazz, simpleName + "#" + mirageQueryMethod.getName() + ".sql"),
+				new SqlResourceCandidate(clazz, simpleName + "_" + mirageQueryMethod.getName() + args + ".sql"),
+				new SqlResourceCandidate(clazz, simpleName + "_" + mirageQueryMethod.getName() + ".sql"),
+				new SqlResourceCandidate(clazz, simpleName + ".sql")
+			}));
+		}
+		return candidates.toArray(new SqlResourceCandidate[candidates.size()]);
 	}
 	
 	private SqlResource createSqlResource() {
-		String[] names = createQueryNameCandidates();
-		return new ScopeClasspathSqlResource(mirageQueryMethod.getDeclaringClass(), names);
+		SqlResourceCandidate[] candidates = createQueryNameCandidates();
+		return new ScopeClasspathSqlResource(candidates);
 	}
 	
 	private int getTotalCount(SqlResource sqlResource) {

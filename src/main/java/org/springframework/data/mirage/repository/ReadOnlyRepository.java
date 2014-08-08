@@ -40,6 +40,7 @@ public interface ReadOnlyRepository<T, ID extends Serializable> extends Reposito
 	 * Returns the number of entities available.
 	 * 
 	 * @return the number of entities
+	 * @since 0.2.1
 	 */
 	long count();
 	
@@ -49,6 +50,7 @@ public interface ReadOnlyRepository<T, ID extends Serializable> extends Reposito
 	 * @param id must not be {@literal null}.
 	 * @return true if an entity with the given id exists, {@literal false} otherwise
 	 * @throws IllegalArgumentException if {@code id} is {@literal null}
+	 * @since 0.2.1
 	 */
 	boolean exists(ID id);
 	
@@ -56,6 +58,7 @@ public interface ReadOnlyRepository<T, ID extends Serializable> extends Reposito
 	 * Returns all instances of the type.
 	 * 
 	 * @return all entities
+	 * @since 0.2.1
 	 */
 	Iterable<T> findAll();
 	
@@ -64,6 +67,7 @@ public interface ReadOnlyRepository<T, ID extends Serializable> extends Reposito
 	 * 
 	 * @param ids
 	 * @return
+	 * @since 0.2.1
 	 */
 	Iterable<T> findAll(Iterable<ID> ids);
 	
@@ -72,6 +76,7 @@ public interface ReadOnlyRepository<T, ID extends Serializable> extends Reposito
 	 * 
 	 * @param pageable
 	 * @return a page of entities
+	 * @since 0.2.1
 	 */
 	Page<T> findAll(Pageable pageable);
 	
@@ -80,6 +85,7 @@ public interface ReadOnlyRepository<T, ID extends Serializable> extends Reposito
 	 * 
 	 * @param sort
 	 * @return all entities sorted by the given options
+	 * @since 0.2.1
 	 */
 	Iterable<T> findAll(Sort sort);
 	
@@ -89,6 +95,7 @@ public interface ReadOnlyRepository<T, ID extends Serializable> extends Reposito
 	 * @param id must not be {@literal null}.
 	 * @return the entity with the given id or {@literal null} if none found
 	 * @throws IllegalArgumentException if {@code id} is {@literal null}
+	 * @since 0.2.1
 	 */
 	T findOne(ID id);
 }
