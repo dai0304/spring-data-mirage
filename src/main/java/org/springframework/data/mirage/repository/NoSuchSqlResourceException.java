@@ -25,7 +25,7 @@ import org.springframework.util.Assert;
 /**
  * TODO for daisuke
  * 
- * @since 1.0
+ * @since 0.1
  * @version $Id$
  * @author daisuke
  */
@@ -47,7 +47,7 @@ public class NoSuchSqlResourceException extends RuntimeException {
 	 * @param scope
 	 * @param names
 	 * @throws IllegalArgumentException 引数に{@code null}を与えた場合
-	 * @since 1.0
+	 * @since 0.1
 	 */
 	@Deprecated
 	public NoSuchSqlResourceException(Class<?> scope, String[] names) {
@@ -75,7 +75,7 @@ public class NoSuchSqlResourceException extends RuntimeException {
 	 * TODO for daisuke
 	 *
 	 * @return the names
-	 * @since 1.0
+	 * @since 0.1
 	 */
 	@Deprecated
 	public String[] getNames() {
@@ -90,7 +90,7 @@ public class NoSuchSqlResourceException extends RuntimeException {
 	 * TODO for daisuke
 	 * 
 	 * @return the scope
-	 * @since 1.0
+	 * @since 0.1
 	 */
 	@Deprecated
 	public Class<?> getScope() {

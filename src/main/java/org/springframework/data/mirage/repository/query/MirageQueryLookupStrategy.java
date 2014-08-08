@@ -30,7 +30,7 @@ import org.springframework.data.repository.query.RepositoryQuery;
  * 
  * <p>Base class for {@link QueryLookupStrategy} implementations that need access to an {@link SqlManager}.</p>
  * 
- * @since 1.2
+ * @since 0.1
  * @version $Id$
  * @author daisuke
  */
@@ -43,6 +43,7 @@ public abstract class MirageQueryLookupStrategy implements QueryLookupStrategy {
 	 * @param sqlManager {@link SqlManager}
 	 * @param key
 	 * @return
+	 * @since 0.1
 	 */
 	public static QueryLookupStrategy create(SqlManager sqlManager, Key key) {
 		if (key == null) {
@@ -81,7 +82,7 @@ public abstract class MirageQueryLookupStrategy implements QueryLookupStrategy {
 	 * @param sqlManager {@link SqlManager}
 	 * @param namedQueries
 	 * @return
-	 * @since 1.0
+	 * @since 0.1
 	 */
 	protected abstract RepositoryQuery resolveQuery(MirageQueryMethod method, SqlManager sqlManager,
 			NamedQueries namedQueries);

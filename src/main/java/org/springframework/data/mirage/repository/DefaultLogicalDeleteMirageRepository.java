@@ -29,7 +29,7 @@ import org.springframework.util.Assert;
  * Mirageフレームワークを利用した {@link LogicalDeleteMirageRepository} の実装クラス。
  * 
  * @param <E> the domain type the repository manages
- * @since 1.0
+ * @since 0.1
  * @version $Id$
  * @author daisuke
  */

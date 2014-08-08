@@ -21,7 +21,7 @@ import org.springframework.dao.DataAccessException;
 /**
  * TODO for daisuke
  * 
- * @since 1.0
+ * @since 0.1
  * @version $Id$
  * @author daisuke
  */
@@ -32,6 +32,7 @@ public class EntityDeletedException extends DataAccessException {
 	 * インスタンスを生成する。
 	 * 
 	 * @param id
+	 * @since 0.1
 	 */
 	public EntityDeletedException(long id) {
 		super("id = " + id);

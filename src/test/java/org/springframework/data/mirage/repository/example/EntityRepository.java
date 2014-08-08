@@ -23,10 +23,8 @@ import org.springframework.data.mirage.repository.query.StaticParam;
 import org.springframework.data.repository.query.Param;
 
 /**
- * {@link Entity}用リポジトリインターフェイス。
+ * Repository interface for {@link Entity}.
  * 
- * @since 1.0
- * @version $Id$
  * @author daisuke
  */
 public interface EntityRepository extends LogicalDeleteMirageRepository<Entity> {
@@ -50,8 +48,7 @@ public interface EntityRepository extends LogicalDeleteMirageRepository<Entity> 
 	/**
 	 * TODO for daisuke
 	 * 
-	 * @return
-	 * @since TODO
+	 * @return the xxx value
 	 */
 	@StaticParam(key = "str", value = "hoge")
 	List<Entity> findXxx();

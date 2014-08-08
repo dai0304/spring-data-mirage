@@ -28,7 +28,7 @@ import org.springframework.jdbc.support.SQLExceptionTranslator;
 /**
  * TODO for daisuke
  * 
- * @since 1.0
+ * @since 0.1
  * @version $Id$
  * @author daisuke
  */
@@ -36,10 +36,6 @@ public class MiragePersistenceExceptionTranslator implements PersistenceExceptio
 	
 	private SQLExceptionTranslator sqlExceptionTranslator = new SQLErrorCodeSQLExceptionTranslator();
 	
-	
-	public void setSqlExceptionTranslator(SQLExceptionTranslator sqlExceptionTranslator) {
-		this.sqlExceptionTranslator = sqlExceptionTranslator;
-	}
 	
 	@Override
 	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
@@ -56,6 +52,17 @@ public class MiragePersistenceExceptionTranslator implements PersistenceExceptio
 	}
 	
 	
+	/**
+	 * TODO for daisuke
+	 * 
+	 * @param sqlExceptionTranslator
+	 * @since 0.1
+	 */
+	public void setSqlExceptionTranslator(SQLExceptionTranslator sqlExceptionTranslator) {
+		this.sqlExceptionTranslator = sqlExceptionTranslator;
+	}
+
+
 	@SuppressWarnings("serial")
 	private final class MirageDataAccessException extends DataAccessException {
 		

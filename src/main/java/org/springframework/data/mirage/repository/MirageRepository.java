@@ -29,7 +29,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
  * 
  * @param <E> the domain type the repository manages
  * @param <ID> the type of the id of the entity the repository manages
- * @since 1.0
+ * @since 0.1
  * @version $Id: MirageRepository.java 161 2011-10-21 10:08:21Z daisuke $
  * @author daisuke
  */
@@ -41,7 +41,7 @@ public interface MirageRepository<E, ID extends Serializable> extends PagingAndS
 	 * 
 	 * @throws DataAccessException データアクセスエラーが発生した場合
 	 * @throws NullPointerException 引数に{@code null}を与えた場合
-	 * @since 1.0
+	 * @since 0.1
 	 */
 	@Override
 	void delete(E entity);
@@ -50,7 +50,7 @@ public interface MirageRepository<E, ID extends Serializable> extends PagingAndS
 	 * {@inheritDoc}
 	 * 
 	 * @throws DataAccessException データアクセスエラーが発生した場合
-	 * @since 1.0
+	 * @since 0.1
 	 */
 	@Override
 	void delete(ID id);
@@ -60,7 +60,7 @@ public interface MirageRepository<E, ID extends Serializable> extends PagingAndS
 	 * 
 	 * @throws DataAccessException データアクセスエラーが発生した場合
 	 * @throws IllegalArgumentException 引数に{@code null}を与えた場合
-	 * @since 1.0
+	 * @since 0.1
 	 */
 	@Override
 	void delete(Iterable<? extends E> entities);
@@ -69,7 +69,7 @@ public interface MirageRepository<E, ID extends Serializable> extends PagingAndS
 	 * {@inheritDoc}
 	 * 
 	 * @throws DataAccessException データアクセスエラーが発生した場合
-	 * @since 1.0
+	 * @since 0.1
 	 */
 	@Override
 	void deleteAll();
@@ -79,7 +79,7 @@ public interface MirageRepository<E, ID extends Serializable> extends PagingAndS
 	 * 
 	 * @param entities 削除するエンティティ
 	 * @throws DataAccessException データアクセスエラーが発生した場合
-	 * @since 1.0
+	 * @since 0.1
 	 */
 	void deleteInBatch(Iterable<E> entities);
 	
@@ -105,7 +105,7 @@ public interface MirageRepository<E, ID extends Serializable> extends PagingAndS
 	 * @param entity エンティティ
 	 * @return ID
 	 * @throws DataAccessException データアクセスエラーが発生した場合
-	 * @since 1.0
+	 * @since 0.1
 	 */
 	ID getId(E entity);
 	
@@ -113,7 +113,7 @@ public interface MirageRepository<E, ID extends Serializable> extends PagingAndS
 	 * {@inheritDoc}
 	 * 
 	 * @throws DataAccessException データアクセスエラーが発生した場合
-	 * @since 1.0
+	 * @since 0.1
 	 */
 	@Override
 	<S extends E>Iterable<S> save(Iterable<S> entities);
@@ -124,7 +124,7 @@ public interface MirageRepository<E, ID extends Serializable> extends PagingAndS
 	 * <p>{@code entity}として{@code null}を渡した場合、何もせずに{@code null}を返す。</p>
 	 * 
 	 * @throws DataAccessException データアクセスエラーが発生した場合
-	 * @since 1.0
+	 * @since 0.1
 	 */
 	@Override
 	<S extends E>S save(S entity);

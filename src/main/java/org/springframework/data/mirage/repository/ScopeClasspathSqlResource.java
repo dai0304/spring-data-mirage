@@ -30,7 +30,7 @@ import org.springframework.util.Assert;
 /**
  * TODO daisuke
  * 
- * @since 1.0
+ * @since 0.1
  * @version $Id$
  * @author daisuke
  */
@@ -140,13 +140,10 @@ public class ScopeClasspathSqlResource extends ClasspathSqlResource {
 	 * @param name
 	 * @throws NoSuchSqlResourceException 指定したリソースが見つからない場合
 	 * @throws IllegalArgumentException 引数に{@code null}を与えた場合
-	 * @since 1.0
+	 * @since 0.1
 	 */
-	@Deprecated
 	public ScopeClasspathSqlResource(Class<?> scope, String name) {
-		this(scope, new String[] {
-			name
-		});
+		this(new SqlResourceCandidate(scope, name));
 	}
 	
 	/**
@@ -156,11 +153,23 @@ public class ScopeClasspathSqlResource extends ClasspathSqlResource {
 	 * @param names
 	 * @throws NoSuchSqlResourceException 指定したリソースが見つからない場合
 	 * @throws IllegalArgumentException 引数に{@code null}を与えた場合
-	 * @since 1.0
+	 * @since 0.1
 	 */
 	@Deprecated
 	public ScopeClasspathSqlResource(Class<?> scope, String[] names) {
 		super(toAbsolutePath(scope, names));
+	}
+	
+	/**
+	 * インスタンスを生成する。
+	 * 
+	 * @param candidate
+	 * @since 0.2.5
+	 */
+	public ScopeClasspathSqlResource(SqlResourceCandidate candidate) {
+		this(new SqlResourceCandidate[] {
+			candidate
+		});
 	}
 	
 	/**

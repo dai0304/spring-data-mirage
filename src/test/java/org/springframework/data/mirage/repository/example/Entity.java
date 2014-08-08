@@ -27,10 +27,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mirage.repository.Identifiable;
 
 /**
- * TODO を表すエンティティクラス。
+ * Sample entity class.
  * 
- * @since 1.0
- * @version $Id$
  * @author daisuke
  */
 @Table(name = "samples")

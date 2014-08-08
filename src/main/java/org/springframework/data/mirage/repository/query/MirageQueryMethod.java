@@ -30,7 +30,7 @@ import org.springframework.util.StringUtils;
 /**
  * TODO for daisuke
  * 
- * @since 1.0
+ * @since 0.1
  * @version $Id$
  * @author daisuke
  */
@@ -46,6 +46,7 @@ public class MirageQueryMethod extends QueryMethod {
 	 * 
 	 * @param method {@link Method} object of repository interface.
 	 * @param metadata
+	 * @since 0.1
 	 */
 	public MirageQueryMethod(Method method, RepositoryMetadata metadata) {
 		super(method, metadata);
@@ -70,7 +71,7 @@ public class MirageQueryMethod extends QueryMethod {
 	 * TODO for daisuke
 	 * 
 	 * @return
-	 * @since 1.0
+	 * @since 0.1
 	 */
 	public Iterable<StaticParam> getStaticParameters() {
 		StaticParams staticParams = method.getAnnotation(StaticParams.class);
