@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.springframework.data</groupId>
   <artifactId>spring-data-mirage</artifactId>
-  <version>0.2.5.BUILD-SNAPSHOT</version>
+  <version>0.2.5.RELEASE</version>
   <name>Spring Data Mirage</name>
   <description>Spring Data module to provide sophisticated support for Mirage repositories</description>
   <inceptionYear>2012</inceptionYear>
@@ -49,9 +49,9 @@
   <build>
     <extensions>
       <extension>
-        <groupId>org.apache.maven.wagon</groupId>
-        <artifactId>wagon-ssh</artifactId>
-        <version>2.4</version>
+        <groupId>org.springframework.build</groupId>
+        <artifactId>aws-maven</artifactId>
+        <version>4.8.0.RELEASE</version>
       </extension>
     </extensions>
     <plugins>
@@ -70,6 +70,10 @@
           <target>1.6</target>
           <encoding>UTF-8</encoding>
         </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <version>2.8.1</version>
       </plugin>
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
@@ -102,18 +106,6 @@
           <locales>ja,en</locales>
           <inputEncoding>UTF-8</inputEncoding>
           <outputEncoding>UTF-8</outputEncoding>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-release-plugin</artifactId>
-        <version>2.4.1</version>
-        <configuration>
-          <goals>deploy</goals>
-          <pushChanges>false</pushChanges>
-          <localCheckout>true</localCheckout>
-          <username>${scm.username}</username>
-          <password>${scm.password}</password>
         </configuration>
       </plugin>
     </plugins>
@@ -292,53 +284,38 @@
   </dependencies>
   <repositories>
     <repository>
-      <id>amateras</id>
-      <name>Project Amateras Maven2 Repository</name>
-      <url>http://amateras.sourceforge.jp/mvn/</url>
-    </repository>
-    <repository>
-      <id>amateras-snapshot</id>
-      <name>Project Amateras Maven2 SNAPSHOT Repository</name>
-      <url>http://amateras.sourceforge.jp/mvn-snapshot/</url>
-    </repository>
-
-    <!-- for browser http://s3browse.springsource.com/browse/maven.springframework.org/ -->
-    <repository>
       <id>spring-release</id>
       <name>Spring Maven Release Repository</name>
-      <url>http://repo.springsource.org/release</url>
+      <url>http://repo.spring.io/release</url>
     </repository>
     <!--
     <repository>
       <id>spring-milestone</id>
       <name>Spring Maven MILESTONE Repository</name>
-      <url>http://repo.springsource.org/milestone</url>
+      <url>http://repo.spring.io/milestone</url>
     </repository>
     <repository>
       <id>spring-snapshot</id>
       <name>Spring Maven SNAPSHOT Repository</name>
-      <url>http://repo.springsource.org/snapshot</url>
+      <url>http://repo.spring.io/snapshot</url>
     </repository>
     -->
-
-    <repository>
-      <id>jiemamy.org-release</id>
-      <name>Jiemamy Repository</name>
-      <url>http://maven.jiemamy.org/release</url>
-    </repository>
   </repositories>
   <distributionManagement>
     <repository>
-      <id>maven.xet.jp</id>
-      <url>scp://maven.xet.jp/var/www/maven.xet.jp/release</url>
+      <id>mxj</id>
+      <name>AWS S3 Release Repository</name>
+      <url>s3://maven.xet.jp/release</url>
     </repository>
     <snapshotRepository>
-      <id>maven.xet.jp</id>
-      <url>scp://maven.xet.jp/var/www/maven.xet.jp/snapshot</url>
+      <id>mxj</id>
+      <name>AWS S3 Snapshot Repository</name>
+      <url>s3://maven.xet.jp/snapshot</url>
     </snapshotRepository>
     <site>
-      <id>maven.xet.jp</id>
-      <url>scp://maven.xet.jp/var/www/maven.xet.jp/site/${project.artifactId}/${project.version}</url>
+      <id>mxj</id>
+      <name>AWS S3 Site Repository</name>
+      <url>s3://maven.xet.jp/site/${project.artifactId}/${project.version}</url>
     </site>
   </distributionManagement>
   <properties>
