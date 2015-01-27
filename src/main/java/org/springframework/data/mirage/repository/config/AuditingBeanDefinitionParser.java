@@ -16,16 +16,12 @@
  */
 package org.springframework.data.mirage.repository.config;
 
-import static org.springframework.beans.factory.support.BeanDefinitionBuilder.rootBeanDefinition;
-
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.data.config.AuditingHandlerBeanDefinitionParser;
+import org.springframework.util.ClassUtils;
 import org.w3c.dom.Element;
 
 /**
@@ -37,41 +33,15 @@ import org.w3c.dom.Element;
  */
 public class AuditingBeanDefinitionParser implements BeanDefinitionParser {
 	
-	static final String AUDITING_ENTITY_LISTENER_CLASS_NAME =
-			"org.springframework.data.jpa.domain.support.AuditingEntityListener";
-	
-	private static final String AUDITING_BFPP_CLASS_NAME =
-			"org.springframework.data.mirage.domain.support.AuditingBeanFactoryPostProcessor";
-	
-	private final BeanDefinitionParser auditingHandlerParser = new AuditingHandlerBeanDefinitionParser();
+	private final SpringConfiguredBeanDefinitionParser springConfiguredParser =
+			new SpringConfiguredBeanDefinitionParser();
 	
 	
 	@Override
 	public BeanDefinition parse(Element element, ParserContext parser) {
-		
-		new SpringConfiguredBeanDefinitionParser().parse(element, parser);
-		
-		BeanDefinition auditingHandlerDefinition = auditingHandlerParser.parse(element, parser);
-		
-		BeanDefinitionBuilder builder = rootBeanDefinition(AUDITING_ENTITY_LISTENER_CLASS_NAME);
-		builder.addPropertyValue("auditingHandler", auditingHandlerDefinition);
-		builder.setScope("prototype");
-		
-		registerInfrastructureBeanWithId(builder.getRawBeanDefinition(), AUDITING_ENTITY_LISTENER_CLASS_NAME, parser,
-				element);
-		
-		RootBeanDefinition def = new RootBeanDefinition(AUDITING_BFPP_CLASS_NAME);
-		registerInfrastructureBeanWithId(def, AUDITING_BFPP_CLASS_NAME, parser, element);
+		springConfiguredParser.parse(element, parser);
 		
 		return null;
-	}
-	
-	private void registerInfrastructureBeanWithId(AbstractBeanDefinition def, String id, ParserContext context,
-			Element element) {
-		
-		def.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-		def.setSource(context.extractSource(element));
-		context.registerBeanComponent(new BeanComponentDefinition(def, id));
 	}
 	
 	
@@ -97,6 +67,14 @@ public class AuditingBeanDefinitionParser implements BeanDefinitionParser {
 		public BeanDefinition parse(Element element, ParserContext parserContext) {
 			
 			if (!parserContext.getRegistry().containsBeanDefinition(BEAN_CONFIGURER_ASPECT_BEAN_NAME)) {
+				if (!ClassUtils.isPresent(BEAN_CONFIGURER_ASPECT_CLASS_NAME, getClass().getClassLoader())) {
+					parserContext.getReaderContext().error(
+							"Could not configure Spring Data Mirage auditing-feature because"
+									+ " spring-aspects.jar is not on the classpath!\n"
+									+ "If you want to use auditing please add spring-aspects.jar to the classpath.",
+							element);
+				}
+				
 				RootBeanDefinition def = new RootBeanDefinition();
 				def.setBeanClassName(BEAN_CONFIGURER_ASPECT_CLASS_NAME);
 				def.setFactoryMethodName("aspectOf");
