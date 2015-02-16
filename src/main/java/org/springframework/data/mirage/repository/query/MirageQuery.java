@@ -56,13 +56,6 @@ import org.springframework.util.Assert;
  */
 public class MirageQuery implements RepositoryQuery {
 	
-	private static Logger logger = LoggerFactory.getLogger(MirageQuery.class);
-	
-	private static final Charset UTF_8 = Charset.forName("UTF-8");
-	
-	private static final int BUFFER_SIZE = 1024 * 4;
-	
-	
 	static String getArgsPartOfSignature(Method method) {
 		try {
 			StringBuilder sb = new StringBuilder();
@@ -141,6 +134,12 @@ public class MirageQuery implements RepositoryQuery {
 		return sb.toString();
 	}
 	
+	
+	private static Logger logger = LoggerFactory.getLogger(MirageQuery.class);
+	
+	private static final Charset UTF_8 = Charset.forName("UTF-8");
+	
+	private static final int BUFFER_SIZE = 1024 * 4;
 	
 	private final MirageQueryMethod mirageQueryMethod;
 	
@@ -279,7 +278,7 @@ public class MirageQuery implements RepositoryQuery {
 				}
 			}
 		}
-		return 0; // TODO
+		return Integer.MAX_VALUE;
 	}
 	
 	private String toString(Reader input) throws IOException {

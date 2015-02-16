@@ -37,12 +37,20 @@ public class MiragePersistenceExceptionTranslator implements PersistenceExceptio
 	private SQLExceptionTranslator sqlExceptionTranslator = new SQLErrorCodeSQLExceptionTranslator();
 	
 	
+	/**
+	 * @param sqlExceptionTranslator {@link SQLExceptionTranslator}
+	 * @since 0.1
+	 */
+	public void setSqlExceptionTranslator(SQLExceptionTranslator sqlExceptionTranslator) {
+		this.sqlExceptionTranslator = sqlExceptionTranslator;
+	}
+	
 	@Override
 	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
 		if (ex instanceof SQLRuntimeException && sqlExceptionTranslator != null) {
 			SQLRuntimeException sqlRuntimeException = (SQLRuntimeException) ex;
 			SQLException sqlException = sqlRuntimeException.getCause();
-			return sqlExceptionTranslator.translate("", "", sqlException);
+			return sqlExceptionTranslator.translate("", "unknown", sqlException);
 		}
 		
 		if (ex.getClass().getPackage().getName().startsWith("jp.sf.amateras.mirage.exception")) {
@@ -52,17 +60,6 @@ public class MiragePersistenceExceptionTranslator implements PersistenceExceptio
 	}
 	
 	
-	/**
-	 * TODO for daisuke
-	 * 
-	 * @param sqlExceptionTranslator
-	 * @since 0.1
-	 */
-	public void setSqlExceptionTranslator(SQLExceptionTranslator sqlExceptionTranslator) {
-		this.sqlExceptionTranslator = sqlExceptionTranslator;
-	}
-
-
 	@SuppressWarnings("serial")
 	private final class MirageDataAccessException extends DataAccessException {
 		
