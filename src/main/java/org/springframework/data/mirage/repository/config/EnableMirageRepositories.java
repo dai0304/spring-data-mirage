@@ -23,6 +23,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import jp.sf.amateras.mirage.SqlManager;
+
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.Import;
@@ -96,7 +98,13 @@ public @interface EnableMirageRepositories {
 	String repositoryImplementationPostfix() default "Impl";
 	
 	/**
-	 * /** Configures the name of the {@link PlatformTransactionManager} bean definition to be used to create repositories
+	 * Configures the name of the {@link SqlManager} bean definition to be used to create repositories
+	 * discovered through this annotation. Defaults to {@code sqlManager}.
+	 */
+	String sqlManagerRef() default "sqlManager";
+	
+	/**
+	 * Configures the name of the {@link PlatformTransactionManager} bean definition to be used to create repositories
 	 * discovered through this annotation. Defaults to {@code transactionManager}.
 	 */
 	String transactionManagerRef() default "transactionManager";
