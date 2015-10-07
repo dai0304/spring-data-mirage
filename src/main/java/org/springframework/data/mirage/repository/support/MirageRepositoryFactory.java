@@ -30,6 +30,7 @@ import org.springframework.data.mirage.repository.LogicalDeleteMirageRepository;
 import org.springframework.data.mirage.repository.NoSuchSqlResourceException;
 import org.springframework.data.mirage.repository.query.MirageQueryLookupStrategy;
 import org.springframework.data.repository.core.EntityInformation;
+import org.springframework.data.repository.core.RepositoryInformation;
 import org.springframework.data.repository.core.RepositoryMetadata;
 import org.springframework.data.repository.core.support.RepositoryFactorySupport;
 import org.springframework.data.repository.query.QueryLookupStrategy;
@@ -54,7 +55,7 @@ public class MirageRepositoryFactory extends RepositoryFactorySupport {
 	 * インスタンスを生成する。
 	 * 
 	 * @param sqlManager {@link SqlManager}
-	 * @throws IllegalArgumentException if the argument is {@code null} 
+	 * @throws IllegalArgumentException if the argument is {@code null}
 	 * @since 0.1
 	 */
 	public MirageRepositoryFactory(SqlManager sqlManager) {
@@ -87,7 +88,7 @@ public class MirageRepositoryFactory extends RepositoryFactorySupport {
 		"rawtypes",
 		"unchecked"
 	})
-	protected Object getTargetRepository(RepositoryMetadata metadata) {
+	protected Object getTargetRepository(RepositoryInformation metadata) {
 		Class<?> repositoryInterface = metadata.getRepositoryInterface();
 		EntityInformation<?, Serializable> entityInformation = getEntityInformation(metadata.getDomainType());
 		
