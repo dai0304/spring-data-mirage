@@ -17,7 +17,6 @@
 package org.springframework.data.mirage.repository;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
@@ -60,7 +59,7 @@ public class LogicalDeleteMirageRepositoryTest {
 		
 		Entity entity = new Entity("foo");
 		Entity saved = repos.save(entity); // insert
-		assertThat(saved.getId(), is(not(0L)));
+		assertThat(saved.getId(), is(1L));
 		assertThat(repos.count(), is(1L));
 		
 		saved.setStr("bar");

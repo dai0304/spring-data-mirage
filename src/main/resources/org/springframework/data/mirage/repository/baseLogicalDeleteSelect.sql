@@ -7,12 +7,22 @@ WHERE
 	/*$id_column_name*/id > 0
 	/*END*/
 
+	/*IF esk != null*/
+		/*IF direction != 'DESC'*/
+		AND /*$id_column_name*/id > /*esk*/1
+-- ELSE	AND /*$id_column_name*/id < /*esk*/1
+		/*END*/
+	/*END*/
+	
 	/*IF id != null*/
 	AND /*$id_column_name*/id = /*id*/10
 	/*END*/
 
 	/*IF ids != null*/
-	/*$id_column_name*/id IN /*ids*/(10, 20, 30)
+		/*IF ids.isEmpty() == false*/
+		AND /*$id_column_name*/id IN /*ids*/(10, 20, 30)
+-- ELSE	AND false
+		/*END*/
 	/*END*/
 
 	/*IF absid != null*/
@@ -22,6 +32,7 @@ WHERE
 
 /*IF orders != null*/
 ORDER BY /*$orders*/id
+-- ELSE ORDER BY /*$id_column_name*/id /*$direction*/ASC
 /*END*/
 
 /*BEGIN*/

@@ -17,10 +17,17 @@
 package org.springframework.data.mirage.repository.example;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import jp.xet.sparwings.spring.data.chunk.Chunk;
+import jp.xet.sparwings.spring.data.chunk.ChunkRequest;
+import jp.xet.sparwings.spring.data.chunk.Chunkable;
 
 import com.google.common.collect.Iterables;
 
@@ -73,6 +80,134 @@ public class EntityRepositoryTest {
 		
 		Iterable<Entity> all = repos.findAll();
 		assertThat(Iterables.size(all), is(7));
+	}
+	
+	@Test
+	public void testChunking1() {
+		assertThat(repos.count(), is(0L));
+		repos.save(new Entity("foo"));
+		repos.save(new Entity("bar"));
+		repos.save(new Entity("baz"));
+		repos.save(new Entity("qux"));
+		repos.save(new Entity("quux"));
+		repos.save(new Entity("courge"));
+		repos.save(new Entity("grault"));
+		repos.save(new Entity("garply"));
+		
+		List<Entity> list = new ArrayList<Entity>();
+		
+		Chunkable req = new ChunkRequest(2);
+		Chunk<Entity> chunk = repos.findAll(req);
+		assertThat(chunk, is(notNullValue()));
+		assertThat(chunk.getContent(), hasSize(lessThanOrEqualTo(2)));
+		list.addAll(chunk.getContent());
+		
+		do {
+			req = req.next(chunk.getLastEvaluatedKey());
+			chunk = repos.findAll(req);
+			assertThat(chunk, is(notNullValue()));
+			assertThat(chunk.getContent(), hasSize(lessThanOrEqualTo(2)));
+			list.addAll(chunk.getContent());
+		} while (chunk.getContent().isEmpty() == false);
+		assertThat(list, hasSize(8));
+	}
+	
+	@Test
+	public void testChunking2() {
+		assertThat(repos.count(), is(0L));
+		repos.save(new Entity("foo"));
+		repos.save(new Entity("bar"));
+		repos.save(new Entity("baz"));
+		repos.save(new Entity("qux"));
+		repos.save(new Entity("quux"));
+		repos.save(new Entity("courge"));
+		repos.save(new Entity("grault"));
+		
+		List<Entity> list = new ArrayList<Entity>();
+		
+		Chunkable req = new ChunkRequest(2);
+		Chunk<Entity> chunk = repos.findAll(req);
+		assertThat(chunk, is(notNullValue()));
+		assertThat(chunk.getContent(), hasSize(lessThanOrEqualTo(2)));
+		list.addAll(chunk.getContent());
+		
+		do {
+			req = req.next(chunk.getLastEvaluatedKey());
+			chunk = repos.findAll(req);
+			assertThat(chunk, is(notNullValue()));
+			assertThat(chunk.getContent(), hasSize(lessThanOrEqualTo(2)));
+			list.addAll(chunk.getContent());
+		} while (chunk.getContent().isEmpty() == false);
+		assertThat(list, hasSize(7));
+	}
+	
+	@Test
+	public void testChunkingDirectionASC() {
+		assertThat(repos.count(), is(0L));
+		repos.save(new Entity("foo"));
+		repos.save(new Entity("bar"));
+		repos.save(new Entity("baz"));
+		repos.save(new Entity("qux"));
+		repos.save(new Entity("quux"));
+		repos.save(new Entity("courge"));
+		repos.save(new Entity("grault"));
+		
+		List<Entity> list = new ArrayList<Entity>();
+		
+		Chunkable req = new ChunkRequest(2, Direction.ASC);
+		Chunk<Entity> chunk = repos.findAll(req);
+		assertThat(chunk, is(notNullValue()));
+		assertThat(chunk.getContent(), hasSize(lessThanOrEqualTo(2)));
+		list.addAll(chunk.getContent());
+		
+		do {
+			req = req.next(chunk.getLastEvaluatedKey());
+			chunk = repos.findAll(req);
+			assertThat(chunk, is(notNullValue()));
+			assertThat(chunk.getContent(), hasSize(lessThanOrEqualTo(2)));
+			list.addAll(chunk.getContent());
+		} while (chunk.getContent().isEmpty() == false);
+		assertThat(list, hasSize(7));
+	}
+	
+	@Test
+	public void testChunkingDirectionDESC() {
+		assertThat(repos.count(), is(0L));
+		repos.save(new Entity("foo"));
+		repos.save(new Entity("bar"));
+		repos.save(new Entity("baz"));
+		repos.save(new Entity("qux"));
+		repos.save(new Entity("quux"));
+		repos.save(new Entity("courge"));
+		repos.save(new Entity("grault"));
+		
+		List<Entity> list = new ArrayList<Entity>();
+		
+		Chunkable req = new ChunkRequest(2, Direction.DESC);
+		Chunk<Entity> chunk = repos.findAll(req);
+		assertThat(chunk, is(notNullValue()));
+		assertThat(chunk.getContent(), hasSize(lessThanOrEqualTo(2)));
+		list.addAll(chunk.getContent());
+		
+		do {
+			req = req.next(chunk.getLastEvaluatedKey());
+			chunk = repos.findAll(req);
+			assertThat(chunk, is(notNullValue()));
+			assertThat(chunk.getContent(), hasSize(lessThanOrEqualTo(2)));
+			list.addAll(chunk.getContent());
+		} while (chunk.getContent().isEmpty() == false);
+		assertThat(list, hasSize(7));
+	}
+	
+	@Test
+	public void testPaging() {
+		repos.save(new Entity("foo"));
+		repos.save(new Entity("bar"));
+		repos.save(new Entity("foo"));
+		repos.save(new Entity("foo2"));
+		repos.save(new Entity("foo3"));
+		repos.save(new Entity("bar2"));
+		repos.save(new Entity("bar3"));
 		
 		Page<Entity> page1 = repos.findAll(new PageRequest(1/*zero based*/, 2, Direction.ASC, "str"));
 		assertThat(page1.getNumber(), is(1));
