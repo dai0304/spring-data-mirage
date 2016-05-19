@@ -24,7 +24,7 @@ import org.springframework.data.repository.query.ParametersParameterAccessor;
 /**
  * TODO for daisuke
  * 
- * @since #version#
+ * @since 0.4.0.RELEASE
  * @version $Id$
  * @author daisuke
  */
