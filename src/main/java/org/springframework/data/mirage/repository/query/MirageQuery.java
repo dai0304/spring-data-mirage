@@ -19,6 +19,7 @@ package org.springframework.data.mirage.repository.query;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -31,9 +32,14 @@ import java.util.Map;
 import jp.sf.amateras.mirage.SqlManager;
 import jp.sf.amateras.mirage.SqlResource;
 import jp.sf.amateras.mirage.StringSqlResource;
+import jp.xet.sparwings.spring.data.chunk.ChunkImpl;
+import jp.xet.sparwings.spring.data.chunk.Chunkable;
+
+import com.google.common.collect.Iterables;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -41,8 +47,6 @@ import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.mirage.repository.ScopeClasspathSqlResource;
 import org.springframework.data.mirage.repository.SqlResourceCandidate;
 import org.springframework.data.repository.query.Parameter;
-import org.springframework.data.repository.query.ParameterAccessor;
-import org.springframework.data.repository.query.ParametersParameterAccessor;
 import org.springframework.data.repository.query.QueryMethod;
 import org.springframework.data.repository.query.RepositoryQuery;
 import org.springframework.util.Assert;
@@ -55,6 +59,13 @@ import org.springframework.util.Assert;
  * @author daisuke
  */
 public class MirageQuery implements RepositoryQuery {
+	
+	private static Logger logger = LoggerFactory.getLogger(MirageQuery.class);
+	
+	private static final Charset UTF_8 = Charset.forName("UTF-8");
+	
+	private static final int BUFFER_SIZE = 1024 * 4;
+	
 	
 	static String getArgsPartOfSignature(Method method) {
 		try {
@@ -71,6 +82,17 @@ public class MirageQuery implements RepositoryQuery {
 			return sb.toString();
 		} catch (Exception e) {
 			return "<" + e + ">";
+		}
+	}
+	
+	private static void addChunkParam(Map<String, Object> params, Chunkable chunkable) {
+		if (chunkable == null) {
+			return;
+		}
+		params.put("esk", chunkable.getExclusiveStartKey());
+		params.put("size", chunkable.getMaxPageSize());
+		if (chunkable.getDirection() != null) {
+			params.put("direction", chunkable.getDirection().name());
 		}
 	}
 	
@@ -135,12 +157,6 @@ public class MirageQuery implements RepositoryQuery {
 	}
 	
 	
-	private static Logger logger = LoggerFactory.getLogger(MirageQuery.class);
-	
-	private static final Charset UTF_8 = Charset.forName("UTF-8");
-	
-	private static final int BUFFER_SIZE = 1024 * 4;
-	
 	private final MirageQueryMethod mirageQueryMethod;
 	
 	private final SqlManager sqlManager;
@@ -166,7 +182,8 @@ public class MirageQuery implements RepositoryQuery {
 		Map<String, Object> parameterMap = createParameterMap(parameters);
 		
 		Class<?> returnedDomainType = mirageQueryMethod.getReturnedObjectType();
-		ParameterAccessor accessor = new ParametersParameterAccessor(mirageQueryMethod.getParameters(), parameters);
+		ChunkableParameterAccessor accessor =
+				new ParameterChunkableParameterAccessor(mirageQueryMethod.getParameters(), parameters);
 		
 		if (mirageQueryMethod.isModifyingQuery()) {
 			return sqlManager.executeUpdate(sqlResource, parameterMap);
@@ -176,6 +193,29 @@ public class MirageQuery implements RepositoryQuery {
 				addSortParam(parameterMap, sort);
 			}
 			return sqlManager.getResultList(returnedDomainType, sqlResource, parameterMap);
+		} else if (mirageQueryMethod.isChunkQuery()) {
+			Chunkable chunkable = accessor.getChunkable();
+			if (chunkable != null) {
+				addChunkParam(parameterMap, chunkable);
+			}
+			
+			List<?> resultList = sqlManager.getResultList(returnedDomainType, sqlResource, parameterMap);
+			
+			if (List.class.isAssignableFrom(mirageQueryMethod.getReturnType())) {
+				return resultList;
+			}
+			
+			Object lek = null;
+			if (resultList.isEmpty() == false) {
+				Object last = Iterables.getLast(resultList);
+				lek = getId(last);
+			}
+			@SuppressWarnings({
+				"rawtypes",
+				"unchecked"
+			})
+			ChunkImpl<?> chunk = new ChunkImpl(resultList, lek, chunkable);
+			return chunk;
 		} else if (mirageQueryMethod.isPageQuery()) {
 			Pageable pageable = accessor.getPageable();
 			if (pageable != null) {
@@ -184,6 +224,7 @@ public class MirageQuery implements RepositoryQuery {
 				Sort sort = accessor.getSort();
 				addSortParam(parameterMap, sort);
 			}
+			
 			List<?> resultList = sqlManager.getResultList(returnedDomainType, sqlResource, parameterMap);
 			
 			if (List.class.isAssignableFrom(mirageQueryMethod.getReturnType())) {
@@ -257,6 +298,26 @@ public class MirageQuery implements RepositoryQuery {
 	private SqlResource createSqlResource() {
 		SqlResourceCandidate[] candidates = createQueryNameCandidates();
 		return new ScopeClasspathSqlResource(candidates);
+	}
+	
+	private Object getId(Object entity) {
+		Class<?> c = entity.getClass();
+		while (c != null && c != Object.class) {
+			Field[] declaredFields = c.getDeclaredFields();
+			for (Field field : declaredFields) {
+				Id idAnnotation = field.getAnnotation(Id.class);
+				if (idAnnotation != null) {
+					field.setAccessible(true);
+					try {
+						return field.get(entity);
+					} catch (Exception e) {
+						// ignore
+					}
+				}
+			}
+			c = c.getSuperclass();
+		}
+		return null;
 	}
 	
 	private int getTotalCount(SqlResource sqlResource) {
