@@ -40,8 +40,6 @@ import jp.xet.sparwings.spring.data.chunk.Chunk;
 import jp.xet.sparwings.spring.data.chunk.ChunkImpl;
 import jp.xet.sparwings.spring.data.chunk.Chunkable;
 
-import com.google.common.collect.Iterables;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -254,7 +252,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 			List<E> result = getResultList(getBaseSelectSqlResource(), createParams(chunkable));
 			ID lek = null;
 			if (result.isEmpty() == false) {
-				E last = Iterables.getLast(result);
+				E last = result.get(result.size() - 1);
 				lek = getId(last);
 			}
 			return new ChunkImpl<E>(result, lek, chunkable);
