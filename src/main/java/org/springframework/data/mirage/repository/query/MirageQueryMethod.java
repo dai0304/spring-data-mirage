@@ -20,10 +20,14 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import jp.xet.sparwings.spring.data.chunk.Chunk;
+
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.data.repository.core.RepositoryMetadata;
 import org.springframework.data.repository.query.Parameters;
 import org.springframework.data.repository.query.QueryMethod;
+import org.springframework.data.repository.util.QueryExecutionConverters;
+import org.springframework.data.util.ClassTypeInformation;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -36,9 +40,21 @@ import org.springframework.util.StringUtils;
  */
 public class MirageQueryMethod extends QueryMethod {
 	
+	private static Class<? extends Object> potentiallyUnwrapReturnTypeFor(Method method) {
+		if (QueryExecutionConverters.supports(method.getReturnType())) {
+			// unwrap only one level to handle cases like Future<List<Entity>> correctly.
+			return ClassTypeInformation.fromReturnTypeOf(method).getComponentType().getType();
+		}
+		
+		return method.getReturnType();
+	}
+	
+	
 	final Method method;
 	
 	final RepositoryMetadata metadata;
+	
+	private final Class<?> unwrappedReturnType;
 	
 	
 	/**
@@ -52,6 +68,7 @@ public class MirageQueryMethod extends QueryMethod {
 		super(method, metadata);
 		this.method = method;
 		this.metadata = metadata;
+		unwrappedReturnType = potentiallyUnwrapReturnTypeFor(method);
 		
 		Assert.isTrue((isModifyingQuery() && getParameters().hasSpecialParameter()) == false,
 				String.format("Modifying method must not contain %s!", Parameters.TYPES));
@@ -94,6 +111,28 @@ public class MirageQueryMethod extends QueryMethod {
 	}
 	
 	/**
+	 * TODO for daisuke
+	 * 
+	 * @return
+	 * @since #version#
+	 */
+	public boolean isChunkQuery() {
+		return !isPageQuery() && org.springframework.util.ClassUtils.isAssignable(Chunk.class, unwrappedReturnType);
+	}
+	
+	/**
+	 * Returns whether the finder will actually return a collection of entities or a single one.
+	 * 
+	 * @return
+	 */
+	@Override
+	public boolean isCollectionQuery() {
+		return !(isPageQuery() || isSliceQuery() || isChunkQuery())
+				&& org.springframework.util.ClassUtils.isAssignable(Iterable.class, unwrappedReturnType)
+				|| unwrappedReturnType.isArray();
+	}
+	
+	/**
 	 * Returns whether the finder is a modifying one.
 	 * 
 	 * @return {@code true} if the finder is a modifying one
@@ -101,6 +140,11 @@ public class MirageQueryMethod extends QueryMethod {
 	@Override
 	public boolean isModifyingQuery() {
 		return method.getAnnotation(Modifying.class) != null;
+	}
+	
+	@Override
+	protected Parameters<?, ?> createParameters(Method method) {
+		return new ChunkableSupportedParameters(method);
 	}
 	
 	/**
@@ -158,4 +202,5 @@ public class MirageQueryMethod extends QueryMethod {
 	private Query getQueryAnnotation() {
 		return method.getAnnotation(Query.class);
 	}
+	
 }

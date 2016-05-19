@@ -94,6 +94,13 @@ public class Entity implements Identifiable, Serializable {
 		this.str = str;
 	}
 	
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("Entity [id=").append(id).append(", str=").append(str).append("]");
+		return builder.toString();
+	}
+	
 	void setId(long id) {
 		this.id = id;
 	}

@@ -36,6 +36,11 @@ import jp.sf.amateras.mirage.exception.SQLRuntimeException;
 import jp.sf.amateras.mirage.naming.NameConverter;
 import jp.sf.amateras.mirage.util.MirageUtil;
 import jp.sf.amateras.mirage.util.Validate;
+import jp.xet.sparwings.spring.data.chunk.Chunk;
+import jp.xet.sparwings.spring.data.chunk.ChunkImpl;
+import jp.xet.sparwings.spring.data.chunk.Chunkable;
+
+import com.google.common.collect.Iterables;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -234,6 +239,25 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 	public Iterable<E> findAll() {
 		try {
 			return getResultList(getBaseSelectSqlResource(), createParams());
+		} catch (SQLRuntimeException e) {
+			throw getExceptionTranslator().translate("findAll", null, e.getCause());
+		}
+	}
+	
+	@Override
+	public Chunk<E> findAll(Chunkable chunkable) {
+		if (null == chunkable) {
+			return new ChunkImpl<E>(newArrayList(findAll()), null, chunkable);
+		}
+		
+		try {
+			List<E> result = getResultList(getBaseSelectSqlResource(), createParams(chunkable));
+			ID lek = null;
+			if (result.isEmpty() == false) {
+				E last = Iterables.getLast(result);
+				lek = getId(last);
+			}
+			return new ChunkImpl<E>(result, lek, chunkable);
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("findAll", null, e.getCause());
 		}
@@ -442,6 +466,19 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 		params.put("id", null); // 何故これが要るのだろう。無いとコケる
 		params.put("id_column_name", findIdColumnName());
 		
+		return params;
+	}
+	
+	/**
+	 * TODO for daisuke
+	 * 
+	 * @param pageable
+	 * @return
+	 * @since 0.1
+	 */
+	protected Map<String, Object> createParams(Chunkable chunkable) {
+		Map<String, Object> params = createParams();
+		addChunkParam(params, chunkable);
 		return params;
 	}
 	
@@ -921,6 +958,14 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 			return sqlManager.updateEntity(entity);
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("updateEntity", null, e.getCause());
+		}
+	}
+	
+	private void addChunkParam(Map<String, Object> params, Chunkable chunkable) {
+		params.put("esk", chunkable == null ? null : chunkable.getExclusiveStartKey());
+		params.put("size", chunkable == null ? null : chunkable.getMaxPageSize());
+		if (chunkable != null && chunkable.getDirection() != null) {
+			params.put("direction", chunkable.getDirection().name());
 		}
 	}
 	

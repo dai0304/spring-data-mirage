@@ -19,6 +19,9 @@ package org.springframework.data.mirage.repository;
 import java.io.Serializable;
 import java.util.List;
 
+import jp.xet.sparwings.spring.data.chunk.Chunk;
+import jp.xet.sparwings.spring.data.chunk.Chunkable;
+
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.NoRepositoryBean;
@@ -35,6 +38,17 @@ import org.springframework.data.repository.PagingAndSortingRepository;
  */
 @NoRepositoryBean
 public interface MirageRepository<E, ID extends Serializable> extends PagingAndSortingRepository<E, ID> {
+	
+	/**
+	 * TODO for daisuke
+	 * 
+	 * @param chunkable
+	 * @return
+	 * @throws DataAccessException データアクセスエラーが発生した場合
+	 * @throws NullPointerException 引数に{@code null}を与えた場合
+	 * @since #version#
+	 */
+	Chunk<E> findAll(Chunkable chunkable);
 	
 	/**
 	 * {@inheritDoc}
