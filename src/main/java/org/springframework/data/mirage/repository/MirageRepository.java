@@ -46,7 +46,7 @@ public interface MirageRepository<E, ID extends Serializable> extends PagingAndS
 	 * @return
 	 * @throws DataAccessException データアクセスエラーが発生した場合
 	 * @throws NullPointerException 引数に{@code null}を与えた場合
-	 * @since #version#
+	 * @since 0.4.0.RELEASE
 	 */
 	Chunk<E> findAll(Chunkable chunkable);
 	

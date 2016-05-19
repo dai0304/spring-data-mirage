@@ -114,7 +114,7 @@ public class MirageQueryMethod extends QueryMethod {
 	 * TODO for daisuke
 	 * 
 	 * @return
-	 * @since #version#
+	 * @since 0.4.0.RELEASE
 	 */
 	public boolean isChunkQuery() {
 		return !isPageQuery() && org.springframework.util.ClassUtils.isAssignable(Chunk.class, unwrappedReturnType);
