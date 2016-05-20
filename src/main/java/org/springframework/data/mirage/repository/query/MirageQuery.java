@@ -253,7 +253,8 @@ public class MirageQuery implements RepositoryQuery {
 		for (Parameter p : mirageQueryMethod.getParameters()) {
 			String parameterName = p.getName();
 			if (parameterName == null) {
-				if (Pageable.class.isAssignableFrom(p.getType()) == false) {
+				if (Pageable.class.isAssignableFrom(p.getType()) == false
+						&& Chunkable.class.isAssignableFrom(p.getType()) == false) {
 					logger.warn("null name parameter [{}] is ignored", p);
 				}
 			} else {

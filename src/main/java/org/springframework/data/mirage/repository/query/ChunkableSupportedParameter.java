@@ -16,9 +16,14 @@
  */
 package org.springframework.data.mirage.repository.query;
 
+import java.util.Arrays;
+import java.util.List;
+
 import jp.xet.sparwings.spring.data.chunk.Chunkable;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.query.Parameter;
 
 /**
@@ -30,6 +35,11 @@ import org.springframework.data.repository.query.Parameter;
  */
 public class ChunkableSupportedParameter extends Parameter {
 	
+	static final List<Class<?>> TYPES = Arrays.asList(Pageable.class, Sort.class, Chunkable.class);
+	
+	private MethodParameter parameter;
+	
+	
 	/**
 	 * インスタンスを生成する。
 	 * 
@@ -37,7 +47,12 @@ public class ChunkableSupportedParameter extends Parameter {
 	 */
 	public ChunkableSupportedParameter(MethodParameter parameter) {
 		super(parameter);
-		// TODO Auto-generated constructor stub
+		this.parameter = parameter;
+	}
+	
+	@Override
+	public boolean isSpecialParameter() {
+		return TYPES.contains(parameter.getParameterType());
 	}
 	
 	/**
