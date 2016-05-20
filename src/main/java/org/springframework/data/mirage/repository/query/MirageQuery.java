@@ -35,8 +35,6 @@ import jp.sf.amateras.mirage.StringSqlResource;
 import jp.xet.sparwings.spring.data.chunk.ChunkImpl;
 import jp.xet.sparwings.spring.data.chunk.Chunkable;
 
-import com.google.common.collect.Iterables;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.annotation.Id;
@@ -207,7 +205,7 @@ public class MirageQuery implements RepositoryQuery {
 			
 			Object lek = null;
 			if (resultList.isEmpty() == false) {
-				Object last = Iterables.getLast(resultList);
+				Object last = resultList.get(resultList.size() - 1);
 				lek = getId(last);
 			}
 			@SuppressWarnings({
@@ -255,7 +253,8 @@ public class MirageQuery implements RepositoryQuery {
 		for (Parameter p : mirageQueryMethod.getParameters()) {
 			String parameterName = p.getName();
 			if (parameterName == null) {
-				if (Pageable.class.isAssignableFrom(p.getType()) == false) {
+				if (Pageable.class.isAssignableFrom(p.getType()) == false
+						&& Chunkable.class.isAssignableFrom(p.getType()) == false) {
 					logger.warn("null name parameter [{}] is ignored", p);
 				}
 			} else {
