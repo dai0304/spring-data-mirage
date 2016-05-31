@@ -103,7 +103,7 @@ public class EntityRepositoryTest {
 		list.addAll(chunk.getContent());
 		
 		do {
-			req = req.next(chunk.getLastEvaluatedKey());
+			req = req.next(chunk.getLastKey());
 			chunk = repos.findAll(req);
 			assertThat(chunk, is(notNullValue()));
 			assertThat(chunk.getContent(), hasSize(lessThanOrEqualTo(2)));
@@ -132,7 +132,7 @@ public class EntityRepositoryTest {
 		list.addAll(chunk.getContent());
 		
 		do {
-			req = req.next(chunk.getLastEvaluatedKey());
+			req = req.next(chunk.getLastKey());
 			chunk = repos.findAll(req);
 			assertThat(chunk, is(notNullValue()));
 			assertThat(chunk.getContent(), hasSize(lessThanOrEqualTo(2)));
@@ -161,7 +161,7 @@ public class EntityRepositoryTest {
 		list.addAll(chunk.getContent());
 		
 		do {
-			req = req.next(chunk.getLastEvaluatedKey());
+			req = req.next(chunk.getLastKey());
 			chunk = repos.findAll(req);
 			assertThat(chunk, is(notNullValue()));
 			assertThat(chunk.getContent(), hasSize(lessThanOrEqualTo(2)));
@@ -190,7 +190,7 @@ public class EntityRepositoryTest {
 		list.addAll(chunk.getContent());
 		
 		do {
-			req = req.next(chunk.getLastEvaluatedKey());
+			req = req.next(chunk.getLastKey());
 			chunk = repos.findAll(req);
 			assertThat(chunk, is(notNullValue()));
 			assertThat(chunk.getContent(), hasSize(lessThanOrEqualTo(2)));

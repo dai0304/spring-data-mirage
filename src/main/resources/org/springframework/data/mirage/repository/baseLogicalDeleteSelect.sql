@@ -1,3 +1,8 @@
+/*IF before != null*/
+SELECT * FROM (
+/*END*/
+
+
 SELECT *
 FROM /*$table*/some_table
 
@@ -7,10 +12,17 @@ WHERE
 	/*$id_column_name*/id > 0
 	/*END*/
 
-	/*IF esk != null*/
+	/*IF after != null*/
 		/*IF direction != 'DESC'*/
-		AND /*$id_column_name*/id > /*esk*/1
--- ELSE	AND /*$id_column_name*/id < /*esk*/1
+		AND /*$id_column_name*/id > /*after*/1
+-- ELSE	AND /*$id_column_name*/id < /*after*/1
+		/*END*/
+	/*END*/
+
+	/*IF before != null*/
+		/*IF direction != 'DESC'*/
+		AND /*$id_column_name*/id < /*before*/1
+-- ELSE	AND /*$id_column_name*/id > /*before*/1
 		/*END*/
 	/*END*/
 	
@@ -30,9 +42,21 @@ WHERE
 	/*END*/
 /*END*/
 
-/*IF orders != null*/
-ORDER BY /*$orders*/id
--- ELSE ORDER BY /*$id_column_name*/id /*$direction*/ASC
+/*IF orders == null*/
+ORDER BY /*$id_column_name*/id
+	/*IF direction == null || direction == 'ASC'*/
+		/*IF before == null*/
+		ASC
+-- ELSE DESC
+		/*END*/
+	/*END*/
+	/*IF direction == 'DESC'*/
+		/*IF before != null*/
+		ASC
+-- ELSE DESC
+		/*END*/
+	/*END*/
+-- ELSE ORDER BY /*$orders*/id
 /*END*/
 
 /*BEGIN*/
@@ -44,4 +68,9 @@ LIMIT
 	/*IF size != null*/
 	/*size*/10
 	/*END*/
+/*END*/
+
+
+/*IF before != null*/
+) sub ORDER BY /*$id_column_name*/id /*$direction*/ASC
 /*END*/

@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.sql.DataSource;
 
@@ -245,17 +246,20 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 	@Override
 	public Chunk<E> findAll(Chunkable chunkable) {
 		if (null == chunkable) {
-			return new ChunkImpl<E>(newArrayList(findAll()), null, chunkable);
+			return new ChunkImpl<E>(newArrayList(findAll()), null, null, chunkable);
 		}
 		
 		try {
 			List<E> result = getResultList(getBaseSelectSqlResource(), createParams(chunkable));
-			ID lek = null;
+			String lastKey = null;
+			String firstKey = null;
 			if (result.isEmpty() == false) {
 				E last = result.get(result.size() - 1);
-				lek = getId(last);
+				lastKey = Objects.toString(getId(last));
+				E first = result.get(0);
+				firstKey = Objects.toString(getId(first));
 			}
-			return new ChunkImpl<E>(result, lek, chunkable);
+			return new ChunkImpl<E>(result, lastKey, firstKey, chunkable);
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("findAll", null, e.getCause());
 		}
@@ -960,7 +964,8 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 	}
 	
 	private void addChunkParam(Map<String, Object> params, Chunkable chunkable) {
-		params.put("esk", chunkable == null ? null : chunkable.getExclusiveStartKey());
+		params.put("after", chunkable == null ? null : chunkable.getAfterKey());
+		params.put("before", chunkable == null ? null : chunkable.getBeforeKey());
 		params.put("size", chunkable == null ? null : chunkable.getMaxPageSize());
 		if (chunkable != null && chunkable.getDirection() != null) {
 			params.put("direction", chunkable.getDirection().name());
