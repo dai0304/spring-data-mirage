@@ -245,7 +245,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 	
 	@Override
 	public Chunk<E> findAll(Chunkable chunkable) {
-		if (null == chunkable) {
+		if (chunkable == null) {
 			return new ChunkImpl<E>(newArrayList(findAll()), null, null, chunkable);
 		}
 		
