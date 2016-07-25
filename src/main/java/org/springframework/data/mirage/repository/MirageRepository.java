@@ -23,6 +23,8 @@ import jp.xet.sparwings.spring.data.chunk.Chunk;
 import jp.xet.sparwings.spring.data.chunk.Chunkable;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.IncorrectUpdateSemanticsDataAccessException;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -113,6 +115,17 @@ public interface MirageRepository<E, ID extends Serializable> extends PagingAndS
 	@Override
 	List<E> findAll(Sort sort);
 	
+	E findOne(ID id, boolean forUpdate);
+	
+	/**
+	 * Returns whether an entity with the given id exists.
+	 * 
+	 * @param id must not be {@literal null}.
+	 * @return true if an entity with the given id exists, {@literal false} otherwise
+	 * @throws IllegalArgumentException if {@code id} is {@literal null}
+	 */
+	boolean exists(ID id, boolean forUpdate);
+	
 	/**
 	 * 指定したエンティティの識別子(ID)を返す。
 	 * 
@@ -142,4 +155,30 @@ public interface MirageRepository<E, ID extends Serializable> extends PagingAndS
 	 */
 	@Override
 	<S extends E>S save(S entity);
+	
+	/**
+	 * Create entity.
+	 * 
+	 * <p>{@code entity}として{@code null}を渡した場合、何もせずに{@code null}を返す。</p>
+	 * 
+	 * @param entity entity to update
+	 * @return updated entity
+	 * @throws DuplicateKeyException 対象エンティティがすでにあった場合
+	 * @throws DataAccessException データアクセスエラーが発生した場合
+	 * @since #version#
+	 */
+	<S extends E>S create(S entity);
+	
+	/**
+	 * Update item
+	 * 
+	 * <p>{@code entity}として{@code null}を渡した場合、何もせずに{@code null}を返す。</p>
+	 * 
+	 * @param entity entity to update
+	 * @return updated entity
+	 * @throws IncorrectUpdateSemanticsDataAccessException 対象エンティティがなかった場合
+	 * @throws DataAccessException データアクセスエラーが発生した場合
+	 * @since #version#
+	 */
+	<S extends E>S update(S entity);
 }

@@ -16,15 +16,13 @@
  */
 package org.springframework.data.mirage.repository;
 
+import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-import static org.junit.matchers.JUnitMatchers.hasItem;
 
 import java.util.Arrays;
-
-import jp.sf.amateras.mirage.SqlManager;
 
 import com.google.common.collect.Iterables;
 
@@ -38,6 +36,8 @@ import org.springframework.data.repository.core.support.RepositoryFactorySupport
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
+
+import jp.sf.amateras.mirage.SqlManager;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("classpath:/test-context.xml")

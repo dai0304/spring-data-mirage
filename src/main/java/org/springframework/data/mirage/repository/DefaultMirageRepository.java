@@ -28,19 +28,6 @@ import java.util.Objects;
 
 import javax.sql.DataSource;
 
-import jp.sf.amateras.mirage.IterationCallback;
-import jp.sf.amateras.mirage.SqlManager;
-import jp.sf.amateras.mirage.SqlResource;
-import jp.sf.amateras.mirage.StringSqlResource;
-import jp.sf.amateras.mirage.annotation.Column;
-import jp.sf.amateras.mirage.exception.SQLRuntimeException;
-import jp.sf.amateras.mirage.naming.NameConverter;
-import jp.sf.amateras.mirage.util.MirageUtil;
-import jp.sf.amateras.mirage.util.Validate;
-import jp.xet.sparwings.spring.data.chunk.Chunk;
-import jp.xet.sparwings.spring.data.chunk.ChunkImpl;
-import jp.xet.sparwings.spring.data.chunk.Chunkable;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +44,22 @@ import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.Assert;
 
+import jp.sf.amateras.mirage.IterationCallback;
+import jp.sf.amateras.mirage.SqlManager;
+import jp.sf.amateras.mirage.SqlResource;
+import jp.sf.amateras.mirage.StringSqlResource;
+import jp.sf.amateras.mirage.annotation.Column;
+import jp.sf.amateras.mirage.exception.SQLRuntimeException;
+import jp.sf.amateras.mirage.naming.NameConverter;
+import jp.sf.amateras.mirage.util.MirageUtil;
+import jp.sf.amateras.mirage.util.Validate;
+import jp.xet.sparwings.spring.data.chunk.Chunk;
+import jp.xet.sparwings.spring.data.chunk.ChunkImpl;
+import jp.xet.sparwings.spring.data.chunk.Chunkable;
+import jp.xet.sparwings.spring.data.chunk.Chunkable.PaginationRelation;
+import jp.xet.sparwings.spring.data.chunk.PaginationTokenEncoder;
+import jp.xet.sparwings.spring.data.chunk.SimplePaginationTokenEncoder;
+
 /**
  * Mirageフレームワークを利用した {@link MirageRepository} の実装クラス。
  * 
@@ -70,8 +73,8 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 	
 	private static Logger logger = LoggerFactory.getLogger(DefaultMirageRepository.class);
 	
-	static final SqlResource BASE_SELECT_SQL = new ScopeClasspathSqlResource(DefaultMirageRepository.class,
-			"baseSelect.sql");
+	static final SqlResource BASE_SELECT_SQL =
+			new ScopeClasspathSqlResource(DefaultMirageRepository.class, "baseSelect.sql");
 	
 	
 	/**
@@ -102,7 +105,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 		return sb.toString();
 	}
 	
-	private static <E>List<E> newArrayList(Iterable<E> iterable) {
+	private static <E> List<E> newArrayList(Iterable<E> iterable) {
 		List<E> list = new ArrayList<E>();
 		for (E element : iterable) {
 			list.add(element);
@@ -129,6 +132,8 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 	
 	private final Class<E> entityClass;
 	
+	private PaginationTokenEncoder encoder = new SimplePaginationTokenEncoder();
+	
 	
 	/**
 	 * インスタンスを生成する。
@@ -149,7 +154,8 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 	 * @param sqlManager {@link SqlManager}
 	 * @since 0.1
 	 */
-	public DefaultMirageRepository(EntityInformation<E, ? extends Serializable> entityInformation, SqlManager sqlManager) {
+	public DefaultMirageRepository(EntityInformation<E, ? extends Serializable> entityInformation,
+			SqlManager sqlManager) {
 		Assert.notNull(entityInformation);
 		this.entityClass = entityInformation.getJavaType();
 		this.sqlManager = sqlManager;
@@ -158,6 +164,20 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 	@Override
 	public long count() {
 		return getCount(getBaseSelectSqlResource(), createParams());
+	}
+	
+	@Override
+	public <S extends E> S create(S entity) {
+		if (entity == null) {
+			return null;
+		}
+		try {
+			sqlManager.insertEntity(entity);
+			logger.debug("entity inserted: {}", entity);
+		} catch (SQLRuntimeException e) {
+			throw getExceptionTranslator().translate("save", null, e.getCause());
+		}
+		return entity;
 	}
 	
 	@Override
@@ -226,9 +246,14 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 	
 	@Override
 	public boolean exists(ID id) {
+		return exists(id, false);
+	}
+	
+	@Override
+	public boolean exists(ID id, boolean forUpdate) {
 		Assert.notNull(id, "id must not be null");
 		try {
-			return getCount(getBaseSelectSqlResource(), createParams(id)) > 0;
+			return getCount(getBaseSelectSqlResource(), createParams(id, forUpdate)) > 0;
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("exists", null, e.getCause());
 		}
@@ -246,20 +271,24 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 	@Override
 	public Chunk<E> findAll(Chunkable chunkable) {
 		if (chunkable == null) {
-			return new ChunkImpl<E>(newArrayList(findAll()), null, null, chunkable);
+			return new ChunkImpl<E>(newArrayList(findAll()), null, chunkable);
 		}
 		
 		try {
-			List<E> result = getResultList(getBaseSelectSqlResource(), createParams(chunkable));
-			String lastKey = null;
-			String firstKey = null;
-			if (result.isEmpty() == false) {
-				E last = result.get(result.size() - 1);
-				lastKey = Objects.toString(getId(last));
-				E first = result.get(0);
-				firstKey = Objects.toString(getId(first));
+			List<E> resultList = getResultList(getBaseSelectSqlResource(), createParams(chunkable));
+			String pt = null;
+			if (resultList.isEmpty() == false) {
+				String firstKey = null;
+				if (chunkable.getPaginationToken() != null && resultList.isEmpty() == false) {
+					firstKey = Objects.toString(getId(resultList.get(0)));
+				}
+				String lastKey = null;
+				if (resultList.isEmpty() == false) {
+					lastKey = Objects.toString(getId(resultList.get(resultList.size() - 1)));
+				}
+				pt = encoder.encode(firstKey, lastKey);
 			}
-			return new ChunkImpl<E>(result, lastKey, firstKey, chunkable);
+			return new ChunkImpl<E>(resultList, pt, chunkable);
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("findAll", null, e.getCause());
 		}
@@ -304,11 +333,15 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 	
 	@Override
 	public E findOne(ID id) {
+		return findOne(id, false);
+	}
+	
+	@Override
+	public E findOne(ID id, boolean forUpdate) {
 		Assert.notNull(id, "id must not be null");
 		
-		Map<String, Object> params = createParams(id);
 		try {
-			return getSingleResult(getBaseSelectSqlResource(), params);
+			return getSingleResult(getBaseSelectSqlResource(), createParams(id, forUpdate));
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("findOne", null, e.getCause());
 		}
@@ -337,7 +370,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 	}
 	
 	@Override
-	public <S extends E>Iterable<S> save(Iterable<S> entities) {
+	public <S extends E> Iterable<S> save(Iterable<S> entities) {
 		if (entities == null) {
 			return Collections.emptyList();
 		}
@@ -364,7 +397,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 	}
 	
 	@Override
-	public <S extends E>S save(S entity) {
+	public <S extends E> S save(S entity) {
 		if (entity == null) {
 			return null;
 		}
@@ -388,6 +421,20 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 		} else {
 			this.baseSelectSqlResource = baseSelectSqlResource;
 		}
+	}
+	
+	@Override
+	public <S extends E> S update(S entity) {
+		if (entity == null) {
+			return null;
+		}
+		try {
+			sqlManager.updateEntity(entity);
+			logger.debug("entity updated: {}", entity);
+		} catch (SQLRuntimeException e) {
+			throw getExceptionTranslator().translate("save", null, e.getCause());
+		}
+		return entity;
 	}
 	
 	/**
@@ -491,9 +538,10 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 	 * @return
 	 * @since 0.1
 	 */
-	protected Map<String, Object> createParams(ID id) {
+	protected Map<String, Object> createParams(ID id, boolean forUpdate) {
 		Map<String, Object> params = createParams();
 		addIdParam(params, id);
+		params.put("forUpdate", forUpdate);
 		return params;
 	}
 	
@@ -877,7 +925,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 	 * @see SqlManager#iterate(Class, IterationCallback, String)
 	 */
 	@SuppressWarnings("javadoc")
-	protected <R>R iterate(IterationCallback<E, R> callback, SqlResource resource) {
+	protected <R> R iterate(IterationCallback<E, R> callback, SqlResource resource) {
 		Assert.notNull(resource);
 		try {
 			return sqlManager.iterate(entityClass, callback, resource);
@@ -890,7 +938,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 	 * @see SqlManager#iterate(Class, IterationCallback, String, Object)
 	 */
 	@SuppressWarnings("javadoc")
-	protected <R>R iterate(IterationCallback<E, R> callback, SqlResource resource, Object param) {
+	protected <R> R iterate(IterationCallback<E, R> callback, SqlResource resource, Object param) {
 		Assert.notNull(resource);
 		try {
 			return sqlManager.iterate(entityClass, callback, resource, param);
@@ -905,7 +953,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 	 */
 	@Deprecated
 	@SuppressWarnings("javadoc")
-	protected <R>R iterateBySql(IterationCallback<E, R> callback, String sql) {
+	protected <R> R iterateBySql(IterationCallback<E, R> callback, String sql) {
 		try {
 			return sqlManager.iterate(entityClass, callback, new StringSqlResource(sql));
 		} catch (SQLRuntimeException e) {
@@ -919,7 +967,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 	 */
 	@Deprecated
 	@SuppressWarnings("javadoc")
-	protected <R>R iterateBySql(IterationCallback<E, R> callback, String sql, Object... params) {
+	protected <R> R iterateBySql(IterationCallback<E, R> callback, String sql, Object... params) {
 		try {
 			return sqlManager.iterate(entityClass, callback, new StringSqlResource(sql), params);
 		} catch (SQLRuntimeException e) {
@@ -964,10 +1012,18 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 	}
 	
 	private void addChunkParam(Map<String, Object> params, Chunkable chunkable) {
-		params.put("after", chunkable == null ? null : chunkable.getAfterKey());
-		params.put("before", chunkable == null ? null : chunkable.getBeforeKey());
-		params.put("size", chunkable == null ? null : chunkable.getMaxPageSize());
-		if (chunkable != null && chunkable.getDirection() != null) {
+		if (chunkable == null) {
+			return;
+		}
+		if (chunkable.getPaginationRelation() == null || chunkable.getPaginationRelation() == PaginationRelation.NEXT) {
+			String key = encoder.extractLastKey(chunkable.getPaginationToken()).orElse(null);
+			params.put("after", key);
+		} else {
+			String key = encoder.extractFirstKey(chunkable.getPaginationToken()).orElse(null);
+			params.put("before", key);
+		}
+		params.put("size", chunkable.getMaxPageSize());
+		if (chunkable.getDirection() != null) {
 			params.put("direction", chunkable.getDirection().name());
 		}
 	}

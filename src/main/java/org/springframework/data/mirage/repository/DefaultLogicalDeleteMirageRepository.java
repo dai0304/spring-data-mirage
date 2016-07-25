@@ -82,7 +82,7 @@ public class DefaultLogicalDeleteMirageRepository<E extends Identifiable> extend
 	public void delete(Long id) {
 		if (id > 0) {
 			try {
-				executeUpdate(BASE_LOGICAL_DELETE, createParams(id));
+				executeUpdate(BASE_LOGICAL_DELETE, createParams(id, false));
 			} catch (SQLRuntimeException e) {
 				throw getExceptionTranslator().translate("delete", null, e.getCause());
 			}
@@ -102,7 +102,7 @@ public class DefaultLogicalDeleteMirageRepository<E extends Identifiable> extend
 	@Override
 	public boolean exists(Long id) {
 		try {
-			Map<String, Object> params = createParams(id);
+			Map<String, Object> params = createParams(id, false);
 			params.put("include_logical_deleted", true);
 			return getCount(getBaseSelectSqlResource(), params) > 0;
 		} catch (SQLRuntimeException e) {
@@ -128,7 +128,7 @@ public class DefaultLogicalDeleteMirageRepository<E extends Identifiable> extend
 	public E findOne(Long id) {
 		Assert.notNull(id, "id must not be null");
 		
-		Map<String, Object> params = createParams(id);
+		Map<String, Object> params = createParams(id, false);
 		params.put("include_logical_deleted", true);
 		try {
 			return getSingleResult(getBaseSelectSqlResource(), params);
@@ -139,7 +139,7 @@ public class DefaultLogicalDeleteMirageRepository<E extends Identifiable> extend
 	
 	@Override
 	public E findOneIncludeLogicalDeleted(Long id) {
-		Map<String, Object> params = createParams(id);
+		Map<String, Object> params = createParams(id, false);
 		params.remove("id");
 		params.put("absid", id);
 		params.put("include_logical_deleted", true);
@@ -202,7 +202,7 @@ public class DefaultLogicalDeleteMirageRepository<E extends Identifiable> extend
 	public void revert(Long id) {
 		if (id < 0) {
 			try {
-				executeUpdate(BASE_LOGICAL_DELETE, createParams(id));
+				executeUpdate(BASE_LOGICAL_DELETE, createParams(id, false));
 			} catch (SQLRuntimeException e) {
 				throw getExceptionTranslator().translate("revert", null, e.getCause());
 			}

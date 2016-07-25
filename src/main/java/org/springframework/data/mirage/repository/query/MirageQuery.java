@@ -30,12 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import jp.sf.amateras.mirage.SqlManager;
-import jp.sf.amateras.mirage.SqlResource;
-import jp.sf.amateras.mirage.StringSqlResource;
-import jp.xet.sparwings.spring.data.chunk.ChunkImpl;
-import jp.xet.sparwings.spring.data.chunk.Chunkable;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.annotation.Id;
@@ -50,6 +44,14 @@ import org.springframework.data.repository.query.Parameter;
 import org.springframework.data.repository.query.QueryMethod;
 import org.springframework.data.repository.query.RepositoryQuery;
 import org.springframework.util.Assert;
+
+import jp.sf.amateras.mirage.SqlManager;
+import jp.sf.amateras.mirage.SqlResource;
+import jp.sf.amateras.mirage.StringSqlResource;
+import jp.xet.sparwings.spring.data.chunk.ChunkImpl;
+import jp.xet.sparwings.spring.data.chunk.Chunkable;
+import jp.xet.sparwings.spring.data.chunk.PaginationTokenEncoder;
+import jp.xet.sparwings.spring.data.chunk.SimplePaginationTokenEncoder;
 
 /**
  * {@link RepositoryQuery} implementation for spring-data-mirage.
@@ -82,18 +84,6 @@ public class MirageQuery implements RepositoryQuery {
 			return sb.toString();
 		} catch (Exception e) {
 			return "<" + e + ">";
-		}
-	}
-	
-	private static void addChunkParam(Map<String, Object> params, Chunkable chunkable) {
-		if (chunkable == null) {
-			return;
-		}
-		params.put("after", chunkable.getAfterKey());
-		params.put("before", chunkable.getBeforeKey());
-		params.put("size", chunkable.getMaxPageSize());
-		if (chunkable.getDirection() != null) {
-			params.put("direction", chunkable.getDirection().name());
 		}
 	}
 	
@@ -162,6 +152,8 @@ public class MirageQuery implements RepositoryQuery {
 	
 	private final SqlManager sqlManager;
 	
+	private PaginationTokenEncoder encoder = new SimplePaginationTokenEncoder();
+	
 	
 	/**
 	 * インスタンスを生成する。
@@ -204,77 +196,23 @@ public class MirageQuery implements RepositoryQuery {
 			return sqlManager.getSingleResult(returnedDomainType, sqlResource, parameterMap);
 		}
 	}
-
-	private Object processPageQuery(SqlResource sqlResource, Map<String, Object> parameterMap,
-			Class<?> returnedDomainType, ChunkableParameterAccessor accessor) {
-		Pageable pageable = accessor.getPageable();
-		if (pageable != null) {
-			addPageParam(parameterMap, pageable);
-		} else if (accessor.getSort() != null) {
-			Sort sort = accessor.getSort();
-			addSortParam(parameterMap, sort);
-		}
-		
-		List<?> resultList = sqlManager.getResultList(returnedDomainType, sqlResource, parameterMap);
-		
-		if (List.class.isAssignableFrom(mirageQueryMethod.getReturnType())) {
-			return resultList;
-		}
-		
-		int totalCount = getTotalCount(sqlResource);
-		
-		PageImpl<?> page = new PageImpl<>(resultList, pageable, totalCount);
-		return page;
-	}
-
-	private Object processSliceQuery(SqlResource sqlResource, Map<String, Object> parameterMap,
-			Class<?> returnedDomainType, ChunkableParameterAccessor accessor) {
-		Pageable pageable = accessor.getPageable();
-		if (pageable != null) {
-			addPageParam(parameterMap, pageable);
-		} else if (accessor.getSort() != null) {
-			Sort sort = accessor.getSort();
-			addSortParam(parameterMap, sort);
-		}
-		
-		List<?> resultList = sqlManager.getResultList(returnedDomainType, sqlResource, parameterMap);
-		
-		if (List.class.isAssignableFrom(mirageQueryMethod.getReturnType())) {
-			return resultList;
-		}
-		
-		SliceImpl<?> page = new SliceImpl<>(resultList, pageable, true/*TODO*/);
-		return page;
-	}
-
-	private Object processChunkQuery(SqlResource sqlResource, Map<String, Object> parameterMap,
-			Class<?> returnedDomainType, ChunkableParameterAccessor accessor) {
-		Chunkable chunkable = accessor.getChunkable();
-		if (chunkable != null) {
-			addChunkParam(parameterMap, chunkable);
-		}
-		
-		List<?> resultList = sqlManager.getResultList(returnedDomainType, sqlResource, parameterMap);
-		
-		if (List.class.isAssignableFrom(mirageQueryMethod.getReturnType())) {
-			return resultList;
-		}
-		
-		String after = null;
-		String before = null;
-		if (resultList.isEmpty() == false) {
-			Object last = resultList.get(resultList.size() - 1);
-			after = Objects.toString(getId(last));
-			Object first = resultList.get(0);
-			before = Objects.toString(getId(first));
-		}
-		ChunkImpl<?> chunk = new ChunkImpl<>(resultList, after, before, chunkable);
-		return chunk;
-	}
 	
 	@Override
 	public QueryMethod getQueryMethod() {
 		return mirageQueryMethod;
+	}
+	
+	private void addChunkParam(Map<String, Object> params, Chunkable chunkable) {
+		if (chunkable == null) {
+			return;
+		}
+		
+		params.put("after", encoder.extractLastKey(chunkable.getPaginationToken()).orElse(null));
+		params.put("before", encoder.extractFirstKey(chunkable.getPaginationToken()).orElse(null));
+		params.put("size", chunkable.getMaxPageSize());
+		if (chunkable.getDirection() != null) {
+			params.put("direction", chunkable.getDirection().name());
+		}
 	}
 	
 	private Map<String, Object> createParameterMap(Object[] parameters) {
@@ -330,6 +268,9 @@ public class MirageQuery implements RepositoryQuery {
 	}
 	
 	private Object getId(Object entity) {
+		if (entity == null) {
+			return null;
+		}
 		Class<?> c = entity.getClass();
 		while (c != null && c != Object.class) {
 			Field[] declaredFields = c.getDeclaredFields();
@@ -369,6 +310,69 @@ public class MirageQuery implements RepositoryQuery {
 			}
 		}
 		return Integer.MAX_VALUE;
+	}
+	
+	private Object processChunkQuery(SqlResource sqlResource, Map<String, Object> parameterMap,
+			Class<?> returnedDomainType, ChunkableParameterAccessor accessor) {
+		Chunkable chunkable = accessor.getChunkable();
+		if (chunkable != null) {
+			addChunkParam(parameterMap, chunkable);
+		}
+		
+		List<?> resultList = sqlManager.getResultList(returnedDomainType, sqlResource, parameterMap);
+		
+		if (List.class.isAssignableFrom(mirageQueryMethod.getReturnType())) {
+			return resultList;
+		}
+		
+		String firstKey = Objects
+			.toString(getId((chunkable == null || chunkable.getPaginationToken() == null || resultList.isEmpty()) ? null
+					: resultList.get(0)));
+		String lastKey = Objects.toString(getId(resultList.isEmpty() ? null : resultList.get(resultList.size() - 1)));
+		String pt = encoder.encode(firstKey, lastKey);
+		return new ChunkImpl<>(resultList, pt, chunkable);
+	}
+	
+	private Object processPageQuery(SqlResource sqlResource, Map<String, Object> parameterMap,
+			Class<?> returnedDomainType, ChunkableParameterAccessor accessor) {
+		Pageable pageable = accessor.getPageable();
+		if (pageable != null) {
+			addPageParam(parameterMap, pageable);
+		} else if (accessor.getSort() != null) {
+			Sort sort = accessor.getSort();
+			addSortParam(parameterMap, sort);
+		}
+		
+		List<?> resultList = sqlManager.getResultList(returnedDomainType, sqlResource, parameterMap);
+		
+		if (List.class.isAssignableFrom(mirageQueryMethod.getReturnType())) {
+			return resultList;
+		}
+		
+		int totalCount = getTotalCount(sqlResource);
+		
+		PageImpl<?> page = new PageImpl<>(resultList, pageable, totalCount);
+		return page;
+	}
+	
+	private Object processSliceQuery(SqlResource sqlResource, Map<String, Object> parameterMap,
+			Class<?> returnedDomainType, ChunkableParameterAccessor accessor) {
+		Pageable pageable = accessor.getPageable();
+		if (pageable != null) {
+			addPageParam(parameterMap, pageable);
+		} else if (accessor.getSort() != null) {
+			Sort sort = accessor.getSort();
+			addSortParam(parameterMap, sort);
+		}
+		
+		List<?> resultList = sqlManager.getResultList(returnedDomainType, sqlResource, parameterMap);
+		
+		if (List.class.isAssignableFrom(mirageQueryMethod.getReturnType())) {
+			return resultList;
+		}
+		
+		SliceImpl<?> page = new SliceImpl<>(resultList, pageable, true/*TODO*/);
+		return page;
 	}
 	
 	private String toString(Reader input) throws IOException {

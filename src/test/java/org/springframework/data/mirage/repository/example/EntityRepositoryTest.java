@@ -25,10 +25,6 @@ import static org.junit.Assert.assertThat;
 import java.util.ArrayList;
 import java.util.List;
 
-import jp.xet.sparwings.spring.data.chunk.Chunk;
-import jp.xet.sparwings.spring.data.chunk.ChunkRequest;
-import jp.xet.sparwings.spring.data.chunk.Chunkable;
-
 import com.google.common.collect.Iterables;
 
 import org.junit.Test;
@@ -37,9 +33,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
+import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
+import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 import org.springframework.transaction.annotation.Transactional;
+
+import jp.xet.sparwings.spring.data.chunk.Chunk;
+import jp.xet.sparwings.spring.data.chunk.ChunkRequest;
+import jp.xet.sparwings.spring.data.chunk.Chunkable;
 
 /**
  * Test for {@link EntityRepository}.
@@ -50,6 +55,11 @@ import org.springframework.transaction.annotation.Transactional;
 @ContextConfiguration("classpath:/test-context.xml")
 @Transactional
 @SuppressWarnings("javadoc")
+@TestExecutionListeners(listeners = {
+	DependencyInjectionTestExecutionListener.class,
+	DirtiesContextTestExecutionListener.class,
+	TransactionalTestExecutionListener.class
+})
 public class EntityRepositoryTest {
 	
 	@Autowired
@@ -57,7 +67,8 @@ public class EntityRepositoryTest {
 	
 	
 	@Test
-	public void test() {
+	@Rollback
+	public void test_save_and_findOne() {
 		assertThat(repos, is(notNullValue()));
 		assertThat(repos.count(), is(0L));
 		Entity foo = repos.save(new Entity("foo"));
@@ -83,7 +94,39 @@ public class EntityRepositoryTest {
 	}
 	
 	@Test
-	public void testChunking1() {
+	@Rollback
+	public void testChunking_ASC_7items() {
+		assertThat(repos.count(), is(0L));
+		repos.save(new Entity("foo"));
+		repos.save(new Entity("bar"));
+		repos.save(new Entity("baz"));
+		repos.save(new Entity("qux"));
+		repos.save(new Entity("quux"));
+		repos.save(new Entity("courge"));
+		repos.save(new Entity("grault"));
+		
+		List<Entity> list = new ArrayList<Entity>();
+		
+		Chunkable req = new ChunkRequest(2);
+		Chunk<Entity> chunk = repos.findAll(req);
+		assertThat(chunk, is(notNullValue()));
+		assertThat(chunk.getContent(), hasSize(lessThanOrEqualTo(2)));
+		assertThat(chunk.getContent().toString(), is("[Entity[foo], Entity[bar]]"));
+		list.addAll(chunk.getContent());
+		
+		do {
+			req = chunk.nextChunkable();
+			chunk = repos.findAll(req);
+			assertThat(chunk, is(notNullValue()));
+			assertThat(chunk.getContent(), hasSize(lessThanOrEqualTo(2)));
+			list.addAll(chunk.getContent());
+		} while (chunk.hasNext());
+		assertThat(list, hasSize(7));
+	}
+	
+	@Test
+	@Rollback
+	public void testChunking_ASC_8items() {
 		assertThat(repos.count(), is(0L));
 		repos.save(new Entity("foo"));
 		repos.save(new Entity("bar"));
@@ -100,78 +143,22 @@ public class EntityRepositoryTest {
 		Chunk<Entity> chunk = repos.findAll(req);
 		assertThat(chunk, is(notNullValue()));
 		assertThat(chunk.getContent(), hasSize(lessThanOrEqualTo(2)));
+		assertThat(chunk.getContent().toString(), is("[Entity[foo], Entity[bar]]"));
 		list.addAll(chunk.getContent());
 		
 		do {
-			req = req.next(chunk.getLastKey());
+			req = chunk.nextChunkable();
 			chunk = repos.findAll(req);
 			assertThat(chunk, is(notNullValue()));
 			assertThat(chunk.getContent(), hasSize(lessThanOrEqualTo(2)));
 			list.addAll(chunk.getContent());
-		} while (chunk.getContent().isEmpty() == false);
+		} while (chunk.hasNext());
 		assertThat(list, hasSize(8));
 	}
 	
 	@Test
-	public void testChunking2() {
-		assertThat(repos.count(), is(0L));
-		repos.save(new Entity("foo"));
-		repos.save(new Entity("bar"));
-		repos.save(new Entity("baz"));
-		repos.save(new Entity("qux"));
-		repos.save(new Entity("quux"));
-		repos.save(new Entity("courge"));
-		repos.save(new Entity("grault"));
-		
-		List<Entity> list = new ArrayList<Entity>();
-		
-		Chunkable req = new ChunkRequest(2);
-		Chunk<Entity> chunk = repos.findAll(req);
-		assertThat(chunk, is(notNullValue()));
-		assertThat(chunk.getContent(), hasSize(lessThanOrEqualTo(2)));
-		list.addAll(chunk.getContent());
-		
-		do {
-			req = req.next(chunk.getLastKey());
-			chunk = repos.findAll(req);
-			assertThat(chunk, is(notNullValue()));
-			assertThat(chunk.getContent(), hasSize(lessThanOrEqualTo(2)));
-			list.addAll(chunk.getContent());
-		} while (chunk.getContent().isEmpty() == false);
-		assertThat(list, hasSize(7));
-	}
-	
-	@Test
-	public void testChunkingDirectionASC() {
-		assertThat(repos.count(), is(0L));
-		repos.save(new Entity("foo"));
-		repos.save(new Entity("bar"));
-		repos.save(new Entity("baz"));
-		repos.save(new Entity("qux"));
-		repos.save(new Entity("quux"));
-		repos.save(new Entity("courge"));
-		repos.save(new Entity("grault"));
-		
-		List<Entity> list = new ArrayList<Entity>();
-		
-		Chunkable req = new ChunkRequest(2, Direction.ASC);
-		Chunk<Entity> chunk = repos.findAll(req);
-		assertThat(chunk, is(notNullValue()));
-		assertThat(chunk.getContent(), hasSize(lessThanOrEqualTo(2)));
-		list.addAll(chunk.getContent());
-		
-		do {
-			req = req.next(chunk.getLastKey());
-			chunk = repos.findAll(req);
-			assertThat(chunk, is(notNullValue()));
-			assertThat(chunk.getContent(), hasSize(lessThanOrEqualTo(2)));
-			list.addAll(chunk.getContent());
-		} while (chunk.getContent().isEmpty() == false);
-		assertThat(list, hasSize(7));
-	}
-	
-	@Test
-	public void testChunkingDirectionDESC() {
+	@Rollback
+	public void testChunking_DESC() {
 		assertThat(repos.count(), is(0L));
 		repos.save(new Entity("foo"));
 		repos.save(new Entity("bar"));
@@ -187,19 +174,21 @@ public class EntityRepositoryTest {
 		Chunk<Entity> chunk = repos.findAll(req);
 		assertThat(chunk, is(notNullValue()));
 		assertThat(chunk.getContent(), hasSize(lessThanOrEqualTo(2)));
+		assertThat(chunk.getContent().toString(), is("[Entity[grault], Entity[courge]]"));
 		list.addAll(chunk.getContent());
 		
 		do {
-			req = req.next(chunk.getLastKey());
+			req = chunk.nextChunkable();
 			chunk = repos.findAll(req);
 			assertThat(chunk, is(notNullValue()));
 			assertThat(chunk.getContent(), hasSize(lessThanOrEqualTo(2)));
 			list.addAll(chunk.getContent());
-		} while (chunk.getContent().isEmpty() == false);
+		} while (chunk.hasNext());
 		assertThat(list, hasSize(7));
 	}
 	
 	@Test
+	@Rollback
 	public void testPaging() {
 		repos.save(new Entity("foo"));
 		repos.save(new Entity("bar"));
