@@ -18,7 +18,11 @@ package org.springframework.data.mirage.repository.example;
 
 import java.util.List;
 
-import org.springframework.data.mirage.repository.MirageRepository;
+import org.springframework.data.mirage.repository.ChunkableMirageRepository;
+import org.springframework.data.mirage.repository.PageableMirageRepository;
+import org.springframework.data.mirage.repository.SavableMirageRepository;
+import org.springframework.data.mirage.repository.ScannableMirageRepository;
+import org.springframework.data.mirage.repository.WritableMirageRepository;
 import org.springframework.data.mirage.repository.query.StaticParam;
 import org.springframework.data.repository.query.Param;
 
@@ -27,7 +31,9 @@ import org.springframework.data.repository.query.Param;
  * 
  * @author daisuke
  */
-public interface EntityRepository extends MirageRepository<Entity, Long> {
+public interface EntityRepository extends ScannableMirageRepository<Entity, Long>,
+		SavableMirageRepository<Entity, Long>, WritableMirageRepository<Entity, Long>,
+		ChunkableMirageRepository<Entity, Long>, PageableMirageRepository<Entity, Long> {
 	
 	/**
 	 * TODO for daisuke

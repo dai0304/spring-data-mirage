@@ -18,19 +18,28 @@ package org.springframework.data.mirage.repository;
 
 import java.io.Serializable;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.NoRepositoryBean;
 
 /**
- * TODO
+ * Repository interface to retrieve page of entities.
  * 
  * @param <E> the domain type the repository manages
  * @param <ID> the type of the id of the entity the repository manages
- * @since 0.1
- * @version $Id: MirageRepository.java 161 2011-10-21 10:08:21Z daisuke $
+ * @since #version#
  * @author daisuke
  */
-@Deprecated
 @NoRepositoryBean
-public interface MirageRepository<E, ID extends Serializable>extends ScannableMirageRepository<E, ID>,
-		BatchReadableMirageRepository<E, ID>, BatchWritableMirageRepository<E, ID> {
+public interface PageableMirageRepository<E, ID extends Serializable>extends ReadableMirageRepository<E, ID> {
+	
+	/**
+	 * Returns a {@link Page} of entities meeting the paging restriction provided in the {@code Pageable} object.
+	 * 
+	 * @param pageable paging information
+	 * @return a page of entities
+	 * @since #version#
+	 */
+	Page<E> findAll(Pageable pageable);
+	
 }

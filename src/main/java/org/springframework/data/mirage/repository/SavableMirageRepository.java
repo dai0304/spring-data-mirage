@@ -21,16 +21,22 @@ import java.io.Serializable;
 import org.springframework.data.repository.NoRepositoryBean;
 
 /**
- * TODO
+ * Repository interface to save (upsert) single entity.
  * 
  * @param <E> the domain type the repository manages
  * @param <ID> the type of the id of the entity the repository manages
- * @since 0.1
- * @version $Id: MirageRepository.java 161 2011-10-21 10:08:21Z daisuke $
+ * @since #version#
  * @author daisuke
  */
-@Deprecated
 @NoRepositoryBean
-public interface MirageRepository<E, ID extends Serializable>extends ScannableMirageRepository<E, ID>,
-		BatchReadableMirageRepository<E, ID>, BatchWritableMirageRepository<E, ID> {
+public interface SavableMirageRepository<E, ID extends Serializable>extends BaseMirageRepository<E, ID> {
+	
+	/**
+	 * Saves a given entity. Use the returned instance for further operations as the save operation might have changed the
+	 * entity instance completely.
+	 * 
+	 * @param entity entity to save
+	 * @return the saved entity
+	 */
+	<S extends E> S save(S entity);
 }

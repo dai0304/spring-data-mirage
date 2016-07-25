@@ -16,11 +16,9 @@
  */
 package org.springframework.data.mirage.repository;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
-import org.springframework.util.Assert;
+import lombok.Getter;
 
 /**
  * TODO for daisuke
@@ -32,68 +30,18 @@ import org.springframework.util.Assert;
 @SuppressWarnings("serial")
 public class NoSuchSqlResourceException extends RuntimeException {
 	
-	private static <T>T notNull(T target) {
-		Assert.notNull(target);
-		return target;
-	}
-	
-	
+	@Getter
 	private final SqlResourceCandidate[] candidates;
 	
 	
 	/**
 	 * インスタンスを生成する。
 	 * 
-	 * @param scope
-	 * @param names
-	 * @throws IllegalArgumentException 引数に{@code null}を与えた場合
-	 * @since 0.1
-	 */
-	@Deprecated
-	public NoSuchSqlResourceException(Class<?> scope, String[] names) {
-		super(String.format("%s:%s", notNull(scope).getName(), Arrays.toString(notNull(names))));
-		
-		List<SqlResourceCandidate> c = new ArrayList<SqlResourceCandidate>();
-		for (String name : names) {
-			c.add(new SqlResourceCandidate(scope, name));
-		}
-		candidates = c.toArray(new SqlResourceCandidate[c.size()]);
-	}
-	
-	/**
-	 * インスタンスを生成する。
-	 * 
-	 * @param candidates
+	 * @param candidates array of SQL resource candidate
 	 * @since 0.2.1
 	 */
 	public NoSuchSqlResourceException(SqlResourceCandidate[] candidates) {
 		super(Arrays.toString(candidates));
 		this.candidates = candidates;
-	}
-	
-	/**
-	 * TODO for daisuke
-	 *
-	 * @return the names
-	 * @since 0.1
-	 */
-	@Deprecated
-	public String[] getNames() {
-		String[] names = new String[candidates.length];
-		for (int i = 0; i < candidates.length; i++) {
-			names[i] = candidates[i].getName();
-		}
-		return names;
-	}
-	
-	/**
-	 * TODO for daisuke
-	 * 
-	 * @return the scope
-	 * @since 0.1
-	 */
-	@Deprecated
-	public Class<?> getScope() {
-		return candidates[0].getScope();
 	}
 }

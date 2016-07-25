@@ -21,16 +21,22 @@ import java.io.Serializable;
 import org.springframework.data.repository.NoRepositoryBean;
 
 /**
- * TODO
+ * Repository interface to retrieve multiple entities in batch.
  * 
  * @param <E> the domain type the repository manages
  * @param <ID> the type of the id of the entity the repository manages
- * @since 0.1
- * @version $Id: MirageRepository.java 161 2011-10-21 10:08:21Z daisuke $
+ * @since #version#
  * @author daisuke
  */
-@Deprecated
 @NoRepositoryBean
-public interface MirageRepository<E, ID extends Serializable>extends ScannableMirageRepository<E, ID>,
-		BatchReadableMirageRepository<E, ID>, BatchWritableMirageRepository<E, ID> {
+public interface BatchReadableMirageRepository<E, ID extends Serializable>extends ReadableMirageRepository<E, ID> {
+	
+	/**
+	 * Returns all instances of the type with the given IDs.
+	 * 
+	 * @param ids set of ID
+	 * @return set of entities
+	 */
+	Iterable<E> findAll(Iterable<ID> ids);
+	
 }

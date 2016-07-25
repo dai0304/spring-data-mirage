@@ -18,19 +18,32 @@ package org.springframework.data.mirage.repository;
 
 import java.io.Serializable;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.repository.NoRepositoryBean;
 
+import jp.xet.sparwings.spring.data.chunk.Chunk;
+import jp.xet.sparwings.spring.data.chunk.Chunkable;
+
 /**
- * TODO
+ * Repository interface to retrieve chunk of entities.
  * 
  * @param <E> the domain type the repository manages
  * @param <ID> the type of the id of the entity the repository manages
- * @since 0.1
- * @version $Id: MirageRepository.java 161 2011-10-21 10:08:21Z daisuke $
+ * @since #version#
  * @author daisuke
  */
-@Deprecated
 @NoRepositoryBean
-public interface MirageRepository<E, ID extends Serializable>extends ScannableMirageRepository<E, ID>,
-		BatchReadableMirageRepository<E, ID>, BatchWritableMirageRepository<E, ID> {
+public interface ChunkableMirageRepository<E, ID extends Serializable>extends ReadableMirageRepository<E, ID> {
+	
+	/**
+	 * Returns a {@link Chunk} of entities meeting the chunking restriction provided in the {@code Chunkable} object.
+	 * 
+	 * @param chunkable chunking information
+	 * @return a chunk of entities
+	 * @throws DataAccessException データアクセスエラーが発生した場合
+	 * @throws NullPointerException 引数に{@code null}を与えた場合
+	 * @since #version#
+	 */
+	Chunk<E> findAll(Chunkable chunkable);
+	
 }

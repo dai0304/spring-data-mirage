@@ -29,9 +29,8 @@ import java.util.Optional;
 
 import javax.sql.DataSource;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -49,7 +48,6 @@ import org.springframework.util.Assert;
 import jp.sf.amateras.mirage.IterationCallback;
 import jp.sf.amateras.mirage.SqlManager;
 import jp.sf.amateras.mirage.SqlResource;
-import jp.sf.amateras.mirage.StringSqlResource;
 import jp.sf.amateras.mirage.annotation.Column;
 import jp.sf.amateras.mirage.exception.SQLRuntimeException;
 import jp.sf.amateras.mirage.naming.NameConverter;
@@ -64,18 +62,17 @@ import jp.xet.sparwings.spring.data.chunk.SimplePaginationTokenEncoder;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Mirageフレームワークを利用した {@link MirageRepository} の実装クラス。
+ * Mirage SQLを利用した repository 実装クラス。
  * 
  * @param <E> the domain type the repository manages
  * @param <ID> the type of the id of the entity the repository manages
  * @since 0.1
- * @version $Id: SimpleMirageRepository.java 161 2011-10-21 10:08:21Z daisuke $
  * @author daisuke
  */
 @Slf4j
-public class DefaultMirageRepository<E, ID extends Serializable> implements MirageRepository<E, ID> {
-	
-	private static Logger logger = LoggerFactory.getLogger(DefaultMirageRepository.class);
+public class DefaultMirageRepository<E, ID extends Serializable> implements ScannableMirageRepository<E, ID>,
+		BatchReadableMirageRepository<E, ID>, BatchWritableMirageRepository<E, ID>, LockableCrudMirageRepository<E, ID>,
+		ChunkableMirageRepository<E, ID>, PageableMirageRepository<E, ID>, TruncatableMirageRepository<E, ID> {
 	
 	static final SqlResource BASE_SELECT_SQL =
 			new ScopeClasspathSqlResource(DefaultMirageRepository.class, "baseSelect.sql");
@@ -177,9 +174,9 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 		}
 		try {
 			sqlManager.insertEntity(entity);
-			logger.debug("entity inserted: {}", entity);
+			log.debug("entity inserted: {}", entity);
 		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("save", null, e.getCause());
+			throw getExceptionTranslator().translate("create", null, e.getCause());
 		}
 		return entity;
 	}
@@ -206,11 +203,12 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 				throw getExceptionTranslator().translate("delete", null, e.getCause());
 			}
 		} else {
-			logger.warn("entity id [{}] not found", id);
+			log.warn("entity id [{}] not found", id);
 		}
 	}
 	
 	@Override
+	@SuppressWarnings("unchecked")
 	public void delete(Iterable<? extends E> entities) {
 		if (entities == null) {
 			throw new NullPointerException("entities is null"); //$NON-NLS-1$
@@ -220,12 +218,11 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 				throw new NullPointerException("entity is null"); //$NON-NLS-1$
 			}
 		}
-		for (E entity : entities) {
-			try {
-				delete(entity);
-			} catch (SQLRuntimeException e) {
-				throw getExceptionTranslator().translate("delete", null, e.getCause());
-			}
+		
+		try {
+			sqlManager.deleteBatch(entities);
+		} catch (SQLRuntimeException e) {
+			throw getExceptionTranslator().translate("delete", null, e.getCause());
 		}
 	}
 	
@@ -235,16 +232,6 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 			delete(findAll());
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("deleteAll", null, e.getCause());
-		}
-	}
-	
-	@Override
-	@SuppressWarnings("unchecked")
-	public void deleteInBatch(Iterable<E> entities) {
-		try {
-			sqlManager.deleteBatch(entities);
-		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("deleteInBatch", null, e.getCause());
 		}
 	}
 	
@@ -386,7 +373,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 			while (iterator.hasNext()) {
 				E entity = iterator.next();
 				if (entity != null) {
-					if (exists(getId(entity))) {
+					if (exists(getId(entity), true)) {
 						toUpdate.add(entity);
 					} else {
 						toInsert.add(entity);
@@ -407,12 +394,12 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 			return null;
 		}
 		try {
-			if (exists(getId(entity))) {
+			if (exists(getId(entity), true)) {
 				sqlManager.updateEntity(entity);
-				logger.debug("entity updated: {}", entity);
+				log.debug("entity updated: {}", entity);
 			} else {
 				sqlManager.insertEntity(entity);
-				logger.debug("entity inserted: {}", entity);
+				log.debug("entity inserted: {}", entity);
 			}
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("save", null, e.getCause());
@@ -434,10 +421,14 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 			return null;
 		}
 		try {
-			sqlManager.updateEntity(entity);
-			logger.debug("entity updated: {}", entity);
+			int rowCount = sqlManager.updateEntity(entity);
+			if (rowCount == 1) {
+				log.debug("entity updated: {}", entity);
+			} else {
+				throw new IncorrectResultSizeDataAccessException(1, rowCount);
+			}
 		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("save", null, e.getCause());
+			throw getExceptionTranslator().translate("update", null, e.getCause());
 		}
 		return entity;
 	}
@@ -640,46 +631,6 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 	}
 	
 	/**
-	 * @see SqlManager#executeUpdateBySql(String)
-	 * @deprecated use {@link #executeUpdate(SqlResource)}
-	 */
-	@Deprecated
-	@SuppressWarnings("javadoc")
-	protected int executeUpdateBySql(String sql) {
-		try {
-			return sqlManager.executeUpdate(new StringSqlResource(sql));
-		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("executeUpdateBySql", sql, e.getCause());
-		}
-	}
-	
-	/**
-	 * @see SqlManager#executeUpdateBySql(String, Object...)
-	 * @deprecated use {@link #executeUpdate(SqlResource, Object)}
-	 */
-	@Deprecated
-	@SuppressWarnings("javadoc")
-	protected int executeUpdateBySql(String sql, Object... params) {
-		try {
-			return sqlManager.executeUpdate(new StringSqlResource(sql), params);
-		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("executeUpdateBySql", sql, e.getCause());
-		}
-	}
-	
-	/**
-	 * @see SqlManager#findEntity(Class, Object...)
-	 */
-	@SuppressWarnings("javadoc")
-	protected E findEntity(Object... id) {
-		try {
-			return sqlManager.findEntity(entityClass, id);
-		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("findEntity", null, e.getCause());
-		}
-	}
-	
-	/**
 	 * TODO for daisuke
 	 * 
 	 * @return
@@ -712,36 +663,6 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 			return sqlManager.getCount(resource, param);
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("getCount", null, e.getCause());
-		}
-	}
-	
-	/**
-	 * @see SqlManager#getCountBySql(String, Object...)
-	 * @deprecated use {@link #getCount(SqlResource)}
-	 */
-	@Deprecated
-	@SuppressWarnings("javadoc")
-	protected int getCountBySql(String sql) {
-		Assert.notNull(sql);
-		try {
-			return sqlManager.getCount(new StringSqlResource(sql));
-		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("getCountBySql", sql, e.getCause());
-		}
-	}
-	
-	/**
-	 * @see SqlManager#getCountBySql(String, Object...)
-	 * @deprecated use {@link #getCount(SqlResource, Object)}
-	 */
-	@Deprecated
-	@SuppressWarnings("javadoc")
-	protected int getCountBySql(String sql, Object... params) {
-		Assert.notNull(sql);
-		try {
-			return sqlManager.getCount(new StringSqlResource(sql), params);
-		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("getCountBySql", sql, e.getCause());
 		}
 	}
 	
@@ -800,34 +721,6 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 	}
 	
 	/**
-	 * @see SqlManager#getResultListBySql(Class, String)
-	 * @deprecated use {@link #getResultList(SqlResource)}
-	 */
-	@Deprecated
-	@SuppressWarnings("javadoc")
-	protected List<E> getResultListBySql(String sql) {
-		try {
-			return sqlManager.getResultList(entityClass, new StringSqlResource(sql));
-		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("getResultListBySql", sql, e.getCause());
-		}
-	}
-	
-	/**
-	 * @see SqlManager#getResultListBySql(Class, String, Object...)
-	 * @deprecated use {@link #getResultList(SqlResource, Object)}
-	 */
-	@Deprecated
-	@SuppressWarnings("javadoc")
-	protected List<E> getResultListBySql(String sql, Object... params) {
-		try {
-			return sqlManager.getResultList(entityClass, new StringSqlResource(sql), params);
-		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("getResultListBySql", sql, e.getCause());
-		}
-	}
-	
-	/**
 	 * @see SqlManager#getSingleResult(Class, String)
 	 */
 	@SuppressWarnings("javadoc")
@@ -850,34 +743,6 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 			return sqlManager.getSingleResult(entityClass, resource, param);
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("getSingleResult", null, e.getCause());
-		}
-	}
-	
-	/**
-	 * @see SqlManager#getSingleResultBySql(Class, String)
-	 * @deprecated use {@link #getSingleResult(SqlResource)}
-	 */
-	@Deprecated
-	@SuppressWarnings("javadoc")
-	protected E getSingleResultBySql(String sql) {
-		try {
-			return sqlManager.getSingleResult(entityClass, new StringSqlResource(sql));
-		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("getSingleResultBySql", sql, e.getCause());
-		}
-	}
-	
-	/**
-	 * @see SqlManager#getSingleResultBySql(Class, String, Object...)
-	 * @deprecated use {@link #getSingleResult(SqlResource, Object)}
-	 */
-	@Deprecated
-	@SuppressWarnings("javadoc")
-	protected E getSingleResultBySql(String sql, Object... params) {
-		try {
-			return sqlManager.getSingleResult(entityClass, new StringSqlResource(sql), params);
-		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("getSingleResultBySql", sql, e.getCause());
 		}
 	}
 	
@@ -950,34 +815,6 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 			return sqlManager.iterate(entityClass, callback, resource, param);
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("iterate", null, e.getCause());
-		}
-	}
-	
-	/**
-	 * @see SqlManager#iterateBySql(Class, IterationCallback, String)
-	 * @deprecated use {@link #iterate(IterationCallback, SqlResource)}
-	 */
-	@Deprecated
-	@SuppressWarnings("javadoc")
-	protected <R> R iterateBySql(IterationCallback<E, R> callback, String sql) {
-		try {
-			return sqlManager.iterate(entityClass, callback, new StringSqlResource(sql));
-		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("iterateBySql", sql, e.getCause());
-		}
-	}
-	
-	/**
-	 * @see SqlManager#iterateBySql(Class, IterationCallback, String, Object...)
-	 * @deprecated use {@link #iterate(IterationCallback, SqlResource, Object)}
-	 */
-	@Deprecated
-	@SuppressWarnings("javadoc")
-	protected <R> R iterateBySql(IterationCallback<E, R> callback, String sql, Object... params) {
-		try {
-			return sqlManager.iterate(entityClass, callback, new StringSqlResource(sql), params);
-		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("iterateBySql", sql, e.getCause());
 		}
 	}
 	

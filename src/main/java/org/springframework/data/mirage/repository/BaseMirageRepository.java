@@ -1,6 +1,6 @@
 /*
- * Copyright 2012 the original author or authors.
- * Created on 2014/08/07
+ * Copyright 2011 Daisuke Miyamoto.
+ * Created on 2011/10/20
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,19 @@
  */
 package org.springframework.data.mirage.repository;
 
-import lombok.Data;
+import java.io.Serializable;
+
+import org.springframework.data.repository.NoRepositoryBean;
+import org.springframework.data.repository.Repository;
 
 /**
- * TODO for daisuke
+ * Base repository interface for Spring Data Mirage.
  * 
- * @since 0.2.5
- * @version $Id$
+ * @param <E> the domain type the repository manages
+ * @param <ID> the type of the id of the entity the repository manages
+ * @since 0.1
  * @author daisuke
  */
-@Data
-public class SqlResourceCandidate {
-	
-	private final Class<?> scope;
-	
-	private final String name;
-	
+@NoRepositoryBean
+public interface BaseMirageRepository<E, ID extends Serializable>extends Repository<E, ID> {
 }

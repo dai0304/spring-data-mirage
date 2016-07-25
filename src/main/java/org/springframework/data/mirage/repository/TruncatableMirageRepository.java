@@ -1,6 +1,6 @@
 /*
- * Copyright 2012 the original author or authors.
- * Created on 2014/08/07
+ * Copyright 2011 Daisuke Miyamoto.
+ * Created on 2011/10/20
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,27 @@
  */
 package org.springframework.data.mirage.repository;
 
-import lombok.Data;
+import java.io.Serializable;
+
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.repository.NoRepositoryBean;
 
 /**
- * TODO for daisuke
+ * TODO
  * 
- * @since 0.2.5
- * @version $Id$
+ * @param <E> the domain type the repository manages
+ * @param <ID> the type of the id of the entity the repository manages
+ * @since #version#
  * @author daisuke
  */
-@Data
-public class SqlResourceCandidate {
+@NoRepositoryBean
+public interface TruncatableMirageRepository<E, ID extends Serializable>extends BaseMirageRepository<E, ID> {
 	
-	private final Class<?> scope;
-	
-	private final String name;
+	/**
+	 * Deletes all entities managed by the repository.
+	 * 
+	 * @throws DataAccessException データアクセスエラーが発生した場合
+	 */
+	void deleteAll();
 	
 }

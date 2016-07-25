@@ -96,3 +96,8 @@
 		
 	) sub ORDER BY /*$id_column_name*/id ASC
 /*END*/
+
+
+/*IF forUpdate != null && forUpdate == true*/
+FOR UPDATE
+/*END*/
