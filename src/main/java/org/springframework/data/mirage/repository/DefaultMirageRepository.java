@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import javax.sql.DataSource;
 
@@ -36,6 +37,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.repository.core.EntityInformation;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
@@ -59,6 +61,7 @@ import jp.xet.sparwings.spring.data.chunk.Chunkable;
 import jp.xet.sparwings.spring.data.chunk.Chunkable.PaginationRelation;
 import jp.xet.sparwings.spring.data.chunk.PaginationTokenEncoder;
 import jp.xet.sparwings.spring.data.chunk.SimplePaginationTokenEncoder;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Mirageフレームワークを利用した {@link MirageRepository} の実装クラス。
@@ -69,6 +72,7 @@ import jp.xet.sparwings.spring.data.chunk.SimplePaginationTokenEncoder;
  * @version $Id: SimpleMirageRepository.java 161 2011-10-21 10:08:21Z daisuke $
  * @author daisuke
  */
+@Slf4j
 public class DefaultMirageRepository<E, ID extends Serializable> implements MirageRepository<E, ID> {
 	
 	private static Logger logger = LoggerFactory.getLogger(DefaultMirageRepository.class);
@@ -275,7 +279,8 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 		}
 		
 		try {
-			List<E> resultList = getResultList(getBaseSelectSqlResource(), createParams(chunkable));
+			Map<String, Object> param = createParams(chunkable);
+			List<E> resultList = getResultList(getBaseSelectSqlResource(), param);
 			String pt = null;
 			if (resultList.isEmpty() == false) {
 				String firstKey = null;
@@ -521,7 +526,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 	/**
 	 * TODO for daisuke
 	 * 
-	 * @param pageable
+	 * @param chunkable
 	 * @return
 	 * @since 0.1
 	 */
@@ -535,6 +540,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 	 * TODO for daisuke
 	 * 
 	 * @param id
+	 * @param forUpdate
 	 * @return
 	 * @since 0.1
 	 */
@@ -1015,15 +1021,26 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 		if (chunkable == null) {
 			return;
 		}
-		if (chunkable.getPaginationRelation() == null || chunkable.getPaginationRelation() == PaginationRelation.NEXT) {
-			String key = encoder.extractLastKey(chunkable.getPaginationToken()).orElse(null);
-			params.put("after", key);
-		} else {
-			String key = encoder.extractFirstKey(chunkable.getPaginationToken()).orElse(null);
-			params.put("before", key);
+		boolean ascending = isAscending(chunkable);
+		boolean forward = isForward(chunkable);
+		log.debug("Chunk param for {} {}", ascending ? "ascending" : "descending", forward ? "forward" : "backword");
+		
+		if (chunkable.getPaginationToken() != null) {
+			String key;
+			
+			if (forward) {
+				key = encoder.extractLastKey(chunkable.getPaginationToken()).orElse(null);
+				params.put("after", key);
+				log.debug("Using last key as after: {}", key);
+			} else {
+				key = encoder.extractFirstKey(chunkable.getPaginationToken()).orElse(null);
+				params.put("before", key);
+				log.debug("Using first key as before: {}", key);
+			}
 		}
+		
 		params.put("size", chunkable.getMaxPageSize());
-		if (chunkable.getDirection() != null) {
+		if (ascending == false) {
 			params.put("direction", chunkable.getDirection().name());
 		}
 	}
@@ -1078,5 +1095,14 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Mira
 			c = c.getSuperclass();
 		}
 		return null;
+	}
+	
+	private boolean isAscending(Chunkable chunkable) {
+		return Optional.ofNullable(chunkable.getDirection()).orElse(Direction.ASC) == Direction.ASC;
+	}
+	
+	private boolean isForward(Chunkable chunkable) {
+		return Optional.ofNullable(chunkable.getPaginationRelation())
+			.orElse(PaginationRelation.NEXT) == PaginationRelation.NEXT;
 	}
 }

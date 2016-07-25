@@ -18,7 +18,7 @@ package org.springframework.data.mirage.repository.example;
 
 import java.util.List;
 
-import org.springframework.data.mirage.repository.LogicalDeleteMirageRepository;
+import org.springframework.data.mirage.repository.MirageRepository;
 import org.springframework.data.mirage.repository.query.StaticParam;
 import org.springframework.data.repository.query.Param;
 
@@ -27,7 +27,7 @@ import org.springframework.data.repository.query.Param;
  * 
  * @author daisuke
  */
-public interface EntityRepository extends LogicalDeleteMirageRepository<Entity> {
+public interface EntityRepository extends MirageRepository<Entity, Long> {
 	
 	/**
 	 * TODO for daisuke

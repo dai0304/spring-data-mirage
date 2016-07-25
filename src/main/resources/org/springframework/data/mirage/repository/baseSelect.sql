@@ -1,4 +1,5 @@
 /*IF after == null && before == null*/
+-- first
 	SELECT *
 	FROM /*$table*/some_table
 	
@@ -19,7 +20,7 @@
 	/*BEGIN*/
 	ORDER BY
 		/*IF orders == null*/
-		/*$id_column_name*/id ASC
+		/*$id_column_name*/id /*$direction*/ASC
 -- ELSE	/*$orders*/id
 		/*END*/
 	/*END*/
@@ -37,8 +38,8 @@
 /*END*/
 
 
-
 /*IF after != null && before == null && (direction == null || direction == 'ASC')*/
+-- ascending forward
 	SELECT *
 	FROM /*$table*/some_table
 	WHERE /*$id_column_name*/id > /*after*/1
@@ -50,13 +51,26 @@
 /*END*/
 
 
-
 /*IF after != null && before == null && direction == 'DESC'*/
+-- descending forward
+	SELECT *
+	FROM /*$table*/some_table
+	WHERE /*$id_column_name*/id < /*after*/1
+	ORDER BY /*$id_column_name*/id DESC
+	
+	/*IF size != null*/
+	LIMIT /*size*/10
+	/*END*/
+/*END*/
+
+
+/*IF after == null && before != null && direction == 'DESC'*/
+-- descending backword
 	SELECT * FROM (
 		
 		SELECT *
 		FROM /*$table*/some_table
-		WHERE /*$id_column_name*/id > /*after*/1
+		WHERE /*$id_column_name*/id > /*before*/1
 		ORDER BY /*$id_column_name*/id ASC
 		
 		/*IF size != null*/
@@ -67,26 +81,13 @@
 /*END*/
 
 
-
-/*IF after == null && before != null && direction == 'DESC'*/
-	SELECT *
-	FROM /*$table*/some_table
-	WHERE /*$id_column_name*/id > /*before*/1
-	ORDER BY /*$id_column_name*/id DESC
-	
-	/*IF size != null*/
-	LIMIT /*size*/10
-	/*END*/
-/*END*/
-
-
-
 /*IF after == null && before != null && (direction == null || direction == 'ASC')*/
+-- ascending backword
 	SELECT * FROM (
 		
 		SELECT *
 		FROM /*$table*/some_table
-		WHERE /*$id_column_name*/id > /*before*/1
+		WHERE /*$id_column_name*/id < /*before*/1
 		ORDER BY /*$id_column_name*/id DESC
 		
 		/*IF size != null*/

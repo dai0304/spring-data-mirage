@@ -45,12 +45,14 @@ import org.springframework.transaction.annotation.Transactional;
 import jp.xet.sparwings.spring.data.chunk.Chunk;
 import jp.xet.sparwings.spring.data.chunk.ChunkRequest;
 import jp.xet.sparwings.spring.data.chunk.Chunkable;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Test for {@link EntityRepository}.
  * 
  * @author daisuke
  */
+@Slf4j
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("classpath:/test-context.xml")
 @Transactional
@@ -95,38 +97,7 @@ public class EntityRepositoryTest {
 	
 	@Test
 	@Rollback
-	public void testChunking_ASC_7items() {
-		assertThat(repos.count(), is(0L));
-		repos.save(new Entity("foo"));
-		repos.save(new Entity("bar"));
-		repos.save(new Entity("baz"));
-		repos.save(new Entity("qux"));
-		repos.save(new Entity("quux"));
-		repos.save(new Entity("courge"));
-		repos.save(new Entity("grault"));
-		
-		List<Entity> list = new ArrayList<Entity>();
-		
-		Chunkable req = new ChunkRequest(2);
-		Chunk<Entity> chunk = repos.findAll(req);
-		assertThat(chunk, is(notNullValue()));
-		assertThat(chunk.getContent(), hasSize(lessThanOrEqualTo(2)));
-		assertThat(chunk.getContent().toString(), is("[Entity[foo], Entity[bar]]"));
-		list.addAll(chunk.getContent());
-		
-		do {
-			req = chunk.nextChunkable();
-			chunk = repos.findAll(req);
-			assertThat(chunk, is(notNullValue()));
-			assertThat(chunk.getContent(), hasSize(lessThanOrEqualTo(2)));
-			list.addAll(chunk.getContent());
-		} while (chunk.hasNext());
-		assertThat(list, hasSize(7));
-	}
-	
-	@Test
-	@Rollback
-	public void testChunking_ASC_8items() {
+	public void testChunking_8items_ASC() {
 		assertThat(repos.count(), is(0L));
 		repos.save(new Entity("foo"));
 		repos.save(new Entity("bar"));
@@ -142,7 +113,8 @@ public class EntityRepositoryTest {
 		Chunkable req = new ChunkRequest(2);
 		Chunk<Entity> chunk = repos.findAll(req);
 		assertThat(chunk, is(notNullValue()));
-		assertThat(chunk.getContent(), hasSize(lessThanOrEqualTo(2)));
+		log.info("{}", chunk.getContent());
+		assertThat(chunk.getContent(), hasSize(2));
 		assertThat(chunk.getContent().toString(), is("[Entity[foo], Entity[bar]]"));
 		list.addAll(chunk.getContent());
 		
@@ -150,10 +122,65 @@ public class EntityRepositoryTest {
 			req = chunk.nextChunkable();
 			chunk = repos.findAll(req);
 			assertThat(chunk, is(notNullValue()));
+			log.info("{}", chunk.getContent());
 			assertThat(chunk.getContent(), hasSize(lessThanOrEqualTo(2)));
 			list.addAll(chunk.getContent());
 		} while (chunk.hasNext());
 		assertThat(list, hasSize(8));
+	}
+	
+	@Test
+	@Rollback
+	public void testChunking_ASC() {
+		assertThat(repos.count(), is(0L));
+		repos.save(new Entity("foo"));
+		repos.save(new Entity("bar"));
+		repos.save(new Entity("baz"));
+		repos.save(new Entity("qux"));
+		repos.save(new Entity("quux"));
+		repos.save(new Entity("courge"));
+		repos.save(new Entity("grault"));
+		
+		List<Entity> list = new ArrayList<Entity>();
+		
+		log.info("==== 1st chunk");
+		Chunkable req = new ChunkRequest(2);
+		Chunk<Entity> chunk = repos.findAll(req);
+		assertThat(chunk, is(notNullValue()));
+		log.info("{}", chunk.getContent());
+		assertThat(chunk.getContent(), hasSize(2));
+		assertThat(chunk.getContent().toString(), is("[Entity[foo], Entity[bar]]"));
+		list.addAll(chunk.getContent());
+		
+		log.info("==== 2nd chunk");
+		req = chunk.nextChunkable();
+		chunk = repos.findAll(req);
+		assertThat(chunk, is(notNullValue()));
+		log.info("{}", chunk.getContent());
+		assertThat(chunk.getContent(), hasSize(2));
+		assertThat(chunk.getContent().toString(), is("[Entity[baz], Entity[qux]]"));
+		list.addAll(chunk.getContent());
+		
+		do {
+			log.info("==== following chunks");
+			req = chunk.nextChunkable();
+			chunk = repos.findAll(req);
+			assertThat(chunk, is(notNullValue()));
+			log.info("{}", chunk.getContent());
+			assertThat(chunk.getContent(), hasSize(lessThanOrEqualTo(2)));
+			list.addAll(chunk.getContent());
+		} while (chunk.hasNext());
+		assertThat(chunk.getContent(), hasSize(1));
+		assertThat(chunk.getContent().toString(), is("[Entity[grault]]"));
+		assertThat(list, hasSize(7));
+		
+		log.info("==== previous chunk");
+		req = chunk.prevChunkable();
+		chunk = repos.findAll(req);
+		assertThat(chunk, is(notNullValue()));
+		log.info("{}", chunk.getContent());
+		assertThat(chunk.getContent(), hasSize(2));
+		assertThat(chunk.getContent().toString(), is("[Entity[quux], Entity[courge]]"));
 	}
 	
 	@Test
@@ -170,21 +197,44 @@ public class EntityRepositoryTest {
 		
 		List<Entity> list = new ArrayList<Entity>();
 		
+		log.info("==== 1st chunk");
 		Chunkable req = new ChunkRequest(2, Direction.DESC);
 		Chunk<Entity> chunk = repos.findAll(req);
 		assertThat(chunk, is(notNullValue()));
-		assertThat(chunk.getContent(), hasSize(lessThanOrEqualTo(2)));
+		log.info("{}", chunk.getContent());
+		assertThat(chunk.getContent(), hasSize(2));
 		assertThat(chunk.getContent().toString(), is("[Entity[grault], Entity[courge]]"));
 		list.addAll(chunk.getContent());
 		
+		log.info("==== 2nd chunk");
+		req = chunk.nextChunkable();
+		chunk = repos.findAll(req);
+		assertThat(chunk, is(notNullValue()));
+		log.info("{}", chunk.getContent());
+		assertThat(chunk.getContent(), hasSize(2));
+		assertThat(chunk.getContent().toString(), is("[Entity[quux], Entity[qux]]"));
+		list.addAll(chunk.getContent());
+		
 		do {
+			log.info("==== following chunks");
 			req = chunk.nextChunkable();
 			chunk = repos.findAll(req);
 			assertThat(chunk, is(notNullValue()));
+			log.info("{}", chunk.getContent());
 			assertThat(chunk.getContent(), hasSize(lessThanOrEqualTo(2)));
 			list.addAll(chunk.getContent());
 		} while (chunk.hasNext());
+		assertThat(chunk.getContent(), hasSize(1));
+		assertThat(chunk.getContent().toString(), is("[Entity[foo]]"));
 		assertThat(list, hasSize(7));
+		
+		log.info("==== previous chunk");
+		req = chunk.prevChunkable();
+		chunk = repos.findAll(req);
+		assertThat(chunk, is(notNullValue()));
+		log.info("{}", chunk.getContent());
+		assertThat(chunk.getContent(), hasSize(2));
+		assertThat(chunk.getContent().toString(), is("[Entity[baz], Entity[bar]]"));
 	}
 	
 	@Test
