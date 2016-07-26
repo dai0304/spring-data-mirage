@@ -29,6 +29,8 @@ import java.util.Optional;
 
 import javax.sql.DataSource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.data.annotation.Id;
@@ -67,7 +69,6 @@ import jp.xet.sparwings.spring.data.repository.LockableCrudRepository;
 import jp.xet.sparwings.spring.data.repository.PageableRepository;
 import jp.xet.sparwings.spring.data.repository.ScannableRepository;
 import jp.xet.sparwings.spring.data.repository.TruncatableRepository;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * Mirage SQLを利用した repository 実装クラス。
@@ -77,11 +78,12 @@ import lombok.extern.slf4j.Slf4j;
  * @since 0.1
  * @author daisuke
  */
-@Slf4j
 public class DefaultMirageRepository<E, ID extends Serializable>
 		implements ScannableRepository<E, ID>, BatchReadableRepository<E, ID>, BatchWritableRepository<E, ID>,
 		LockableCrudRepository<E, ID>, ChunkableRepository<E, ID>, PageableRepository<E, ID>,
 		DeletableRepository<E, ID>, TruncatableRepository<E, ID> {
+	
+	private static Logger log = LoggerFactory.getLogger(DefaultMirageRepository.class);
 	
 	static final SqlResource BASE_SELECT_SQL =
 			new ScopeClasspathSqlResource(DefaultMirageRepository.class, "baseSelect.sql");

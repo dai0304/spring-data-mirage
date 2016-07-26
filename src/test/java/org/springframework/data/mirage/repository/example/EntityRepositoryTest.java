@@ -30,6 +30,8 @@ import com.google.common.collect.Iterables;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
@@ -48,14 +50,12 @@ import org.springframework.transaction.annotation.Transactional;
 import jp.xet.sparwings.spring.data.chunk.Chunk;
 import jp.xet.sparwings.spring.data.chunk.ChunkRequest;
 import jp.xet.sparwings.spring.data.chunk.Chunkable;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * Test for {@link EntityRepository}.
  * 
  * @author daisuke
  */
-@Slf4j
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("classpath:/test-context.xml")
 @Transactional
@@ -65,7 +65,10 @@ import lombok.extern.slf4j.Slf4j;
 	DirtiesContextTestExecutionListener.class,
 	TransactionalTestExecutionListener.class
 })
+
 public class EntityRepositoryTest {
+	
+	private static Logger log = LoggerFactory.getLogger(EntityRepositoryTest.class);
 	
 	@Autowired
 	EntityRepository repo;

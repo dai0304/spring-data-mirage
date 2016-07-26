@@ -21,10 +21,11 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
 import jp.sf.amateras.mirage.ClasspathSqlResource;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * TODO daisuke
@@ -33,8 +34,10 @@ import lombok.extern.slf4j.Slf4j;
  * @version $Id$
  * @author daisuke
  */
-@Slf4j
 public class ScopeClasspathSqlResource extends ClasspathSqlResource {
+	
+	private static Logger log = LoggerFactory.getLogger(ScopeClasspathSqlResource.class);
+	
 	
 	private static boolean existsResource(String absolutePath) {
 		if (absolutePath == null) {

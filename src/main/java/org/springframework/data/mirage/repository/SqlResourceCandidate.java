@@ -16,8 +16,6 @@
  */
 package org.springframework.data.mirage.repository;
 
-import lombok.Data;
-
 /**
  * TODO for daisuke
  * 
@@ -25,11 +23,75 @@ import lombok.Data;
  * @version $Id$
  * @author daisuke
  */
-@Data
 public class SqlResourceCandidate {
 	
 	private final Class<?> scope;
 	
 	private final String name;
+	
+	
+	/**
+	 * インスタンスを生成する。
+	 * 
+	 * @param scope
+	 * @param name
+	 */
+	public SqlResourceCandidate(Class<?> scope, String name) {
+		this.scope = scope;
+		this.name = name;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		SqlResourceCandidate other = (SqlResourceCandidate) obj;
+		if (name == null) {
+			if (other.name != null) {
+				return false;
+			}
+		} else if (!name.equals(other.name)) {
+			return false;
+		}
+		if (scope == null) {
+			if (other.scope != null) {
+				return false;
+			}
+		} else if (!scope.equals(other.scope)) {
+			return false;
+		}
+		return true;
+	}
+	
+	public String getName() {
+		return name;
+	}
+	
+	public Class<?> getScope() {
+		return scope;
+	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((scope == null) ? 0 : scope.hashCode());
+		return result;
+	}
+	
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("SqlResourceCandidate [scope=").append(scope).append(", name=").append(name).append("]");
+		return builder.toString();
+	}
 	
 }

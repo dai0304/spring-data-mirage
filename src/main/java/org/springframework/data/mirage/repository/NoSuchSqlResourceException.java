@@ -18,8 +18,6 @@ package org.springframework.data.mirage.repository;
 
 import java.util.Arrays;
 
-import lombok.Getter;
-
 /**
  * TODO for daisuke
  * 
@@ -30,7 +28,6 @@ import lombok.Getter;
 @SuppressWarnings("serial")
 public class NoSuchSqlResourceException extends RuntimeException {
 	
-	@Getter
 	private final SqlResourceCandidate[] candidates;
 	
 	
@@ -43,5 +40,9 @@ public class NoSuchSqlResourceException extends RuntimeException {
 	public NoSuchSqlResourceException(SqlResourceCandidate[] candidates) {
 		super(Arrays.toString(candidates));
 		this.candidates = candidates;
+	}
+	
+	public SqlResourceCandidate[] getCandidates() {
+		return candidates;
 	}
 }
