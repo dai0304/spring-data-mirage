@@ -18,26 +18,26 @@ package org.springframework.data.mirage.repository.support;
 
 import java.io.Serializable;
 
-import jp.sf.amateras.mirage.SqlManager;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mirage.repository.BaseMirageRepository;
+import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.core.support.RepositoryFactorySupport;
 import org.springframework.data.repository.core.support.TransactionalRepositoryFactoryBeanSupport;
 import org.springframework.util.Assert;
 
+import jp.sf.amateras.mirage.SqlManager;
+
 /**
  * TODO for daisuke
  * 
- * @param <T> 
- * @param <S> 
- * @param <ID> 
+ * @param <T>
+ * @param <S>
+ * @param <ID>
  * @since 0.1
  * @version $Id$
  * @author daisuke
  */
-public class MirageRepositoryFactoryBean<T extends BaseMirageRepository<S, ID>, S, ID extends Serializable> extends
-		TransactionalRepositoryFactoryBeanSupport<T, S, ID> {
+public class MirageRepositoryFactoryBean<T extends Repository<S, ID>, S, ID extends Serializable>
+		extends TransactionalRepositoryFactoryBeanSupport<T, S, ID> {
 	
 	private SqlManager sqlManager;
 	

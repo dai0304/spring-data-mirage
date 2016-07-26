@@ -59,6 +59,14 @@ import jp.xet.sparwings.spring.data.chunk.Chunkable;
 import jp.xet.sparwings.spring.data.chunk.Chunkable.PaginationRelation;
 import jp.xet.sparwings.spring.data.chunk.PaginationTokenEncoder;
 import jp.xet.sparwings.spring.data.chunk.SimplePaginationTokenEncoder;
+import jp.xet.sparwings.spring.data.repository.BatchReadableRepository;
+import jp.xet.sparwings.spring.data.repository.BatchWritableRepository;
+import jp.xet.sparwings.spring.data.repository.ChunkableRepository;
+import jp.xet.sparwings.spring.data.repository.DeletableRepository;
+import jp.xet.sparwings.spring.data.repository.LockableCrudRepository;
+import jp.xet.sparwings.spring.data.repository.PageableRepository;
+import jp.xet.sparwings.spring.data.repository.ScannableRepository;
+import jp.xet.sparwings.spring.data.repository.TruncatableRepository;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -70,9 +78,10 @@ import lombok.extern.slf4j.Slf4j;
  * @author daisuke
  */
 @Slf4j
-public class DefaultMirageRepository<E, ID extends Serializable> implements ScannableMirageRepository<E, ID>,
-		BatchReadableMirageRepository<E, ID>, BatchWritableMirageRepository<E, ID>, LockableCrudMirageRepository<E, ID>,
-		ChunkableMirageRepository<E, ID>, PageableMirageRepository<E, ID>, TruncatableMirageRepository<E, ID> {
+public class DefaultMirageRepository<E, ID extends Serializable>
+		implements ScannableRepository<E, ID>, BatchReadableRepository<E, ID>, BatchWritableRepository<E, ID>,
+		LockableCrudRepository<E, ID>, ChunkableRepository<E, ID>, PageableRepository<E, ID>,
+		DeletableRepository<E, ID>, TruncatableRepository<E, ID> {
 	
 	static final SqlResource BASE_SELECT_SQL =
 			new ScopeClasspathSqlResource(DefaultMirageRepository.class, "baseSelect.sql");

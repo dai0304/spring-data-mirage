@@ -20,6 +20,10 @@ import java.io.Serializable;
 
 import org.springframework.data.repository.NoRepositoryBean;
 
+import jp.xet.sparwings.spring.data.repository.BatchReadableRepository;
+import jp.xet.sparwings.spring.data.repository.BatchWritableRepository;
+import jp.xet.sparwings.spring.data.repository.ScannableRepository;
+
 /**
  * TODO
  * 
@@ -31,6 +35,6 @@ import org.springframework.data.repository.NoRepositoryBean;
  */
 @Deprecated
 @NoRepositoryBean
-public interface MirageRepository<E, ID extends Serializable>extends ScannableMirageRepository<E, ID>,
-		BatchReadableMirageRepository<E, ID>, BatchWritableMirageRepository<E, ID> {
+public interface MirageRepository<E, ID extends Serializable>
+		extends ScannableRepository<E, ID>, BatchReadableRepository<E, ID>, BatchWritableRepository<E, ID> {
 }

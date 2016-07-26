@@ -16,15 +16,15 @@
  */
 package org.springframework.data.mirage.repository.example;
 
-import org.springframework.data.mirage.repository.BatchReadableMirageRepository;
-import org.springframework.data.mirage.repository.SavableMirageRepository;
-import org.springframework.data.mirage.repository.ScannableMirageRepository;
+import jp.xet.sparwings.spring.data.repository.BatchReadableRepository;
+import jp.xet.sparwings.spring.data.repository.ScannableRepository;
+import jp.xet.sparwings.spring.data.repository.UpsertableRepository;
 
 /**
  * Repository interface for {@link Entity}.
  * 
  * @author daisuke
  */
-public interface UserRepository extends ScannableMirageRepository<User, String>, SavableMirageRepository<User, String>,
-		BatchReadableMirageRepository<User, String> {
+public interface UserRepository extends ScannableRepository<User, String>, UpsertableRepository<User, String>,
+		BatchReadableRepository<User, String> {
 }
