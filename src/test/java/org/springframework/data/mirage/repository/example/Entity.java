@@ -18,13 +18,13 @@ package org.springframework.data.mirage.repository.example;
 
 import java.io.Serializable;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mirage.repository.Identifiable;
+
 import jp.sf.amateras.mirage.annotation.Column;
 import jp.sf.amateras.mirage.annotation.PrimaryKey;
 import jp.sf.amateras.mirage.annotation.PrimaryKey.GenerationType;
 import jp.sf.amateras.mirage.annotation.Table;
-
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mirage.repository.Identifiable;
 
 /**
  * Sample entity class.
@@ -97,7 +97,7 @@ public class Entity implements Identifiable, Serializable {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("Entity [id=").append(id).append(", str=").append(str).append("]");
+		builder.append("Entity[").append(str).append("]");
 		return builder.toString();
 	}
 	

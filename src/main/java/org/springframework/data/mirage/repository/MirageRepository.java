@@ -17,15 +17,12 @@
 package org.springframework.data.mirage.repository;
 
 import java.io.Serializable;
-import java.util.List;
 
-import jp.xet.sparwings.spring.data.chunk.Chunk;
-import jp.xet.sparwings.spring.data.chunk.Chunkable;
-
-import org.springframework.dao.DataAccessException;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.NoRepositoryBean;
-import org.springframework.data.repository.PagingAndSortingRepository;
+
+import jp.xet.sparwings.spring.data.repository.BatchReadableRepository;
+import jp.xet.sparwings.spring.data.repository.BatchWritableRepository;
+import jp.xet.sparwings.spring.data.repository.ScannableRepository;
 
 /**
  * TODO
@@ -36,110 +33,8 @@ import org.springframework.data.repository.PagingAndSortingRepository;
  * @version $Id: MirageRepository.java 161 2011-10-21 10:08:21Z daisuke $
  * @author daisuke
  */
+@Deprecated
 @NoRepositoryBean
-public interface MirageRepository<E, ID extends Serializable> extends PagingAndSortingRepository<E, ID> {
-	
-	/**
-	 * TODO for daisuke
-	 * 
-	 * @param chunkable
-	 * @return
-	 * @throws DataAccessException データアクセスエラーが発生した場合
-	 * @throws NullPointerException 引数に{@code null}を与えた場合
-	 * @since 0.4.0.RELEASE
-	 */
-	Chunk<E> findAll(Chunkable chunkable);
-	
-	/**
-	 * {@inheritDoc}
-	 * 
-	 * @throws DataAccessException データアクセスエラーが発生した場合
-	 * @throws NullPointerException 引数に{@code null}を与えた場合
-	 * @since 0.1
-	 */
-	@Override
-	void delete(E entity);
-	
-	/**
-	 * {@inheritDoc}
-	 * 
-	 * @throws DataAccessException データアクセスエラーが発生した場合
-	 * @since 0.1
-	 */
-	@Override
-	void delete(ID id);
-	
-	/**
-	 * {@inheritDoc}
-	 * 
-	 * @throws DataAccessException データアクセスエラーが発生した場合
-	 * @throws IllegalArgumentException 引数に{@code null}を与えた場合
-	 * @since 0.1
-	 */
-	@Override
-	void delete(Iterable<? extends E> entities);
-	
-	/**
-	 * {@inheritDoc}
-	 * 
-	 * @throws DataAccessException データアクセスエラーが発生した場合
-	 * @since 0.1
-	 */
-	@Override
-	void deleteAll();
-	
-	/**
-	 * エンティティのバッチ削除を行う。
-	 * 
-	 * @param entities 削除するエンティティ
-	 * @throws DataAccessException データアクセスエラーが発生した場合
-	 * @since 0.1
-	 */
-	void deleteInBatch(Iterable<E> entities);
-	
-	/**
-	 * {@inheritDoc}
-	 * 
-	 * @throws DataAccessException データアクセスエラーが発生した場合
-	 */
-	@Override
-	Iterable<E> findAll();
-	
-	/**
-	 * {@inheritDoc}
-	 * 
-	 * @throws DataAccessException データアクセスエラーが発生した場合
-	 */
-	@Override
-	List<E> findAll(Sort sort);
-	
-	/**
-	 * 指定したエンティティの識別子(ID)を返す。
-	 * 
-	 * @param entity エンティティ
-	 * @return ID
-	 * @throws DataAccessException データアクセスエラーが発生した場合
-	 * @since 0.1
-	 */
-	ID getId(E entity);
-	
-	/**
-	 * {@inheritDoc}
-	 * 
-	 * @throws DataAccessException データアクセスエラーが発生した場合
-	 * @since 0.1
-	 */
-	@Override
-	<S extends E>Iterable<S> save(Iterable<S> entities);
-	
-	/**
-	 * {@inheritDoc}
-	 * 
-	 * <p>{@code entity}として{@code null}を渡した場合、何もせずに{@code null}を返す。</p>
-	 * 
-	 * @throws DataAccessException データアクセスエラーが発生した場合
-	 * @since 0.1
-	 */
-	@Override
-	<S extends E>S save(S entity);
+public interface MirageRepository<E, ID extends Serializable>
+		extends ScannableRepository<E, ID>, BatchReadableRepository<E, ID>, BatchWritableRepository<E, ID> {
 }

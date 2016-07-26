@@ -21,11 +21,10 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import jp.sf.amateras.mirage.ClasspathSqlResource;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
+
+import jp.sf.amateras.mirage.ClasspathSqlResource;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * TODO daisuke
@@ -34,10 +33,8 @@ import org.springframework.util.Assert;
  * @version $Id$
  * @author daisuke
  */
+@Slf4j
 public class ScopeClasspathSqlResource extends ClasspathSqlResource {
-	
-	private static Logger logger = LoggerFactory.getLogger(ScopeClasspathSqlResource.class);
-	
 	
 	private static boolean existsResource(String absolutePath) {
 		if (absolutePath == null) {
@@ -60,30 +57,6 @@ public class ScopeClasspathSqlResource extends ClasspathSqlResource {
 		return sb.toString();
 	}
 	
-	@Deprecated
-	private static String toAbsolutePath(Class<?> scope, String[] names) {
-		Assert.notNull(scope);
-		Assert.notNull(names);
-		Assert.noNullElements(names);
-		String packageName = scope != null ? scope.getPackage().getName() : "";
-		
-		String targetName = null;
-		for (String name : names) {
-			String currentPath = toAbsolutePath(packageName, name);
-			if (existsResource(currentPath)) {
-				targetName = name;
-				break;
-			} else {
-				logger.trace("{} not exists", currentPath);
-			}
-		}
-		if (targetName != null) {
-			return toAbsolutePath(packageName, targetName);
-		} else {
-			throw new NoSuchSqlResourceException(scope, names);
-		}
-	}
-	
 	private static String toAbsolutePath(SqlResourceCandidate[] candidates) {
 		Assert.noNullElements(candidates);
 		
@@ -95,7 +68,7 @@ public class ScopeClasspathSqlResource extends ClasspathSqlResource {
 			if (existsResource(currentPath)) {
 				return toAbsolutePath(packageName, name);
 			} else {
-				logger.trace("{} not exists", currentPath);
+				log.trace("{} not exists", currentPath);
 			}
 		}
 		throw new NoSuchSqlResourceException(candidates);
@@ -136,7 +109,7 @@ public class ScopeClasspathSqlResource extends ClasspathSqlResource {
 	/**
 	 * インスタンスを生成する。
 	 * 
-	 * @param scope 
+	 * @param scope
 	 * @param name
 	 * @throws NoSuchSqlResourceException 指定したリソースが見つからない場合
 	 * @throws IllegalArgumentException 引数に{@code null}を与えた場合
@@ -144,20 +117,6 @@ public class ScopeClasspathSqlResource extends ClasspathSqlResource {
 	 */
 	public ScopeClasspathSqlResource(Class<?> scope, String name) {
 		this(new SqlResourceCandidate(scope, name));
-	}
-	
-	/**
-	 * インスタンスを生成する。
-	 * 
-	 * @param scope 
-	 * @param names
-	 * @throws NoSuchSqlResourceException 指定したリソースが見つからない場合
-	 * @throws IllegalArgumentException 引数に{@code null}を与えた場合
-	 * @since 0.1
-	 */
-	@Deprecated
-	public ScopeClasspathSqlResource(Class<?> scope, String[] names) {
-		super(toAbsolutePath(scope, names));
 	}
 	
 	/**

@@ -18,16 +18,22 @@ package org.springframework.data.mirage.repository.example;
 
 import java.util.List;
 
-import org.springframework.data.mirage.repository.LogicalDeleteMirageRepository;
 import org.springframework.data.mirage.repository.query.StaticParam;
 import org.springframework.data.repository.query.Param;
+
+import jp.xet.sparwings.spring.data.repository.ChunkableRepository;
+import jp.xet.sparwings.spring.data.repository.PageableRepository;
+import jp.xet.sparwings.spring.data.repository.ScannableRepository;
+import jp.xet.sparwings.spring.data.repository.UpsertableRepository;
+import jp.xet.sparwings.spring.data.repository.WritableRepository;
 
 /**
  * Repository interface for {@link Entity}.
  * 
  * @author daisuke
  */
-public interface EntityRepository extends LogicalDeleteMirageRepository<Entity> {
+public interface EntityRepository extends ScannableRepository<Entity, Long>, UpsertableRepository<Entity, Long>,
+		WritableRepository<Entity, Long>, ChunkableRepository<Entity, Long>, PageableRepository<Entity, Long> {
 	
 	/**
 	 * TODO for daisuke

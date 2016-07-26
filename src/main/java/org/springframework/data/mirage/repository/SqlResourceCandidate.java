@@ -16,6 +16,8 @@
  */
 package org.springframework.data.mirage.repository;
 
+import lombok.Data;
+
 /**
  * TODO for daisuke
  * 
@@ -23,48 +25,11 @@ package org.springframework.data.mirage.repository;
  * @version $Id$
  * @author daisuke
  */
+@Data
 public class SqlResourceCandidate {
 	
 	private final Class<?> scope;
 	
 	private final String name;
 	
-	
-	/**
-	 * インスタンスを生成する。
-	 * 
-	 * @param scope
-	 * @param name
-	 * @since 0.2.5
-	 */
-	public SqlResourceCandidate(Class<?> scope, String name) {
-		super();
-		this.scope = scope;
-		this.name = name;
-	}
-	
-	/**
-	 * TODO for daisuke
-	 * 
-	 * @return
-	 * @since 0.2.5
-	 */
-	public String getName() {
-		return name;
-	}
-	
-	/**
-	 * TODO for daisuke
-	 * 
-	 * @return
-	 * @since 0.2.5
-	 */
-	public Class<?> getScope() {
-		return scope;
-	}
-	
-	@Override
-	public String toString() {
-		return "SqlResourceCandidate [scope=" + scope + ", name=" + name + "]";
-	}
 }
