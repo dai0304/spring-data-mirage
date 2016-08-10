@@ -20,9 +20,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import jp.xet.sparwings.spring.data.chunk.Chunk;
-
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.data.projection.ProjectionFactory;
 import org.springframework.data.repository.core.RepositoryMetadata;
 import org.springframework.data.repository.query.Parameters;
 import org.springframework.data.repository.query.QueryMethod;
@@ -30,6 +29,8 @@ import org.springframework.data.repository.util.QueryExecutionConverters;
 import org.springframework.data.util.ClassTypeInformation;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+
+import jp.xet.sparwings.spring.data.chunk.Chunk;
 
 /**
  * TODO for daisuke
@@ -64,8 +65,8 @@ public class MirageQueryMethod extends QueryMethod {
 	 * @param metadata
 	 * @since 0.1
 	 */
-	public MirageQueryMethod(Method method, RepositoryMetadata metadata) {
-		super(method, metadata);
+	public MirageQueryMethod(Method method, RepositoryMetadata metadata, ProjectionFactory factory) {
+		super(method, metadata, factory);
 		this.method = method;
 		this.metadata = metadata;
 		unwrappedReturnType = potentiallyUnwrapReturnTypeFor(method);
