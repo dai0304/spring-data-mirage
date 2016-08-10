@@ -18,12 +18,13 @@ package org.springframework.data.mirage.repository.query;
 
 import java.lang.reflect.Method;
 
-import jp.sf.amateras.mirage.SqlManager;
-
+import org.springframework.data.projection.ProjectionFactory;
 import org.springframework.data.repository.core.NamedQueries;
 import org.springframework.data.repository.core.RepositoryMetadata;
 import org.springframework.data.repository.query.QueryLookupStrategy;
 import org.springframework.data.repository.query.RepositoryQuery;
+
+import jp.sf.amateras.mirage.SqlManager;
 
 /**
  * Query lookup strategy to execute finders.
@@ -71,8 +72,9 @@ public abstract class MirageQueryLookupStrategy implements QueryLookupStrategy {
 	}
 	
 	@Override
-	public final RepositoryQuery resolveQuery(Method method, RepositoryMetadata metadata, NamedQueries namedQueries) {
-		return resolveQuery(new MirageQueryMethod(method, metadata), sqlManager, namedQueries);
+	public RepositoryQuery resolveQuery(Method method, RepositoryMetadata metadata, ProjectionFactory factory,
+			NamedQueries namedQueries) {
+		return resolveQuery(new MirageQueryMethod(method, metadata, factory), sqlManager, namedQueries);
 	}
 	
 	/**
@@ -103,6 +105,16 @@ public abstract class MirageQueryLookupStrategy implements QueryLookupStrategy {
 			super(sqlManager);
 			strategy = new DeclaredQueryLookupStrategy(sqlManager);
 			createStrategy = new CreateQueryLookupStrategy(sqlManager);
+		}
+		
+		@Override
+		public RepositoryQuery resolveQuery(Method method, RepositoryMetadata metadata, ProjectionFactory factory,
+				NamedQueries namedQueries) {
+			try {
+				return strategy.resolveQuery(method, metadata, factory, namedQueries);
+			} catch (IllegalStateException e) {
+				return createStrategy.resolveQuery(method, metadata, factory, namedQueries);
+			}
 		}
 		
 		@Override

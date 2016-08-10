@@ -18,12 +18,11 @@ package org.springframework.data.mirage.repository.config;
 
 import java.lang.annotation.Annotation;
 
-import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.data.repository.config.RepositoryBeanDefinitionRegistrarSupport;
 import org.springframework.data.repository.config.RepositoryConfigurationExtension;
 
 /**
- * {@link ImportBeanDefinitionRegistrar} to enable {@link EnableMirageRepositories} annotation.
+ * ImportBeanDefinitionRegistrar to enable {@link EnableMirageRepositories} annotation.
  * 
  * @since 0.2.0
  * @version $Id$
