@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.springframework.data</groupId>
   <artifactId>spring-data-mirage</artifactId>
-  <version>0.7.0.RELEASE</version>
+  <version>0.8.0.BUILD-SNAPSHOT</version>
   <name>Spring Data Mirage</name>
   <description>Spring Data module to provide sophisticated support for Mirage repositories</description>
   <inceptionYear>2012</inceptionYear>
