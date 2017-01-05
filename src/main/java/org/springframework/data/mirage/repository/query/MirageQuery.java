@@ -29,6 +29,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +38,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.mirage.repository.ScopeClasspathSqlResource;
 import org.springframework.data.mirage.repository.SqlResourceCandidate;
@@ -50,6 +52,7 @@ import jp.sf.amateras.mirage.SqlResource;
 import jp.sf.amateras.mirage.StringSqlResource;
 import jp.xet.sparwings.spring.data.chunk.ChunkImpl;
 import jp.xet.sparwings.spring.data.chunk.Chunkable;
+import jp.xet.sparwings.spring.data.chunk.Chunkable.PaginationRelation;
 import jp.xet.sparwings.spring.data.chunk.PaginationTokenEncoder;
 import jp.xet.sparwings.spring.data.chunk.SimplePaginationTokenEncoder;
 
@@ -62,7 +65,7 @@ import jp.xet.sparwings.spring.data.chunk.SimplePaginationTokenEncoder;
  */
 public class MirageQuery implements RepositoryQuery {
 	
-	private static Logger logger = LoggerFactory.getLogger(MirageQuery.class);
+	private static Logger log = LoggerFactory.getLogger(MirageQuery.class);
 	
 	private static final Charset UTF_8 = Charset.forName("UTF-8");
 	
@@ -206,11 +209,26 @@ public class MirageQuery implements RepositoryQuery {
 		if (chunkable == null) {
 			return;
 		}
+		boolean ascending = isAscending(chunkable);
+		boolean forward = isForward(chunkable);
+		log.debug("Chunk param for {} {}", ascending ? "ascending" : "descending", forward ? "forward" : "backword");
 		
-		params.put("after", encoder.extractLastKey(chunkable.getPaginationToken()).orElse(null));
-		params.put("before", encoder.extractFirstKey(chunkable.getPaginationToken()).orElse(null));
+		if (chunkable.getPaginationToken() != null) {
+			String key;
+			
+			if (forward) {
+				key = encoder.extractLastKey(chunkable.getPaginationToken()).orElse(null);
+				params.put("after", key);
+				log.debug("Using last key as after: {}", key);
+			} else {
+				key = encoder.extractFirstKey(chunkable.getPaginationToken()).orElse(null);
+				params.put("before", key);
+				log.debug("Using first key as before: {}", key);
+			}
+		}
+		
 		params.put("size", chunkable.getMaxPageSize());
-		if (chunkable.getDirection() != null) {
+		if (ascending == false) {
 			params.put("direction", chunkable.getDirection().name());
 		}
 	}
@@ -223,7 +241,7 @@ public class MirageQuery implements RepositoryQuery {
 			if (parameterName == null) {
 				if (Pageable.class.isAssignableFrom(p.getType()) == false
 						&& Chunkable.class.isAssignableFrom(p.getType()) == false) {
-					logger.warn("null name parameter [{}] is ignored", p);
+					log.warn("null name parameter [{}] is ignored", p);
 				}
 			} else {
 				parameterMap.put(parameterName, parameters[p.getIndex()]);
@@ -299,7 +317,7 @@ public class MirageQuery implements RepositoryQuery {
 				return sqlManager.getSingleResult(Integer.class, new StringSqlResource("SELECT FOUND_ROWS()"));
 			}
 		} catch (IOException e) {
-			logger.error("IOException", e);
+			log.error("IOException", e);
 		} finally {
 			if (reader != null) {
 				try {
@@ -310,6 +328,15 @@ public class MirageQuery implements RepositoryQuery {
 			}
 		}
 		return Integer.MAX_VALUE;
+	}
+	
+	private boolean isAscending(Chunkable chunkable) {
+		return Optional.ofNullable(chunkable.getDirection()).orElse(Direction.ASC) == Direction.ASC;
+	}
+	
+	private boolean isForward(Chunkable chunkable) {
+		return Optional.ofNullable(chunkable.getPaginationRelation())
+			.orElse(PaginationRelation.NEXT) == PaginationRelation.NEXT;
 	}
 	
 	private Object processChunkQuery(SqlResource sqlResource, Map<String, Object> parameterMap,
