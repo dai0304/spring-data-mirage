@@ -64,7 +64,6 @@ import jp.xet.sparwings.spring.data.chunk.SimplePaginationTokenEncoder;
 import jp.xet.sparwings.spring.data.repository.BatchReadableRepository;
 import jp.xet.sparwings.spring.data.repository.BatchWritableRepository;
 import jp.xet.sparwings.spring.data.repository.ChunkableRepository;
-import jp.xet.sparwings.spring.data.repository.DeletableRepository;
 import jp.xet.sparwings.spring.data.repository.LockableCrudRepository;
 import jp.xet.sparwings.spring.data.repository.PageableRepository;
 import jp.xet.sparwings.spring.data.repository.ScannableRepository;
@@ -78,10 +77,9 @@ import jp.xet.sparwings.spring.data.repository.TruncatableRepository;
  * @since 0.1
  * @author daisuke
  */
-public class DefaultMirageRepository<E, ID extends Serializable>
-		implements ScannableRepository<E, ID>, BatchReadableRepository<E, ID>, BatchWritableRepository<E, ID>,
-		LockableCrudRepository<E, ID>, ChunkableRepository<E, ID>, PageableRepository<E, ID>,
-		DeletableRepository<E, ID>, TruncatableRepository<E, ID> {
+public class DefaultMirageRepository<E, ID extends Serializable> implements ScannableRepository<E, ID>,
+		BatchReadableRepository<E, ID>, BatchWritableRepository<E, ID>, LockableCrudRepository<E, ID>,
+		ChunkableRepository<E, ID>, PageableRepository<E, ID>, TruncatableRepository<E, ID> {
 	
 	private static Logger log = LoggerFactory.getLogger(DefaultMirageRepository.class);
 	
