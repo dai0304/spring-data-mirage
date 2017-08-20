@@ -39,6 +39,10 @@ import jp.sf.amateras.mirage.SqlManager;
 public class MirageRepositoryFactoryBean<T extends Repository<S, ID>, S, ID extends Serializable>
 		extends TransactionalRepositoryFactoryBeanSupport<T, S, ID> {
 	
+	protected MirageRepositoryFactoryBean(Class<? extends T> repositoryInterface) {
+		super(repositoryInterface);
+	}
+	
 	private SqlManager sqlManager;
 	
 	
