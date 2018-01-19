@@ -18,10 +18,10 @@ package org.springframework.data.mirage.repository;
 
 import java.io.Serializable;
 
-import jp.sf.amateras.mirage.SqlManager;
-
 import org.springframework.data.repository.core.EntityInformation;
 import org.springframework.util.Assert;
+
+import jp.sf.amateras.mirage.SqlManager;
 
 /**
  * TODO for daisuke
@@ -31,7 +31,7 @@ import org.springframework.util.Assert;
  * @version $Id$
  * @author daisuke
  */
-public class IdentifiableMirageRepository<E extends Identifiable> extends DefaultMirageRepository<E, Long> {
+public class IdentifiableMirageRepository<E extends Identifiable>extends DefaultMirageRepository<E, Long> {
 	
 	/**
 	 * インスタンスを生成する。
@@ -58,7 +58,7 @@ public class IdentifiableMirageRepository<E extends Identifiable> extends Defaul
 	
 	@Override
 	public final Long getId(E entity) {
-		Assert.notNull(entity);
+		Assert.notNull(entity, "entity is required");
 		return entity.getId();
 	}
 }

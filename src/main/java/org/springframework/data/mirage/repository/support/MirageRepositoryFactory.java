@@ -18,8 +18,6 @@ package org.springframework.data.mirage.repository.support;
 
 import java.io.Serializable;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.mirage.repository.DefaultMirageRepository;
 import org.springframework.data.mirage.repository.Identifiable;
 import org.springframework.data.mirage.repository.IdentifiableMirageRepository;
@@ -32,6 +30,9 @@ import org.springframework.data.repository.core.support.RepositoryFactorySupport
 import org.springframework.data.repository.query.QueryLookupStrategy;
 import org.springframework.data.repository.query.QueryLookupStrategy.Key;
 import org.springframework.util.Assert;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jp.sf.amateras.mirage.SqlManager;
 
@@ -57,7 +58,7 @@ public class MirageRepositoryFactory extends RepositoryFactorySupport {
 	 * @since 0.1
 	 */
 	public MirageRepositoryFactory(SqlManager sqlManager) {
-		Assert.notNull(sqlManager);
+		Assert.notNull(sqlManager, "sqlManager is required");
 		this.sqlManager = sqlManager;
 	}
 	
