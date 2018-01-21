@@ -21,9 +21,10 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import org.springframework.util.Assert;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.Assert;
 
 import jp.sf.amateras.mirage.ClasspathSqlResource;
 
@@ -61,7 +62,7 @@ public class ScopeClasspathSqlResource extends ClasspathSqlResource {
 	}
 	
 	private static String toAbsolutePath(SqlResourceCandidate[] candidates) {
-		Assert.noNullElements(candidates);
+		Assert.noNullElements(candidates, "candidates must not be contains null element");
 		
 		for (SqlResourceCandidate candidate : candidates) {
 			Class<?> scope = candidate.getScope();

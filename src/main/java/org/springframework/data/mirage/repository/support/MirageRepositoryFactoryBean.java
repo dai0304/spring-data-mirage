@@ -43,13 +43,14 @@ public class MirageRepositoryFactoryBean<T extends Repository<S, ID>, S, ID exte
 		super(repositoryInterface);
 	}
 	
+	
 	private SqlManager sqlManager;
 	
 	
 	@Override
 	public void afterPropertiesSet() {
 		super.afterPropertiesSet();
-		Assert.notNull(sqlManager);
+		Assert.notNull(sqlManager, "sqlManager is required");
 	}
 	
 	/**

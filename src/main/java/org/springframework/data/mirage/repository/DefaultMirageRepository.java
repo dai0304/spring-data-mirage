@@ -29,8 +29,6 @@ import java.util.Optional;
 
 import javax.sql.DataSource;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.data.annotation.Id;
@@ -46,6 +44,9 @@ import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.Assert;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jp.sf.amateras.mirage.IterationCallback;
 import jp.sf.amateras.mirage.SqlManager;
@@ -153,7 +154,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	 * @since 0.1
 	 */
 	public DefaultMirageRepository(Class<E> entityClass) {
-		Assert.notNull(entityClass);
+		Assert.notNull(entityClass, "entityClass is required");
 		this.entityClass = entityClass;
 	}
 	
@@ -166,7 +167,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	 */
 	public DefaultMirageRepository(EntityInformation<E, ? extends Serializable> entityInformation,
 			SqlManager sqlManager) {
-		Assert.notNull(entityInformation);
+		Assert.notNull(entityInformation, "entityInformation is required");
 		this.entityClass = entityInformation.getJavaType();
 		this.sqlManager = sqlManager;
 	}
@@ -618,7 +619,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	 */
 	@SuppressWarnings("javadoc")
 	protected int executeUpdate(SqlResource resource) {
-		Assert.notNull(resource);
+		Assert.notNull(resource, "resource is required");
 		try {
 			return sqlManager.executeUpdate(resource);
 		} catch (SQLRuntimeException e) {
@@ -631,7 +632,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	 */
 	@SuppressWarnings("javadoc")
 	protected int executeUpdate(SqlResource resource, Object param) {
-		Assert.notNull(resource);
+		Assert.notNull(resource, "resource is required");
 		try {
 			return sqlManager.executeUpdate(resource, param);
 		} catch (SQLRuntimeException e) {
@@ -654,7 +655,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	 */
 	@SuppressWarnings("javadoc")
 	protected int getCount(SqlResource resource) {
-		Assert.notNull(resource);
+		Assert.notNull(resource, "resource is required");
 		try {
 			return sqlManager.getCount(resource);
 		} catch (SQLRuntimeException e) {
@@ -667,7 +668,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	 */
 	@SuppressWarnings("javadoc")
 	protected int getCount(SqlResource resource, Object param) {
-		Assert.notNull(resource);
+		Assert.notNull(resource, "resource is required");
 		try {
 			return sqlManager.getCount(resource, param);
 		} catch (SQLRuntimeException e) {
@@ -707,7 +708,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	 */
 	@SuppressWarnings("javadoc")
 	protected List<E> getResultList(SqlResource resource) {
-		Assert.notNull(resource);
+		Assert.notNull(resource, "resource is required");
 		try {
 			return sqlManager.getResultList(entityClass, resource);
 		} catch (SQLRuntimeException e) {
@@ -721,7 +722,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	 */
 	@SuppressWarnings("javadoc")
 	protected List<E> getResultList(SqlResource resource, Object param) {
-		Assert.notNull(resource);
+		Assert.notNull(resource, "resource is required");
 		try {
 			return sqlManager.getResultList(entityClass, resource, param);
 		} catch (SQLRuntimeException e) {
@@ -734,7 +735,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	 */
 	@SuppressWarnings("javadoc")
 	protected E getSingleResult(SqlResource resource) {
-		Assert.notNull(resource);
+		Assert.notNull(resource, "resource is required");
 		try {
 			return sqlManager.getSingleResult(entityClass, resource);
 		} catch (SQLRuntimeException e) {
@@ -747,7 +748,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	 */
 	@SuppressWarnings("javadoc")
 	protected E getSingleResult(SqlResource resource, Object param) {
-		Assert.notNull(resource);
+		Assert.notNull(resource, "resource is required");
 		try {
 			return sqlManager.getSingleResult(entityClass, resource, param);
 		} catch (SQLRuntimeException e) {
@@ -806,7 +807,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	 */
 	@SuppressWarnings("javadoc")
 	protected <R> R iterate(IterationCallback<E, R> callback, SqlResource resource) {
-		Assert.notNull(resource);
+		Assert.notNull(resource, "resource is required");
 		try {
 			return sqlManager.iterate(entityClass, callback, resource);
 		} catch (SQLRuntimeException e) {
@@ -819,7 +820,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	 */
 	@SuppressWarnings("javadoc")
 	protected <R> R iterate(IterationCallback<E, R> callback, SqlResource resource, Object param) {
-		Assert.notNull(resource);
+		Assert.notNull(resource, "resource is required");
 		try {
 			return sqlManager.iterate(entityClass, callback, resource, param);
 		} catch (SQLRuntimeException e) {

@@ -24,22 +24,23 @@ import static org.hamcrest.Matchers.not;
 
 import java.util.Arrays;
 
-import com.google.common.collect.Iterables;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mirage.repository.example.User;
 import org.springframework.data.mirage.repository.example.UserRepository;
 import org.springframework.data.mirage.repository.support.MirageRepositoryFactory;
 import org.springframework.data.repository.core.support.RepositoryFactorySupport;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import com.google.common.collect.Iterables;
 
 import jp.sf.amateras.mirage.SqlManager;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(SpringRunner.class)
 @ContextConfiguration("classpath:/test-context.xml")
 @Transactional
 @SuppressWarnings("javadoc")
