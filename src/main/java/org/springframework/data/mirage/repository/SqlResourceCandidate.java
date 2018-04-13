@@ -89,9 +89,6 @@ public class SqlResourceCandidate {
 	
 	@Override
 	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("SqlResourceCandidate [scope=").append(scope).append(", name=").append(name).append("]");
-		return builder.toString();
+		return "SqlResourceCandidate [scope=" + scope + ", name=" + name + "]";
 	}
-	
 }

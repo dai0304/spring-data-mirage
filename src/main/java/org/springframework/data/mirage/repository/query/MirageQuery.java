@@ -22,6 +22,7 @@ import java.io.Reader;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -66,8 +67,6 @@ import jp.xet.sparwings.spring.data.chunk.SimplePaginationTokenEncoder;
 public class MirageQuery implements RepositoryQuery {
 	
 	private static Logger log = LoggerFactory.getLogger(MirageQuery.class);
-	
-	private static final Charset UTF_8 = Charset.forName("UTF-8");
 	
 	private static final int BUFFER_SIZE = 1024 * 4;
 	
@@ -237,14 +236,12 @@ public class MirageQuery implements RepositoryQuery {
 		Map<String, Object> parameterMap = new HashMap<String, Object>();
 		parameterMap.put("orders", null);
 		for (Parameter p : mirageQueryMethod.getParameters()) {
-			String parameterName = p.getName();
-			if (parameterName == null) {
+			p.getName().ifPresent(parameterName -> parameterMap.put(parameterName, parameters[p.getIndex()]));
+			if (p.getName().isPresent() == false) {
 				if (Pageable.class.isAssignableFrom(p.getType()) == false
 						&& Chunkable.class.isAssignableFrom(p.getType()) == false) {
 					log.warn("null name parameter [{}] is ignored", p);
 				}
-			} else {
-				parameterMap.put(parameterName, parameters[p.getIndex()]);
 			}
 		}
 		Iterable<StaticParam> staticParams = mirageQueryMethod.getStaticParameters();
@@ -269,13 +266,12 @@ public class MirageQuery implements RepositoryQuery {
 		}) {
 			String simpleName = clazz.getSimpleName();
 			String args = getArgsPartOfSignature(mirageQueryMethod.asMethod());
-			candidates.addAll(Arrays.asList(new SqlResourceCandidate[] {
-				new SqlResourceCandidate(clazz, simpleName + "#" + mirageQueryMethod.getName() + args + ".sql"),
-				new SqlResourceCandidate(clazz, simpleName + "#" + mirageQueryMethod.getName() + ".sql"),
-				new SqlResourceCandidate(clazz, simpleName + "_" + mirageQueryMethod.getName() + args + ".sql"),
-				new SqlResourceCandidate(clazz, simpleName + "_" + mirageQueryMethod.getName() + ".sql"),
-				new SqlResourceCandidate(clazz, simpleName + ".sql")
-			}));
+			candidates.addAll(Arrays.asList(
+					new SqlResourceCandidate(clazz, simpleName + "#" + mirageQueryMethod.getName() + args + ".sql"),
+					new SqlResourceCandidate(clazz, simpleName + "#" + mirageQueryMethod.getName() + ".sql"),
+					new SqlResourceCandidate(clazz, simpleName + "_" + mirageQueryMethod.getName() + args + ".sql"),
+					new SqlResourceCandidate(clazz, simpleName + "_" + mirageQueryMethod.getName() + ".sql"),
+					new SqlResourceCandidate(clazz, simpleName + ".sql")));
 		}
 		return candidates.toArray(new SqlResourceCandidate[candidates.size()]);
 	}
@@ -311,7 +307,7 @@ public class MirageQuery implements RepositoryQuery {
 	private int getTotalCount(SqlResource sqlResource) {
 		Reader reader = null;
 		try {
-			reader = new InputStreamReader(sqlResource.getInputStream(), UTF_8);
+			reader = new InputStreamReader(sqlResource.getInputStream(), StandardCharsets.UTF_8);
 			String query = toString(reader);
 			if (query.contains("SQL_CALC_FOUND_ROWS")) { // TODO MySQL固有処理
 				return sqlManager.getSingleResult(Integer.class, new StringSqlResource("SELECT FOUND_ROWS()"));
@@ -378,8 +374,7 @@ public class MirageQuery implements RepositoryQuery {
 		
 		int totalCount = getTotalCount(sqlResource);
 		
-		PageImpl<?> page = new PageImpl<>(resultList, pageable, totalCount);
-		return page;
+		return new PageImpl<>(resultList, pageable, totalCount);
 	}
 	
 	private Object processSliceQuery(SqlResource sqlResource, Map<String, Object> parameterMap,
@@ -398,8 +393,7 @@ public class MirageQuery implements RepositoryQuery {
 			return resultList;
 		}
 		
-		SliceImpl<?> page = new SliceImpl<>(resultList, pageable, true/*TODO*/);
-		return page;
+		return new SliceImpl<>(resultList, pageable, true/*TODO*/);
 	}
 	
 	private String toString(Reader input) throws IOException {

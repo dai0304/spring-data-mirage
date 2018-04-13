@@ -47,7 +47,7 @@ public class MirageRepositoryConfigExtension extends RepositoryConfigurationExte
 	
 	
 	@Override
-	public String getRepositoryFactoryClassName() {
+	public String getRepositoryFactoryBeanClassName() {
 		return MirageRepositoryFactoryBean.class.getName();
 	}
 	

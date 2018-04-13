@@ -101,7 +101,7 @@ public abstract class MirageQueryLookupStrategy implements QueryLookupStrategy {
 		private final CreateQueryLookupStrategy createStrategy;
 		
 		
-		public CreateIfNotFoundQueryLookupStrategy(SqlManager sqlManager) {
+		CreateIfNotFoundQueryLookupStrategy(SqlManager sqlManager) {
 			super(sqlManager);
 			strategy = new DeclaredQueryLookupStrategy(sqlManager);
 			createStrategy = new CreateQueryLookupStrategy(sqlManager);
@@ -133,7 +133,7 @@ public abstract class MirageQueryLookupStrategy implements QueryLookupStrategy {
 	 */
 	private static class CreateQueryLookupStrategy extends MirageQueryLookupStrategy {
 		
-		public CreateQueryLookupStrategy(SqlManager sqlManager) {
+		CreateQueryLookupStrategy(SqlManager sqlManager) {
 			super(sqlManager);
 		}
 		
@@ -150,7 +150,7 @@ public abstract class MirageQueryLookupStrategy implements QueryLookupStrategy {
 	 */
 	private static class DeclaredQueryLookupStrategy extends MirageQueryLookupStrategy {
 		
-		public DeclaredQueryLookupStrategy(SqlManager sqlManager) {
+		DeclaredQueryLookupStrategy(SqlManager sqlManager) {
 			super(sqlManager);
 		}
 		

@@ -18,6 +18,7 @@ package org.springframework.data.mirage.repository.query;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.core.annotation.AnnotationUtils;
@@ -41,7 +42,7 @@ import jp.xet.sparwings.spring.data.chunk.Chunk;
  */
 public class MirageQueryMethod extends QueryMethod {
 	
-	private static Class<? extends Object> potentiallyUnwrapReturnTypeFor(Method method) {
+	private static Class<?> potentiallyUnwrapReturnTypeFor(Method method) {
 		if (QueryExecutionConverters.supports(method.getReturnType())) {
 			// unwrap only one level to handle cases like Future<List<Entity>> correctly.
 			return ClassTypeInformation.fromReturnTypeOf(method).getComponentType().getType();
@@ -51,9 +52,9 @@ public class MirageQueryMethod extends QueryMethod {
 	}
 	
 	
-	final Method method;
+	private final Method method;
 	
-	final RepositoryMetadata metadata;
+	private final RepositoryMetadata metadata;
 	
 	private final Class<?> unwrappedReturnType;
 	
@@ -101,9 +102,7 @@ public class MirageQueryMethod extends QueryMethod {
 		
 		List<StaticParam> result = new ArrayList<StaticParam>(capacity);
 		if (staticParams != null) {
-			for (StaticParam param : staticParams.value()) {
-				result.add(param);
-			}
+			Collections.addAll(result, staticParams.value());
 		}
 		if (staticParam != null) {
 			result.add(staticParam);
@@ -203,5 +202,4 @@ public class MirageQueryMethod extends QueryMethod {
 	private Query getQueryAnnotation() {
 		return method.getAnnotation(Query.class);
 	}
-	
 }
