@@ -16,7 +16,7 @@ ext {
 }
 
 version = describedCommit +
-	(describedCommit.matches(".*-[0-9]+-g[0-9a-f]{7}") ? ".BUILD-SNAPSHOT" : ".RELEASE") +
+	(describedCommit.matches(".*-[0-9]+-g[0-9a-f]{7}") ? ".BUILD-SNAPSHOT" : "") +
 	(git.status().isClean() ? "" : "+dirty")
 
 task showVersion {
