@@ -37,9 +37,9 @@ Add the repository definition to your `pom.xml` :
 ```xml
 <repositories>
   <repository>
-    <id>xet.jp-release</id>
-    <name>xet.jp-release</name>
-    <url>http://maven.xet.jp/release</url>
+    <id>bintray-dai0304-maven</id>
+    <name>bintray-dai0304-maven</name>
+    <url>https://dl.bintray.com/dai0304/maven</url>
   </repository>
 </repositories>
 ```
@@ -50,7 +50,7 @@ Add the jar to your maven project :
 <dependency>
   <groupId>org.springframework.data</groupId>
   <artifactId>spring-data-mirage</artifactId>
-  <version>0.1.2.RELEASE</version>
+  <version>0.10.0.RELEASE</version>
 </dependency>
 ```
 
