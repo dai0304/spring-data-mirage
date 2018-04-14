@@ -1,11 +1,12 @@
-Spring Data Mirage SQL
-======================
+# Spring Data Mirage SQL
 
 The primary goal of the [Spring Data](http://www.springsource.org/spring-data) project is to make it easier to build
 Spring-powered applications that use data access technologies. This module deals with enhanced support for
-[Mirage SQL](https://github.com/takezoe/mirage) based data access layers.
+[Mirage SQL](https://github.com/mirage-sql/mirage) based data access layers.
 
-## Features ##
+
+## Features
+
 This project defines a `MirageRepository` base interface  :
 
 ```java
@@ -20,7 +21,14 @@ public interface MirageRepository<E, ID extends Serializable> extends PagingAndS
 ```
 
 
-## Quick Start ##
+## Requirements
+
+* Java 8+
+* Spring Data Commons 2.0.x
+* Mirage 1.2.x
+
+
+## Quick Start
 
 ### dependency
 
@@ -113,11 +121,12 @@ public class User {
 Create a repository interface in `com.example.product.repository`:
 
 ```java
-public interface AppUserRepository extends MirageRepository<AppUser, Long> {
+public interface UserRepository extends MirageRepository<User, Long> {
 
-  List<AppUser> findByFirstname(@Param("first_name") String firstName);
+  List<User> findByFirstname(@Param("first_name") String firstName);
 
-  List<AppUser> findByComplexCondition(@Param("complex_param1") String cp1, @Param("complex_param2") int cp2);
+  List<User> findByComplexCondition(
+    @Param("complex_param1") String cp1, @Param("complex_param2") int cp2);
 
   // another query methods...
 }
@@ -125,8 +134,8 @@ public interface AppUserRepository extends MirageRepository<AppUser, Long> {
 
 ### SQL files
 
-Write SQL file `AppUserRepository.sql` (that's called 'base-select-SQL') and place on the same directory
-with `AppUserRepository.class` :
+Write SQL file `UserRepository.sql` (that's called 'base-select-SQL') and place on the same directory
+with `UserRepository.class` :
 
 ```sql
 SELECT *
@@ -167,7 +176,7 @@ This base-select-SQL must support "id", "ids", "orders", "offset" and "size" par
 by `findOne()`, `findAll(Iterable<ID>)`, `findAll(Pageable)` and the like.
 
 And you can place another 2-way-sql for specific query method (that's called 'method-specific-2-way-sql')
-like this: `AppUserRepository_findByComplexCondition.sql`
+like this: `UserRepository_findByComplexCondition.sql`
 
 ```
 SELECT U.*
@@ -188,23 +197,23 @@ Write a test client :
 
 ```java
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration("classpath:/applicationContext.xml")
-public class AppUserRepositoryTest {
+@ContextConfiguration(...)
+public class UserRepositoryTest {
 
   @Autowired
-  AppUserRepository repos;
+  UserRepository repo;
 
   @Test
   @TransactionConfiguration
   @Transactional
   public void sampleTestCase() {
-    AppUser user = repos.findOne(1L); // SELECT * FROM users WHERE user_id = 1
+    User user = repo.findOne(1L); // SELECT * FROM users WHERE user_id = 1
     assertThat("user", user, is(notNullValue()));
-    List<AppUser> users = customerRepository.findAll(); // SELECT * FROM users
+    List<User> users = repo.findAll(); // SELECT * FROM users
     assertThat("users", users, is(notNullValue()));
     assertThat("usersSize", users.size() > 0, is(true));
     
-    List<AppUser> complex = customerRepository.findByComplexCondition("xy%z", 2);
+    List<User> complex = repo.findByComplexCondition("xy%z", 2);
     // SELECT U.* FROM users U JOIN blahblah B ON U.username = B.username
     // WHERE B.complex_param1 LIKE 'xy%z' OR B.complex_param2 > 2
   }
@@ -212,7 +221,7 @@ public class AppUserRepositoryTest {
 ```
 
 
-## Miscellaneous things ##
+## Miscellaneous things
 
 ### Modifying query
 
@@ -220,7 +229,7 @@ You must mark modifying (insert, update and delete) query methods by `@Modifying
 
 `FooBarRepository.java`
 ```
-public interface FooBarRepository  extends MirageRepository<AppUser, Long> {
+public interface FooBarRepository  extends MirageRepository<FooBar, Long> {
 
 	@Modifying
 	void updateFooBar(@Param("foo") String foo, @Param("bar") String bar);

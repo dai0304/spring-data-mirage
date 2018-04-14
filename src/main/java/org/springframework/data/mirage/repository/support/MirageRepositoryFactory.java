@@ -17,6 +17,7 @@
 package org.springframework.data.mirage.repository.support;
 
 import java.io.Serializable;
+import java.util.Optional;
 
 import org.springframework.data.mirage.repository.DefaultMirageRepository;
 import org.springframework.data.mirage.repository.Identifiable;
@@ -27,8 +28,10 @@ import org.springframework.data.repository.core.EntityInformation;
 import org.springframework.data.repository.core.RepositoryInformation;
 import org.springframework.data.repository.core.RepositoryMetadata;
 import org.springframework.data.repository.core.support.RepositoryFactorySupport;
+import org.springframework.data.repository.query.EvaluationContextProvider;
 import org.springframework.data.repository.query.QueryLookupStrategy;
 import org.springframework.data.repository.query.QueryLookupStrategy.Key;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 import org.slf4j.Logger;
@@ -64,14 +67,15 @@ public class MirageRepositoryFactory extends RepositoryFactorySupport {
 	
 	@Override
 	@SuppressWarnings("unchecked")
-	public <T, ID extends Serializable> EntityInformation<T, ID> getEntityInformation(Class<T> domainClass) {
+	public <T, ID> EntityInformation<T, ID> getEntityInformation(Class<T> domainClass) {
 		return (EntityInformation<T, ID>) MirageEntityInformationSupport.getMetadata(domainClass, sqlManager);
 	}
 	
 	@Override
-	protected QueryLookupStrategy getQueryLookupStrategy(Key key) {
-		return MirageQueryLookupStrategy.create(sqlManager, key);
-	}
+	protected Optional<QueryLookupStrategy> getQueryLookupStrategy(Key key,
+			EvaluationContextProvider evaluationContextProvider) {
+	return Optional.of(MirageQueryLookupStrategy.create(sqlManager, key));
+}
 	
 	@Override
 	protected Class<?> getRepositoryBaseClass(RepositoryMetadata metadata) {
