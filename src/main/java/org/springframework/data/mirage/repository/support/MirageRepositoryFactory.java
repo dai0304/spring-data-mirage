@@ -1,6 +1,5 @@
 /*
- * Copyright 2011 Daisuke Miyamoto.
- * Created on 2012/05/16
+ * Copyright 2011-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -10,30 +9,34 @@
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
- * either express or implied. See the License for the specific language
- * governing permissions and limitations under the License.
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.springframework.data.mirage.repository.support;
 
 import java.io.Serializable;
+import java.util.Optional;
+
+import org.springframework.data.repository.core.EntityInformation;
+import org.springframework.data.repository.core.RepositoryInformation;
+import org.springframework.data.repository.core.RepositoryMetadata;
+import org.springframework.data.repository.core.support.RepositoryFactorySupport;
+import org.springframework.data.repository.query.EvaluationContextProvider;
+import org.springframework.data.repository.query.QueryLookupStrategy;
+import org.springframework.data.repository.query.QueryLookupStrategy.Key;
+import org.springframework.util.Assert;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jp.sf.amateras.mirage.SqlManager;
+
 import org.springframework.data.mirage.repository.DefaultMirageRepository;
 import org.springframework.data.mirage.repository.Identifiable;
 import org.springframework.data.mirage.repository.IdentifiableMirageRepository;
 import org.springframework.data.mirage.repository.NoSuchSqlResourceException;
 import org.springframework.data.mirage.repository.query.MirageQueryLookupStrategy;
-import org.springframework.data.repository.core.EntityInformation;
-import org.springframework.data.repository.core.RepositoryInformation;
-import org.springframework.data.repository.core.RepositoryMetadata;
-import org.springframework.data.repository.core.support.RepositoryFactorySupport;
-import org.springframework.data.repository.query.QueryLookupStrategy;
-import org.springframework.data.repository.query.QueryLookupStrategy.Key;
-import org.springframework.util.Assert;
-
-import jp.sf.amateras.mirage.SqlManager;
 
 /**
  * TODO for daisuke
@@ -57,19 +60,20 @@ public class MirageRepositoryFactory extends RepositoryFactorySupport {
 	 * @since 0.1
 	 */
 	public MirageRepositoryFactory(SqlManager sqlManager) {
-		Assert.notNull(sqlManager);
+		Assert.notNull(sqlManager, "sqlManager is required");
 		this.sqlManager = sqlManager;
 	}
 	
 	@Override
 	@SuppressWarnings("unchecked")
-	public <T, ID extends Serializable> EntityInformation<T, ID> getEntityInformation(Class<T> domainClass) {
+	public <T, ID> EntityInformation<T, ID> getEntityInformation(Class<T> domainClass) {
 		return (EntityInformation<T, ID>) MirageEntityInformationSupport.getMetadata(domainClass, sqlManager);
 	}
 	
 	@Override
-	protected QueryLookupStrategy getQueryLookupStrategy(Key key) {
-		return MirageQueryLookupStrategy.create(sqlManager, key);
+	protected Optional<QueryLookupStrategy> getQueryLookupStrategy(Key key,
+			EvaluationContextProvider evaluationContextProvider) {
+		return Optional.of(MirageQueryLookupStrategy.create(sqlManager, key));
 	}
 	
 	@Override

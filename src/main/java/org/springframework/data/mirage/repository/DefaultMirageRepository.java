@@ -1,6 +1,5 @@
 /*
- * Copyright 2011 Daisuke Miyamoto.
- * Created on 2011/10/20
+ * Copyright 2011-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -10,9 +9,9 @@
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
- * either express or implied. See the License for the specific language
- * governing permissions and limitations under the License.
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.springframework.data.mirage.repository;
 
@@ -23,14 +22,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
 import javax.sql.DataSource;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.data.annotation.Id;
@@ -47,6 +45,9 @@ import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.Assert;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jp.sf.amateras.mirage.IterationCallback;
 import jp.sf.amateras.mirage.SqlManager;
 import jp.sf.amateras.mirage.SqlResource;
@@ -55,6 +56,7 @@ import jp.sf.amateras.mirage.exception.SQLRuntimeException;
 import jp.sf.amateras.mirage.naming.NameConverter;
 import jp.sf.amateras.mirage.util.MirageUtil;
 import jp.sf.amateras.mirage.util.Validate;
+
 import jp.xet.sparwings.spring.data.chunk.Chunk;
 import jp.xet.sparwings.spring.data.chunk.ChunkImpl;
 import jp.xet.sparwings.spring.data.chunk.Chunkable;
@@ -153,7 +155,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	 * @since 0.1
 	 */
 	public DefaultMirageRepository(Class<E> entityClass) {
-		Assert.notNull(entityClass);
+		Assert.notNull(entityClass, "entityClass is required");
 		this.entityClass = entityClass;
 	}
 	
@@ -166,7 +168,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	 */
 	public DefaultMirageRepository(EntityInformation<E, ? extends Serializable> entityInformation,
 			SqlManager sqlManager) {
-		Assert.notNull(entityInformation);
+		Assert.notNull(entityInformation, "entityInformation is required");
 		this.entityClass = entityInformation.getJavaType();
 		this.sqlManager = sqlManager;
 	}
@@ -580,7 +582,10 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	/**
 	 * @see SqlManager#deleteBatch(Object...)
 	 */
-	@SuppressWarnings("javadoc")
+	@SuppressWarnings({
+		"javadoc",
+		"unchecked"
+	})
 	protected int deleteBatch(E... entities) {
 		try {
 			return sqlManager.deleteBatch(entities);
@@ -618,7 +623,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	 */
 	@SuppressWarnings("javadoc")
 	protected int executeUpdate(SqlResource resource) {
-		Assert.notNull(resource);
+		Assert.notNull(resource, "resource is required");
 		try {
 			return sqlManager.executeUpdate(resource);
 		} catch (SQLRuntimeException e) {
@@ -631,7 +636,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	 */
 	@SuppressWarnings("javadoc")
 	protected int executeUpdate(SqlResource resource, Object param) {
-		Assert.notNull(resource);
+		Assert.notNull(resource, "resource is required");
 		try {
 			return sqlManager.executeUpdate(resource, param);
 		} catch (SQLRuntimeException e) {
@@ -654,7 +659,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	 */
 	@SuppressWarnings("javadoc")
 	protected int getCount(SqlResource resource) {
-		Assert.notNull(resource);
+		Assert.notNull(resource, "resource is required");
 		try {
 			return sqlManager.getCount(resource);
 		} catch (SQLRuntimeException e) {
@@ -667,7 +672,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	 */
 	@SuppressWarnings("javadoc")
 	protected int getCount(SqlResource resource, Object param) {
-		Assert.notNull(resource);
+		Assert.notNull(resource, "resource is required");
 		try {
 			return sqlManager.getCount(resource, param);
 		} catch (SQLRuntimeException e) {
@@ -707,7 +712,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	 */
 	@SuppressWarnings("javadoc")
 	protected List<E> getResultList(SqlResource resource) {
-		Assert.notNull(resource);
+		Assert.notNull(resource, "resource is required");
 		try {
 			return sqlManager.getResultList(entityClass, resource);
 		} catch (SQLRuntimeException e) {
@@ -721,7 +726,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	 */
 	@SuppressWarnings("javadoc")
 	protected List<E> getResultList(SqlResource resource, Object param) {
-		Assert.notNull(resource);
+		Assert.notNull(resource, "resource is required");
 		try {
 			return sqlManager.getResultList(entityClass, resource, param);
 		} catch (SQLRuntimeException e) {
@@ -734,7 +739,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	 */
 	@SuppressWarnings("javadoc")
 	protected E getSingleResult(SqlResource resource) {
-		Assert.notNull(resource);
+		Assert.notNull(resource, "resource is required");
 		try {
 			return sqlManager.getSingleResult(entityClass, resource);
 		} catch (SQLRuntimeException e) {
@@ -747,7 +752,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	 */
 	@SuppressWarnings("javadoc")
 	protected E getSingleResult(SqlResource resource, Object param) {
-		Assert.notNull(resource);
+		Assert.notNull(resource, "resource is required");
 		try {
 			return sqlManager.getSingleResult(entityClass, resource, param);
 		} catch (SQLRuntimeException e) {
@@ -768,7 +773,10 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	/**
 	 * @see SqlManager#insertBatch(Object...)
 	 */
-	@SuppressWarnings("javadoc")
+	@SuppressWarnings({
+		"javadoc",
+		"unchecked"
+	})
 	protected int insertBatch(E... entities) {
 		try {
 			return sqlManager.insertBatch(entities);
@@ -806,7 +814,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	 */
 	@SuppressWarnings("javadoc")
 	protected <R> R iterate(IterationCallback<E, R> callback, SqlResource resource) {
-		Assert.notNull(resource);
+		Assert.notNull(resource, "resource is required");
 		try {
 			return sqlManager.iterate(entityClass, callback, resource);
 		} catch (SQLRuntimeException e) {
@@ -819,7 +827,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	 */
 	@SuppressWarnings("javadoc")
 	protected <R> R iterate(IterationCallback<E, R> callback, SqlResource resource, Object param) {
-		Assert.notNull(resource);
+		Assert.notNull(resource, "resource is required");
 		try {
 			return sqlManager.iterate(entityClass, callback, resource, param);
 		} catch (SQLRuntimeException e) {
@@ -830,7 +838,10 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	/**
 	 * @see SqlManager#updateBatch(Object...)
 	 */
-	@SuppressWarnings("javadoc")
+	@SuppressWarnings({
+		"javadoc",
+		"unchecked"
+	})
 	protected int updateBatch(E... entities) {
 		try {
 			return sqlManager.updateBatch(entities);
@@ -902,7 +913,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 			List<String> orders = new ArrayList<String>();
 			Sort sort = pageable.getSort();
 			for (Order order : sort) {
-				orders.add(String.format("%s %s", order.getProperty(), order.getDirection().name()));
+				orders.add(String.format(Locale.ENGLISH, "%s %s", order.getProperty(), order.getDirection().name()));
 			}
 			if (orders.size() != 0) {
 				params.put("orders", join(orders));
@@ -917,7 +928,8 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 		}
 		List<String> list = new ArrayList<String>();
 		for (Order order : sort) {
-			String orderDefinition = String.format("%s %s", order.getProperty(), order.getDirection()).trim();
+			String orderDefinition =
+					String.format(Locale.ENGLISH, "%s %s", order.getProperty(), order.getDirection()).trim();
 			if (orderDefinition.isEmpty() == false) {
 				list.add(orderDefinition);
 			}

@@ -1,0 +1,9 @@
+project.configurations.each { it.canBeResolved = true }
+task resolveDependencies {
+	doLast {
+		project.configurations.each {
+			println "Resolve " + it.name + " configuration dependencies..."
+			it.resolve()
+		}
+	}
+}

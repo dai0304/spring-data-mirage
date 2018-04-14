@@ -1,6 +1,5 @@
 /*
- * Copyright 2011 Daisuke Miyamoto.
- * Created on 2011/10/21
+ * Copyright 2011-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -10,9 +9,9 @@
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
- * either express or implied. See the License for the specific language
- * governing permissions and limitations under the License.
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.springframework.data.mirage.repository;
 
@@ -24,22 +23,25 @@ import static org.hamcrest.Matchers.not;
 
 import java.util.Arrays;
 
-import com.google.common.collect.Iterables;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.core.support.RepositoryFactorySupport;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mirage.repository.example.User;
-import org.springframework.data.mirage.repository.example.UserRepository;
-import org.springframework.data.mirage.repository.support.MirageRepositoryFactory;
-import org.springframework.data.repository.core.support.RepositoryFactorySupport;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.transaction.annotation.Transactional;
+
+import com.google.common.collect.Iterables;
 
 import jp.sf.amateras.mirage.SqlManager;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+import org.springframework.data.mirage.repository.example.User;
+import org.springframework.data.mirage.repository.example.UserRepository;
+
+import org.springframework.data.mirage.repository.support.MirageRepositoryFactory;
+
+@RunWith(SpringRunner.class)
 @ContextConfiguration("classpath:/test-context.xml")
 @Transactional
 @SuppressWarnings("javadoc")

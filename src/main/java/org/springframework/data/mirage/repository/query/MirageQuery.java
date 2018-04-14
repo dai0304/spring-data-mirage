@@ -1,6 +1,5 @@
 /*
- * Copyright 2011 Daisuke Miyamoto.
- * Created on 2012/05/16
+ * Copyright 2011-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -10,9 +9,9 @@
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
- * either express or implied. See the License for the specific language
- * governing permissions and limitations under the License.
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.springframework.data.mirage.repository.query;
 
@@ -21,18 +20,17 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -40,21 +38,26 @@ import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
-import org.springframework.data.mirage.repository.ScopeClasspathSqlResource;
-import org.springframework.data.mirage.repository.SqlResourceCandidate;
 import org.springframework.data.repository.query.Parameter;
 import org.springframework.data.repository.query.QueryMethod;
 import org.springframework.data.repository.query.RepositoryQuery;
 import org.springframework.util.Assert;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jp.sf.amateras.mirage.SqlManager;
 import jp.sf.amateras.mirage.SqlResource;
 import jp.sf.amateras.mirage.StringSqlResource;
+
 import jp.xet.sparwings.spring.data.chunk.ChunkImpl;
 import jp.xet.sparwings.spring.data.chunk.Chunkable;
 import jp.xet.sparwings.spring.data.chunk.Chunkable.PaginationRelation;
 import jp.xet.sparwings.spring.data.chunk.PaginationTokenEncoder;
 import jp.xet.sparwings.spring.data.chunk.SimplePaginationTokenEncoder;
+
+import org.springframework.data.mirage.repository.ScopeClasspathSqlResource;
+import org.springframework.data.mirage.repository.SqlResourceCandidate;
 
 /**
  * {@link RepositoryQuery} implementation for spring-data-mirage.
@@ -66,8 +69,6 @@ import jp.xet.sparwings.spring.data.chunk.SimplePaginationTokenEncoder;
 public class MirageQuery implements RepositoryQuery {
 	
 	private static Logger log = LoggerFactory.getLogger(MirageQuery.class);
-	
-	private static final Charset UTF_8 = Charset.forName("UTF-8");
 	
 	private static final int BUFFER_SIZE = 1024 * 4;
 	
@@ -108,7 +109,7 @@ public class MirageQuery implements RepositoryQuery {
 		}
 		List<String> orders = new ArrayList<String>();
 		for (Order order : sort) {
-			orders.add(String.format("%s %s", order.getProperty(), order.getDirection().name()));
+			orders.add(String.format(Locale.ENGLISH, "%s %s", order.getProperty(), order.getDirection().name()));
 		}
 		if (orders.size() != 0) {
 			params.put("orders", join(orders));
@@ -237,14 +238,12 @@ public class MirageQuery implements RepositoryQuery {
 		Map<String, Object> parameterMap = new HashMap<String, Object>();
 		parameterMap.put("orders", null);
 		for (Parameter p : mirageQueryMethod.getParameters()) {
-			String parameterName = p.getName();
-			if (parameterName == null) {
+			p.getName().ifPresent(parameterName -> parameterMap.put(parameterName, parameters[p.getIndex()]));
+			if (p.getName().isPresent() == false) {
 				if (Pageable.class.isAssignableFrom(p.getType()) == false
 						&& Chunkable.class.isAssignableFrom(p.getType()) == false) {
 					log.warn("null name parameter [{}] is ignored", p);
 				}
-			} else {
-				parameterMap.put(parameterName, parameters[p.getIndex()]);
 			}
 		}
 		Iterable<StaticParam> staticParams = mirageQueryMethod.getStaticParameters();
@@ -263,19 +262,18 @@ public class MirageQuery implements RepositoryQuery {
 		}
 		
 		List<SqlResourceCandidate> candidates = new ArrayList<SqlResourceCandidate>();
-		for (Class<?> clazz : new Class[] {
+		for (Class<?> clazz : new Class<?>[] {
 			mirageQueryMethod.getRepositoryInterface(),
 			mirageQueryMethod.getDeclaringClass()
 		}) {
 			String simpleName = clazz.getSimpleName();
 			String args = getArgsPartOfSignature(mirageQueryMethod.asMethod());
-			candidates.addAll(Arrays.asList(new SqlResourceCandidate[] {
-				new SqlResourceCandidate(clazz, simpleName + "#" + mirageQueryMethod.getName() + args + ".sql"),
-				new SqlResourceCandidate(clazz, simpleName + "#" + mirageQueryMethod.getName() + ".sql"),
-				new SqlResourceCandidate(clazz, simpleName + "_" + mirageQueryMethod.getName() + args + ".sql"),
-				new SqlResourceCandidate(clazz, simpleName + "_" + mirageQueryMethod.getName() + ".sql"),
-				new SqlResourceCandidate(clazz, simpleName + ".sql")
-			}));
+			candidates.addAll(Arrays.asList(
+					new SqlResourceCandidate(clazz, simpleName + "#" + mirageQueryMethod.getName() + args + ".sql"),
+					new SqlResourceCandidate(clazz, simpleName + "#" + mirageQueryMethod.getName() + ".sql"),
+					new SqlResourceCandidate(clazz, simpleName + "_" + mirageQueryMethod.getName() + args + ".sql"),
+					new SqlResourceCandidate(clazz, simpleName + "_" + mirageQueryMethod.getName() + ".sql"),
+					new SqlResourceCandidate(clazz, simpleName + ".sql")));
 		}
 		return candidates.toArray(new SqlResourceCandidate[candidates.size()]);
 	}
@@ -311,7 +309,7 @@ public class MirageQuery implements RepositoryQuery {
 	private int getTotalCount(SqlResource sqlResource) {
 		Reader reader = null;
 		try {
-			reader = new InputStreamReader(sqlResource.getInputStream(), UTF_8);
+			reader = new InputStreamReader(sqlResource.getInputStream(), StandardCharsets.UTF_8);
 			String query = toString(reader);
 			if (query.contains("SQL_CALC_FOUND_ROWS")) { // TODO MySQL固有処理
 				return sqlManager.getSingleResult(Integer.class, new StringSqlResource("SELECT FOUND_ROWS()"));
@@ -378,8 +376,7 @@ public class MirageQuery implements RepositoryQuery {
 		
 		int totalCount = getTotalCount(sqlResource);
 		
-		PageImpl<?> page = new PageImpl<>(resultList, pageable, totalCount);
-		return page;
+		return new PageImpl<>(resultList, pageable, totalCount);
 	}
 	
 	private Object processSliceQuery(SqlResource sqlResource, Map<String, Object> parameterMap,
@@ -398,8 +395,7 @@ public class MirageQuery implements RepositoryQuery {
 			return resultList;
 		}
 		
-		SliceImpl<?> page = new SliceImpl<>(resultList, pageable, true/*TODO*/);
-		return page;
+		return new SliceImpl<>(resultList, pageable, true/*TODO*/);
 	}
 	
 	private String toString(Reader input) throws IOException {

@@ -1,6 +1,5 @@
 /*
- * Copyright 2011 Daisuke Miyamoto.
- * Created on 2012/05/16
+ * Copyright 2011-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -10,15 +9,17 @@
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
- * either express or implied. See the License for the specific language
- * governing permissions and limitations under the License.
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.springframework.data.mirage.repository.query;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.data.projection.ProjectionFactory;
@@ -41,7 +42,7 @@ import jp.xet.sparwings.spring.data.chunk.Chunk;
  */
 public class MirageQueryMethod extends QueryMethod {
 	
-	private static Class<? extends Object> potentiallyUnwrapReturnTypeFor(Method method) {
+	private static Class<?> potentiallyUnwrapReturnTypeFor(Method method) {
 		if (QueryExecutionConverters.supports(method.getReturnType())) {
 			// unwrap only one level to handle cases like Future<List<Entity>> correctly.
 			return ClassTypeInformation.fromReturnTypeOf(method).getComponentType().getType();
@@ -51,9 +52,9 @@ public class MirageQueryMethod extends QueryMethod {
 	}
 	
 	
-	final Method method;
+	private final Method method;
 	
-	final RepositoryMetadata metadata;
+	private final RepositoryMetadata metadata;
 	
 	private final Class<?> unwrappedReturnType;
 	
@@ -72,7 +73,7 @@ public class MirageQueryMethod extends QueryMethod {
 		unwrappedReturnType = potentiallyUnwrapReturnTypeFor(method);
 		
 		Assert.isTrue((isModifyingQuery() && getParameters().hasSpecialParameter()) == false,
-				String.format("Modifying method must not contain %s!", Parameters.TYPES));
+				String.format(Locale.ENGLISH, "Modifying method must not contain %s!", Parameters.TYPES));
 	}
 	
 	/**
@@ -101,9 +102,7 @@ public class MirageQueryMethod extends QueryMethod {
 		
 		List<StaticParam> result = new ArrayList<StaticParam>(capacity);
 		if (staticParams != null) {
-			for (StaticParam param : staticParams.value()) {
-				result.add(param);
-			}
+			Collections.addAll(result, staticParams.value());
 		}
 		if (staticParam != null) {
 			result.add(staticParam);
@@ -203,5 +202,4 @@ public class MirageQueryMethod extends QueryMethod {
 	private Query getQueryAnnotation() {
 		return method.getAnnotation(Query.class);
 	}
-	
 }

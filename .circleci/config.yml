@@ -1,0 +1,41 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: openjdk:8-jdk
+    environment:
+      _JAVA_OPTIONS: -Xmx3G
+      GRADLE_OPTS: -Dorg.gradle.daemon=false
+      TERM: dumb
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v0-{{ .Branch }}-{{ checksum ".circleci/config.yml" }}-{{ checksum "build.gradle" }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
+            - v0-{{ .Branch }}-{{ checksum ".circleci/config.yml" }}
+            - v0-{{ .Branch }}
+            - v0-develop
+            - v0-master
+      - run:
+          name: Show version
+          command: ./gradlew -v
+      - run:
+          name: Resolve dependencies
+          command: ./gradlew resolveDependencies
+      - run:
+          name: Run tests
+          command: ./gradlew check jacocoTestReport
+      - store_artifacts:
+          name: Store artifacts
+          path: build/reports
+          destination: artifacts
+      - store_test_results:
+          path: build/test-results
+      - deploy:
+          name: Deploy to JFrog Bintray
+          command: ./gradlew bintrayUpload
+      - save_cache:
+          key: v0-{{ .Branch }}-{{ checksum ".circleci/config.yml" }}-{{ checksum "build.gradle" }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
+          paths:
+            - "~/.gradle"
+            - "~/.m2"
