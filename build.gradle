@@ -1,0 +1,128 @@
+// -*- coding: utf-8; mode: groovy -*-
+
+buildscript {
+	repositories {
+		jcenter()
+		mavenCentral()
+		maven { url "https://plugins.gradle.org/m2/" }
+	}
+	dependencies {
+		classpath "com.diffplug.spotless:spotless-plugin-gradle:3.10.0"
+		classpath "de.thetaphi:forbiddenapis:2.2"
+		classpath "de.aaschmid:gradle-cpd-plugin:1.0"
+	}
+}
+
+plugins {
+	id 'java'
+	id 'maven'
+	id 'maven-publish'
+	id "com.jfrog.bintray" version "1.7.3"
+}
+
+// ======== code quality ========
+apply plugin: "checkstyle"
+apply plugin: "findbugs"
+apply plugin: "pmd"
+apply plugin: "cpd"
+apply plugin: "jacoco"
+apply plugin: "de.thetaphi.forbiddenapis"
+apply plugin: "com.diffplug.gradle.spotless"
+
+// code quality configuration
+apply from: "${rootProject.projectDir}/gradle/quality/checkstyle.gradle"
+apply from: "${rootProject.projectDir}/gradle/quality/findbugs.gradle"
+apply from: "${rootProject.projectDir}/gradle/quality/pmd.gradle"
+apply from: "${rootProject.projectDir}/gradle/quality/cpd.gradle"
+apply from: "${rootProject.projectDir}/gradle/quality/jacoco.gradle"
+apply from: "${rootProject.projectDir}/gradle/quality/forbiddenapis.gradle"
+apply from: "${rootProject.projectDir}/gradle/quality/spotless.gradle"
+
+apply from: "${rootProject.projectDir}/gradle/version.gradle"
+apply from: "${rootProject.projectDir}/gradle/resolveDependencies.gradle"
+apply from: "${rootProject.projectDir}/gradle/sourceArtifact.gradle"
+apply from: "${rootProject.projectDir}/gradle/bintray.gradle"
+
+
+group = "org.springframework.data"
+ext.artifactId = "spring-data-mirage"
+
+defaultTasks "clean", "build"
+
+// compiler
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+compileJava {
+	options.compilerArgs << "-Werror"
+	options.compilerArgs << "-Xlint:all" << "-Xlint:-processing" << "-Xlint:-deprecation"
+}
+
+javadoc {
+	failOnError = false
+}
+
+// ======== libraries ========
+repositories {
+	jcenter()
+	mavenCentral()
+	maven { url 'http://dl.bintray.com/dai0304/spar-wings' }
+}
+
+configurations {
+	testCompile.extendsFrom compileOnly
+}
+
+dependencies {
+	compile "org.slf4j:slf4j-api:$slf4jVersion"
+	compile "org.slf4j:jul-to-slf4j:$slf4jVersion"
+	compile "com.google.guava:guava:$guavaVersion"
+	compile "org.springframework.data:spring-data-commons:$springDataCommonsVersion"
+	compile "jp.sf.amateras:mirage:$mirageVersion"
+	compileOnly "org.springframework:spring-context:$springVersion"
+	compileOnly "org.springframework:spring-jdbc:$springVersion"
+	compileOnly "jp.xet.spar-wings:spar-wings-spring-data-chunk:$sparWingsVersion"
+
+	// tests
+	testCompile "junit:junit:$junitVersion"
+	testCompile "org.hamcrest:hamcrest-library:$hamcrestVersion"
+	testCompile "org.mockito:mockito-core:$mockitoVersion"
+	testCompile "org.springframework:spring-test:$springVersion"
+	testCompile "com.h2database:h2:$h2DatabaseVersion"
+	testCompile("org.lazyluke:log4jdbc-remix:$log4jdbcVersion") {
+		exclude group:"slf4j-log4j12"
+	}
+	testCompile "cglib:cglib:$cglibVersion"
+	testCompile "ch.qos.logback:logback-classic:$logbackVersion"
+
+	pmd 'net.sourceforge.pmd:pmd-java:5.8.1'
+	pmd 'org.ow2.asm:asm:6.1'
+}
+
+
+configurations.all {
+	resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+		if (details.requested.name == "commons-logging") {
+			// prefer "jcl-over-slf4j" over "commons-logging":
+			details.useTarget "org.slf4j:jcl-over-slf4j:$slf4jVersion"
+		}
+		if (details.requested.name == "log4j") {
+			// prefer "log4j-over-slf4j" over "log4j":
+			details.useTarget "org.slf4j:log4j-over-slf4j:$slf4jVersion"
+		}
+	}
+}
+
+// ======== publishing ========
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			artifact sourcesJar
+		}
+	}
+}
+
+// ======== wrapper ========
+task wrapper(type: Wrapper) {
+	gradleVersion = "4.6"
+}

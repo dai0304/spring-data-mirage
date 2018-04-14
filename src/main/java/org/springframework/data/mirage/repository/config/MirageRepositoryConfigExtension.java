@@ -1,6 +1,5 @@
 /*
- * Copyright 2012 the original author or authors.
- * Created on 2013/09/10
+ * Copyright 2011-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -10,9 +9,9 @@
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
- * either express or implied. See the License for the specific language
- * governing permissions and limitations under the License.
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.springframework.data.mirage.repository.config;
 
@@ -21,13 +20,15 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor;
-import org.springframework.data.mirage.repository.support.MirageRepositoryFactoryBean;
 import org.springframework.data.repository.config.AnnotationRepositoryConfigurationSource;
 import org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport;
 import org.springframework.data.repository.config.RepositoryConfigurationSource;
 import org.springframework.data.repository.config.XmlRepositoryConfigurationSource;
 import org.springframework.util.StringUtils;
+
 import org.w3c.dom.Element;
+
+import org.springframework.data.mirage.repository.support.MirageRepositoryFactoryBean;
 
 /**
  * Mirage specific configuration extension parsing custom attributes from the XML namespace and
@@ -66,7 +67,8 @@ public class MirageRepositoryConfigExtension extends RepositoryConfigurationExte
 	}
 	
 	@Override
-	public void registerBeansForRoot(BeanDefinitionRegistry registry, RepositoryConfigurationSource configurationSource) {
+	public void registerBeansForRoot(BeanDefinitionRegistry registry,
+			RepositoryConfigurationSource configurationSource) {
 		super.registerBeansForRoot(registry, configurationSource);
 		
 		if (!hasBean(PET_POST_PROCESSOR, registry)) {
