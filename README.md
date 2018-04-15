@@ -1,5 +1,7 @@
 # Spring Data Mirage SQL
 
+[![Download](https://api.bintray.com/packages/dai0304/maven/spring-data-mirage/images/download.svg)](https://bintray.com/dai0304/maven/spring-data-mirage/_latestVersion)
+
 The primary goal of the [Spring Data](http://www.springsource.org/spring-data) project is to make it easier to build
 Spring-powered applications that use data access technologies. This module deals with enhanced support for
 [Mirage SQL](https://github.com/mirage-sql/mirage) based data access layers.
@@ -7,7 +9,7 @@ Spring-powered applications that use data access technologies. This module deals
 
 ## Features
 
-This project defines a `MirageRepository` base interface  :
+This project defines a `MirageRepository` base interface:
 
 ```java
 public interface MirageRepository<E, ID extends Serializable> extends PagingAndSortingRepository<E, ID> {
@@ -32,7 +34,7 @@ public interface MirageRepository<E, ID extends Serializable> extends PagingAndS
 
 ### dependency
 
-Add the repository definition to your `pom.xml` :
+Add the repository definition to your `pom.xml`:
 
 ```xml
 <repositories>
@@ -56,7 +58,7 @@ Add the jar to your maven project :
 
 ### Spring beans configurations
 
-Configure your infrastructure :
+Configure your infrastructure:
 
 ```xml
 <bean id="dataSource" ...>
@@ -135,7 +137,7 @@ public interface UserRepository extends MirageRepository<User, Long> {
 ### SQL files
 
 Write SQL file `UserRepository.sql` (that's called 'base-select-SQL') and place on the same directory
-with `UserRepository.class` :
+with `UserRepository.class`:
 
 ```sql
 SELECT *
@@ -178,7 +180,7 @@ by `findOne()`, `findAll(Iterable<ID>)`, `findAll(Pageable)` and the like.
 And you can place another 2-way-sql for specific query method (that's called 'method-specific-2-way-sql')
 like this: `UserRepository_findByComplexCondition.sql`
 
-```
+```sql
 SELECT U.*
 FROM users U
 	JOIN blahblah B ON U.username = B.username
@@ -228,7 +230,7 @@ public class UserRepositoryTest {
 You must mark modifying (insert, update and delete) query methods by `@Modifying` annotation:
 
 `FooBarRepository.java`
-```
+```java
 public interface FooBarRepository  extends MirageRepository<FooBar, Long> {
 
 	@Modifying
@@ -247,14 +249,14 @@ UPDATE ...
 
 If you want to pass parameters to 2-way-sql statically, you can use `@StaticParam` annotation like this:
 
-```
+```java
 @StaticParam(key = "id", value = "foo")
 User findFoo();
 ```
 
 You can use multiple `@StaticParam` annotations by using `@StaticParams` annotation like this:
 
-```
+```java
 @StaticParams({
 	@StaticParam(key = "foo", value = "foovalue"),
 	@StaticParam(key = "bar", value = "barvalue")

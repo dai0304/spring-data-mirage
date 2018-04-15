@@ -113,15 +113,6 @@ configurations.all {
 	}
 }
 
-// ======== publishing ========
-publishing {
-	publications {
-		mavenJava(MavenPublication) {
-			artifact sourcesJar
-		}
-	}
-}
-
 // ======== wrapper ========
 task wrapper(type: Wrapper) {
 	gradleVersion = "4.6"
