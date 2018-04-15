@@ -16,7 +16,7 @@
   </appender>
 
   <logger name="org.springframework" level="INFO" />
-  <logger name="org.springframework.data.mirage" level="DEBUG" />
+  <logger name="jp.xet.springframework.data.mirage" level="DEBUG" />
 
   <logger name="jp.sf.amateras.mirage" level="WARN" />
 

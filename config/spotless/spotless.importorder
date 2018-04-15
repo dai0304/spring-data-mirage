@@ -1,5 +1,5 @@
-10=org.springframework.data.mirage.repository.example
-10=org.springframework.data.mirage
+11=jp.xet.springframework.data.mirage.repository.example
+10=jp.xet.springframework.data.mirage
 9=jp.xet.sparwings
 8=
 7=jp
