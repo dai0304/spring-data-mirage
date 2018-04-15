@@ -44,7 +44,7 @@ apply from: "${rootProject.projectDir}/gradle/sourceArtifact.gradle"
 apply from: "${rootProject.projectDir}/gradle/bintray.gradle"
 
 
-group = "org.springframework.data"
+group = "jp.xet.springframework.data.mirage"
 ext.artifactId = "spring-data-mirage"
 
 defaultTasks "clean", "build"

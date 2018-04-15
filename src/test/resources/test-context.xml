@@ -12,7 +12,7 @@
 
   <context:annotation-config />
   <context:property-placeholder location="classpath:/jdbc.properties" />
-  <context:component-scan base-package="org.springframework.data.mirage.repository" />
+  <context:component-scan base-package="jp.xet.springframework.data.mirage.repository" />
 
   <bean id="sqlManager" class="jp.sf.amateras.mirage.SqlManagerImpl">
     <property name="dialect" ref="dialect" />
@@ -53,9 +53,9 @@
     </constructor-arg>
   </bean>
 
-  <mirage:repositories base-package="org.springframework.data.mirage.repository.example" sql-manager-ref="sqlManager" />
-  <bean class="org.springframework.data.mirage.repository.support.MiragePersistenceExceptionTranslator" />
-  <bean class="org.springframework.data.mirage.repository.support.FieldPropertyExtractorInitializer"/>
-  <bean class="org.springframework.data.mirage.repository.support.EnableSLF4JBridgeHandler" />
+  <mirage:repositories base-package="jp.xet.springframework.data.mirage.repository.example" sql-manager-ref="sqlManager" />
+  <bean class="jp.xet.springframework.data.mirage.repository.support.MiragePersistenceExceptionTranslator" />
+  <bean class="jp.xet.springframework.data.mirage.repository.support.FieldPropertyExtractorInitializer"/>
+  <bean class="jp.xet.springframework.data.mirage.repository.support.EnableSLF4JBridgeHandler" />
 
 </beans>
