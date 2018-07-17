@@ -162,6 +162,21 @@ public class EntityRepositoryTest {
 		assertThat(foundFoo.getStr(), is("bar"));
 	}
 	
+	
+	@Test
+	@Rollback
+	public void test_create_and_findChunk() {
+		assertThat(repo.count(), is(0L));
+		Entity foo = repo.create(new Entity("foo"));
+		assertThat(repo.count(), is(1L));
+		Chunk<Entity> chunk = repo.findChunk();
+		assertThat(chunk.getContent().size(), is(1));
+		
+		Entity foundFoo = chunk.iterator().next();
+		assertThat(foundFoo.getId(), is(foo.getId()));
+		assertThat(foundFoo.getStr(), is("foo"));
+	}
+	
 	@Test
 	@Rollback
 	public void testChunking_8items_ASC() {
