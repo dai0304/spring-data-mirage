@@ -8,3 +8,6 @@ target/
 .checkstyle
 .fbprefs
 .idea
+/.gradle
+/build
+*.iml
