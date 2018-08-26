@@ -33,7 +33,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.google.common.collect.Iterables;
-
 import com.miragesql.miragesql.SqlManager;
 
 import jp.xet.springframework.data.mirage.repository.support.MirageRepositoryFactory;
