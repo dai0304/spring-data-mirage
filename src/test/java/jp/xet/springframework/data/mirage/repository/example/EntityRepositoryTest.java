@@ -163,7 +163,6 @@ public class EntityRepositoryTest {
 		assertThat(foundFoo.getStr(), is("bar"));
 	}
 	
-	
 	@Test
 	@Rollback
 	public void test_create_and_findChunk() {
