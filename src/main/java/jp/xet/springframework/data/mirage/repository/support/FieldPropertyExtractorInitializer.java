@@ -15,8 +15,8 @@
  */
 package jp.xet.springframework.data.mirage.repository.support;
 
-import jp.sf.amateras.mirage.bean.BeanDescFactory;
-import jp.sf.amateras.mirage.bean.FieldPropertyExtractor;
+import com.miragesql.miragesql.bean.BeanDescFactory;
+import com.miragesql.miragesql.bean.FieldPropertyExtractor;
 
 /**
  * {@link BeanDescFactory}に{@link FieldPropertyExtractor}を設定するタイミングが掴めなかったので強引に…orz
@@ -24,7 +24,7 @@ import jp.sf.amateras.mirage.bean.FieldPropertyExtractor;
  * @since 0.1
  * @version $Id: FieldPropertyExtractorInitializer.java 160 2011-10-21 09:49:56Z daisuke $
  * @author daisuke
- * @deprecated use {@link BeanDescFactory#setPropertyExtractor(jp.sf.amateras.mirage.bean.PropertyExtractor)} instead.
+ * @deprecated use {@link BeanDescFactory#setPropertyExtractor(com.miragesql.miragesql.bean.PropertyExtractor)} instead.
  */
 @Deprecated
 public class FieldPropertyExtractorInitializer {

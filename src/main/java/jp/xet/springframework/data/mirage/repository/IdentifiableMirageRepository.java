@@ -20,7 +20,7 @@ import java.io.Serializable;
 import org.springframework.data.repository.core.EntityInformation;
 import org.springframework.util.Assert;
 
-import jp.sf.amateras.mirage.SqlManager;
+import com.miragesql.miragesql.SqlManager;
 
 /**
  * TODO for daisuke

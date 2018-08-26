@@ -34,7 +34,7 @@ import org.junit.runner.RunWith;
 
 import com.google.common.collect.Iterables;
 
-import jp.sf.amateras.mirage.SqlManager;
+import com.miragesql.miragesql.SqlManager;
 
 import jp.xet.springframework.data.mirage.repository.support.MirageRepositoryFactory;
 

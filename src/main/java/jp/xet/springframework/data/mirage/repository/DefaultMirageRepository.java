@@ -48,14 +48,14 @@ import org.springframework.util.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jp.sf.amateras.mirage.IterationCallback;
-import jp.sf.amateras.mirage.SqlManager;
-import jp.sf.amateras.mirage.SqlResource;
-import jp.sf.amateras.mirage.annotation.Column;
-import jp.sf.amateras.mirage.exception.SQLRuntimeException;
-import jp.sf.amateras.mirage.naming.NameConverter;
-import jp.sf.amateras.mirage.util.MirageUtil;
-import jp.sf.amateras.mirage.util.Validate;
+import com.miragesql.miragesql.IterationCallback;
+import com.miragesql.miragesql.SqlManager;
+import com.miragesql.miragesql.SqlResource;
+import com.miragesql.miragesql.annotation.Column;
+import com.miragesql.miragesql.exception.SQLRuntimeException;
+import com.miragesql.miragesql.naming.NameConverter;
+import com.miragesql.miragesql.util.MirageUtil;
+import com.miragesql.miragesql.util.Validate;
 
 import jp.xet.sparwings.spring.data.chunk.Chunk;
 import jp.xet.sparwings.spring.data.chunk.ChunkImpl;

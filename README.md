@@ -71,21 +71,21 @@ Configure your infrastructure:
 
 <tx:annotation-driven transaction-manager="transactionManager" proxy-target-class="false" />
 
-<bean id="connectionProvider" class="jp.sf.amateras.mirage.integration.spring.SpringConnectionProvider">
+<bean id="connectionProvider" class="com.miragesql.miragesql.integration.spring.SpringConnectionProvider">
   <property name="transactionManager" ref="transactionManager" />
 </bean>
 
-<bean id="dialect" class="jp.sf.amateras.mirage.dialect.MySQLDialect" />
-<bean id="railsLikeNameConverter" class="jp.sf.amateras.mirage.naming.RailsLikeNameConverter" />
+<bean id="dialect" class="com.miragesql.miragesql.dialect.MySQLDialect" />
+<bean id="railsLikeNameConverter" class="com.miragesql.miragesql.naming.RailsLikeNameConverter" />
 
-<bean id="sqlManager" class="jp.sf.amateras.mirage.SqlManagerImpl" depends-on="fieldPropertyExtractorInitializer">
+<bean id="sqlManager" class="com.miragesql.miragesql.SqlManagerImpl" depends-on="fieldPropertyExtractorInitializer">
   <property name="connectionProvider" ref="connectionProvider" />
   <property name="dialect" ref="dialect" />
   <property name="nameConverter" ref="railsLikeNameConverter" />
   <property name="beanDescFactory">
-    <bean class="jp.sf.amateras.mirage.bean.BeanDescFactory">
+    <bean class="com.miragesql.miragesql.bean.BeanDescFactory">
       <property name="propertyExtractor">
-        <bean class="jp.sf.amateras.mirage.bean.FieldPropertyExtractor" />
+        <bean class="com.miragesql.miragesql.bean.FieldPropertyExtractor" />
       </property>
     </bean>
   </property>

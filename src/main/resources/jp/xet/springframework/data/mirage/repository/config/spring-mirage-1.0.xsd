@@ -59,7 +59,7 @@
 		<xsd:annotation>
 			<xsd:appinfo>
 				<tool:annotation kind="ref">
-					<tool:assignable-to type="jp.sf.amateras.mirage.SqlManager" />
+					<tool:assignable-to type="com.miragesql.miragesql.SqlManager" />
 				</tool:annotation>
 			</xsd:appinfo>
 		</xsd:annotation>

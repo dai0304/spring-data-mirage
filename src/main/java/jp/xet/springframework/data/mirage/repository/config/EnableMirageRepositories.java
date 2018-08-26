@@ -29,7 +29,7 @@ import org.springframework.data.repository.query.QueryLookupStrategy;
 import org.springframework.data.repository.query.QueryLookupStrategy.Key;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import jp.sf.amateras.mirage.SqlManager;
+import com.miragesql.miragesql.SqlManager;
 
 import jp.xet.springframework.data.mirage.repository.support.MirageRepositoryFactoryBean;
 
