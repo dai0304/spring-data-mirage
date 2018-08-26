@@ -51,6 +51,7 @@ import com.google.common.collect.Iterables;
 import jp.xet.sparwings.spring.data.chunk.Chunk;
 import jp.xet.sparwings.spring.data.chunk.ChunkRequest;
 import jp.xet.sparwings.spring.data.chunk.Chunkable;
+import jp.xet.springframework.data.mirage.repository.TestConfiguration;
 
 /**
  * Test for {@link EntityRepository}.
@@ -58,15 +59,9 @@ import jp.xet.sparwings.spring.data.chunk.Chunkable;
  * @author daisuke
  */
 @RunWith(SpringRunner.class)
-@ContextConfiguration("classpath:/test-context.xml")
+@ContextConfiguration(classes = TestConfiguration.class)
 @Transactional
 @SuppressWarnings("javadoc")
-@TestExecutionListeners(listeners = {
-	DependencyInjectionTestExecutionListener.class,
-	DirtiesContextTestExecutionListener.class,
-	TransactionalTestExecutionListener.class
-})
-
 public class EntityRepositoryTest {
 	
 	private static Logger log = LoggerFactory.getLogger(EntityRepositoryTest.class);

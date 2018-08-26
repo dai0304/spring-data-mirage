@@ -42,7 +42,7 @@ import jp.xet.springframework.data.mirage.repository.example.User;
 import jp.xet.springframework.data.mirage.repository.example.UserRepository;
 
 @RunWith(SpringRunner.class)
-@ContextConfiguration("classpath:/test-context.xml")
+@ContextConfiguration(classes = TestConfiguration.class)
 @Transactional
 @SuppressWarnings("javadoc")
 public class DefaultMirageRepositoryTest {
