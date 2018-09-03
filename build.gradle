@@ -75,10 +75,9 @@ configurations {
 
 dependencies {
 	compile "org.slf4j:slf4j-api:$slf4jVersion"
-	compile "org.slf4j:jul-to-slf4j:$slf4jVersion"
 	compile "com.google.guava:guava:$guavaVersion"
 	compile "org.springframework.data:spring-data-commons:$springDataCommonsVersion"
-	compile "jp.sf.amateras:mirage:$mirageVersion"
+	compile "com.miragesql:miragesql:$mirageVersion"
 	compileOnly "org.springframework:spring-context:$springVersion"
 	compileOnly "org.springframework:spring-jdbc:$springVersion"
 	compileOnly "jp.xet.spar-wings:spar-wings-spring-data-chunk:$sparWingsVersion"
@@ -89,9 +88,6 @@ dependencies {
 	testCompile "org.mockito:mockito-core:$mockitoVersion"
 	testCompile "org.springframework:spring-test:$springVersion"
 	testCompile "com.h2database:h2:$h2DatabaseVersion"
-	testCompile("org.lazyluke:log4jdbc-remix:$log4jdbcVersion") {
-		exclude group:"slf4j-log4j12"
-	}
 	testCompile "ch.qos.logback:logback-classic:$logbackVersion"
 
 	pmd 'net.sourceforge.pmd:pmd-java:5.8.1'
