@@ -52,7 +52,7 @@ Add the jar to your maven project :
 <dependency>
   <groupId>org.springframework.data</groupId>
   <artifactId>spring-data-mirage</artifactId>
-  <version>0.10.0.RELEASE</version>
+  <version>0.11.1.RELEASE</version>
 </dependency>
 ```
 
