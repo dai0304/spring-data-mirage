@@ -92,7 +92,6 @@ dependencies {
 	testCompile("org.lazyluke:log4jdbc-remix:$log4jdbcVersion") {
 		exclude group:"slf4j-log4j12"
 	}
-	testCompile "cglib:cglib:$cglibVersion"
 	testCompile "ch.qos.logback:logback-classic:$logbackVersion"
 
 	pmd 'net.sourceforge.pmd:pmd-java:5.8.1'
