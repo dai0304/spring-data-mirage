@@ -24,7 +24,7 @@ import org.springframework.data.repository.core.RepositoryMetadata;
 import org.springframework.data.repository.query.QueryLookupStrategy;
 import org.springframework.data.repository.query.RepositoryQuery;
 
-import jp.sf.amateras.mirage.SqlManager;
+import com.miragesql.miragesql.SqlManager;
 
 /**
  * Query lookup strategy to execute finders.

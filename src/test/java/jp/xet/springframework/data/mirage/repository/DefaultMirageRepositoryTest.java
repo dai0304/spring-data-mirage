@@ -33,8 +33,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.google.common.collect.Iterables;
-
-import jp.sf.amateras.mirage.SqlManager;
+import com.miragesql.miragesql.SqlManager;
 
 import jp.xet.springframework.data.mirage.repository.support.MirageRepositoryFactory;
 
@@ -42,7 +41,7 @@ import jp.xet.springframework.data.mirage.repository.example.User;
 import jp.xet.springframework.data.mirage.repository.example.UserRepository;
 
 @RunWith(SpringRunner.class)
-@ContextConfiguration("classpath:/test-context.xml")
+@ContextConfiguration(classes = TestConfiguration.class)
 @Transactional
 @SuppressWarnings("javadoc")
 public class DefaultMirageRepositoryTest {

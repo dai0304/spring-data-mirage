@@ -30,7 +30,7 @@ import org.springframework.util.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jp.sf.amateras.mirage.SqlManager;
+import com.miragesql.miragesql.SqlManager;
 
 import jp.xet.springframework.data.mirage.repository.DefaultMirageRepository;
 import jp.xet.springframework.data.mirage.repository.Identifiable;

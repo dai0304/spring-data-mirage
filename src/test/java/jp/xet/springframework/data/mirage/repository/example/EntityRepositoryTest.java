@@ -32,11 +32,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
-import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
-import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 import org.springframework.transaction.annotation.Transactional;
 
 import org.slf4j.Logger;
@@ -52,21 +48,17 @@ import jp.xet.sparwings.spring.data.chunk.Chunk;
 import jp.xet.sparwings.spring.data.chunk.ChunkRequest;
 import jp.xet.sparwings.spring.data.chunk.Chunkable;
 
+import jp.xet.springframework.data.mirage.repository.TestConfiguration;
+
 /**
  * Test for {@link EntityRepository}.
  * 
  * @author daisuke
  */
 @RunWith(SpringRunner.class)
-@ContextConfiguration("classpath:/test-context.xml")
+@ContextConfiguration(classes = TestConfiguration.class)
 @Transactional
 @SuppressWarnings("javadoc")
-@TestExecutionListeners(listeners = {
-	DependencyInjectionTestExecutionListener.class,
-	DirtiesContextTestExecutionListener.class,
-	TransactionalTestExecutionListener.class
-})
-
 public class EntityRepositoryTest {
 	
 	private static Logger log = LoggerFactory.getLogger(EntityRepositoryTest.class);
