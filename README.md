@@ -27,7 +27,7 @@ public interface MirageRepository<E, ID extends Serializable> extends PagingAndS
 
 * Java 8+
 * Spring Data Commons 2.0.x
-* Mirage 1.2.x
+* Mirage 2.0.x
 
 
 ## Quick Start
