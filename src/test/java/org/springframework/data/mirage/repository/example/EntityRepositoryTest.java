@@ -361,4 +361,14 @@ public class EntityRepositoryTest {
 		List<Entity> foundQux = repo.findByStr("qux");
 		assertThat(foundQux.size(), is(0));
 	}
+	
+	@Test
+	@Rollback
+	public void testFindXxx() {
+		repo.save(new Entity("hoge"));
+		repo.save(new Entity("fuga"));
+		
+		List<Entity> foundXxx = repo.findXxx();
+		assertThat(foundXxx.size(), is(1));
+	}
 }
