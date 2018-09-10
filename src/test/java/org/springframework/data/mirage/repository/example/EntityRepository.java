@@ -18,7 +18,6 @@ package org.springframework.data.mirage.repository.example;
 
 import java.util.List;
 
-import org.springframework.data.mirage.repository.query.StaticParam;
 import org.springframework.data.repository.query.Param;
 
 import jp.xet.sparwings.spring.data.chunk.Chunk;
@@ -51,14 +50,6 @@ public interface EntityRepository extends ScannableRepository<Entity, Long>, Ups
 	 * @return the entities found
 	 */
 	List<Entity> findByStrStartsWith(@Param("str") String str);
-	
-	/**
-	 * TODO for daisuke
-	 * 
-	 * @return the xxx value
-	 */
-	@StaticParam(key = "str", value = "hoge")
-	List<Entity> findXxx();
 	
 	/**
 	 * TODO for wreulicke
