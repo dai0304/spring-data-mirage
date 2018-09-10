@@ -1,4 +1,4 @@
--- EntityRepository_findChunk.sql
+-- EntityRepository_findXxx.sql
 
 SELECT *
 FROM samples
