@@ -74,6 +74,7 @@ public class MirageQuery implements RepositoryQuery {
 	
 	private final SqlResource sqlResource;
 	
+	
 	static String getArgsPartOfSignature(Method method) {
 		try {
 			StringBuilder sb = new StringBuilder();
