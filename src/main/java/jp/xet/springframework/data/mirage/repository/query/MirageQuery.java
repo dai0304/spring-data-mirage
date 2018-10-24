@@ -72,6 +72,8 @@ public class MirageQuery implements RepositoryQuery {
 	
 	private static final int BUFFER_SIZE = 1024 * 4;
 	
+	private final SqlResource sqlResource;
+	
 	
 	static String getArgsPartOfSignature(Method method) {
 		try {
@@ -171,11 +173,11 @@ public class MirageQuery implements RepositoryQuery {
 		Assert.notNull(sqlManager, "SqlManager must not to be null");
 		this.mirageQueryMethod = mirageQueryMethod;
 		this.sqlManager = sqlManager;
+		sqlResource = createSqlResource();
 	}
 	
 	@Override
 	public Object execute(Object[] parameters) {
-		SqlResource sqlResource = createSqlResource();
 		Map<String, Object> parameterMap = createParameterMap(parameters);
 		
 		Class<?> returnedDomainType = mirageQueryMethod.getReturnedObjectType();
