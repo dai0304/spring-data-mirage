@@ -74,7 +74,7 @@ public class MirageRepositoryConfigExtension extends RepositoryConfigurationExte
 		if (!hasBean(PET_POST_PROCESSOR, registry)) {
 			AbstractBeanDefinition definition =
 					BeanDefinitionBuilder.rootBeanDefinition(PET_POST_PROCESSOR).getBeanDefinition();
-			registerWithSourceAndGeneratedBeanName(registry, definition, configurationSource.getSource());
+			registerWithSourceAndGeneratedBeanName(definition, registry, configurationSource.getSource());
 		}
 	}
 	

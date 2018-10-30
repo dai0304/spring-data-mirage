@@ -322,7 +322,7 @@ public class EntityRepositoryTest {
 		repo.save(new Entity("bar2"));
 		repo.save(new Entity("bar3"));
 		
-		Page<Entity> page1 = repo.findAll(new PageRequest(1/*zero based*/, 2, Direction.ASC, "str"));
+		Page<Entity> page1 = repo.findAll(PageRequest.of(1/*zero based*/, 2, Direction.ASC, "str"));
 		assertThat(page1.getNumber(), is(1));
 		assertThat(page1.getNumberOfElements(), is(2));
 		assertThat(page1.getTotalElements(), is(7L));
@@ -330,7 +330,7 @@ public class EntityRepositoryTest {
 		assertThat(page1.getContent().get(0).getStr(), is("bar3"));
 		assertThat(page1.getContent().get(1).getStr(), is("foo"));
 		
-		Page<Entity> page2 = repo.findAll(new PageRequest(2/*zero based*/, 2, Direction.ASC, "str"));
+		Page<Entity> page2 = repo.findAll(PageRequest.of(2/*zero based*/, 2, Direction.ASC, "str"));
 		assertThat(page2.getNumber(), is(2));
 		assertThat(page2.getNumberOfElements(), is(2));
 		assertThat(page2.getTotalElements(), is(7L));
