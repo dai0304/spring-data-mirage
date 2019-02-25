@@ -96,9 +96,7 @@ public class Entity implements Identifiable, Serializable {
 	
 	@Override
 	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("Entity[").append(str).append("]");
-		return builder.toString();
+		return "Entity[" + str + "]";
 	}
 	
 	void setId(long id) {
