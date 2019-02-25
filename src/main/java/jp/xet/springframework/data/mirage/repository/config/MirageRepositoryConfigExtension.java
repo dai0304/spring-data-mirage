@@ -33,7 +33,7 @@ import jp.xet.springframework.data.mirage.repository.support.MirageRepositoryFac
 /**
  * Mirage specific configuration extension parsing custom attributes from the XML namespace and
  * {@link EnableMirageRepositories} annotation.
- * 
+ *
  * @author Oliver Gierke
  * @author Eberhard Wolff
  * @author Gil Markham
@@ -74,7 +74,7 @@ public class MirageRepositoryConfigExtension extends RepositoryConfigurationExte
 		if (!hasBean(PET_POST_PROCESSOR, registry)) {
 			AbstractBeanDefinition definition =
 					BeanDefinitionBuilder.rootBeanDefinition(PET_POST_PROCESSOR).getBeanDefinition();
-			registerWithSourceAndGeneratedBeanName(registry, definition, configurationSource.getSource());
+			registerWithSourceAndGeneratedBeanName(definition, registry, configurationSource.getSource());
 		}
 	}
 	

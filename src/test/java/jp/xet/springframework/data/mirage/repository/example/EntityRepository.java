@@ -19,18 +19,19 @@ import java.util.List;
 
 import org.springframework.data.repository.query.Param;
 
-import jp.xet.sparwings.spring.data.chunk.Chunk;
-import jp.xet.sparwings.spring.data.repository.ChunkableRepository;
-import jp.xet.sparwings.spring.data.repository.PageableRepository;
-import jp.xet.sparwings.spring.data.repository.ScannableRepository;
-import jp.xet.sparwings.spring.data.repository.UpsertableRepository;
-import jp.xet.sparwings.spring.data.repository.WritableRepository;
+import org.ws2ten1.chunks.Chunk;
+import org.ws2ten1.chunks.Chunkable;
+import org.ws2ten1.repositories.ChunkableRepository;
+import org.ws2ten1.repositories.PageableRepository;
+import org.ws2ten1.repositories.ScannableRepository;
+import org.ws2ten1.repositories.UpsertableRepository;
+import org.ws2ten1.repositories.WritableRepository;
 
 import jp.xet.springframework.data.mirage.repository.query.StaticParam;
 
 /**
  * Repository interface for {@link Entity}.
- * 
+ *
  * @author daisuke
  */
 public interface EntityRepository extends ScannableRepository<Entity, Long>, UpsertableRepository<Entity, Long>,
@@ -38,7 +39,7 @@ public interface EntityRepository extends ScannableRepository<Entity, Long>, Ups
 	
 	/**
 	 * TODO for daisuke
-	 * 
+	 *
 	 * @param str strプロパティ指定
 	 * @return the entities found
 	 */
@@ -46,7 +47,7 @@ public interface EntityRepository extends ScannableRepository<Entity, Long>, Ups
 	
 	/**
 	 * TODO for daisuke
-	 * 
+	 *
 	 * @param str strプロパティ指定
 	 * @return the entities found
 	 */
@@ -54,7 +55,7 @@ public interface EntityRepository extends ScannableRepository<Entity, Long>, Ups
 	
 	/**
 	 * TODO for daisuke
-	 * 
+	 *
 	 * @return the xxx value
 	 */
 	@StaticParam(key = "str", value = "hoge")
@@ -65,6 +66,6 @@ public interface EntityRepository extends ScannableRepository<Entity, Long>, Ups
 	 *
 	 * @return the entities found
 	 */
-	Chunk<Entity> findChunk();
+	Chunk<Entity> findChunk(Chunkable chunkable);
 	
 }

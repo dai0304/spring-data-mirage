@@ -22,9 +22,9 @@ import org.springframework.data.repository.core.EntityInformation;
 import org.springframework.data.repository.core.RepositoryInformation;
 import org.springframework.data.repository.core.RepositoryMetadata;
 import org.springframework.data.repository.core.support.RepositoryFactorySupport;
-import org.springframework.data.repository.query.EvaluationContextProvider;
 import org.springframework.data.repository.query.QueryLookupStrategy;
 import org.springframework.data.repository.query.QueryLookupStrategy.Key;
+import org.springframework.data.repository.query.QueryMethodEvaluationContextProvider;
 import org.springframework.util.Assert;
 
 import org.slf4j.Logger;
@@ -40,9 +40,8 @@ import jp.xet.springframework.data.mirage.repository.query.MirageQueryLookupStra
 
 /**
  * TODO for daisuke
- * 
+ *
  * @since 0.1
- * @version $Id$
  * @author daisuke
  */
 public class MirageRepositoryFactory extends RepositoryFactorySupport {
@@ -54,7 +53,7 @@ public class MirageRepositoryFactory extends RepositoryFactorySupport {
 	
 	/**
 	 * インスタンスを生成する。
-	 * 
+	 *
 	 * @param sqlManager {@link SqlManager}
 	 * @throws IllegalArgumentException if the argument is {@code null}
 	 * @since 0.1
@@ -68,12 +67,6 @@ public class MirageRepositoryFactory extends RepositoryFactorySupport {
 	@SuppressWarnings("unchecked")
 	public <T, ID> EntityInformation<T, ID> getEntityInformation(Class<T> domainClass) {
 		return (EntityInformation<T, ID>) MirageEntityInformationSupport.getMetadata(domainClass, sqlManager);
-	}
-	
-	@Override
-	protected Optional<QueryLookupStrategy> getQueryLookupStrategy(Key key,
-			EvaluationContextProvider evaluationContextProvider) {
-		return Optional.of(MirageQueryLookupStrategy.create(sqlManager, key));
 	}
 	
 	@Override
@@ -104,6 +97,17 @@ public class MirageRepositoryFactory extends RepositoryFactorySupport {
 			logger.debug("Repository Default SQL [{}] not found, default used.", repositoryInterface);
 		}
 		return repos;
+	}
+	
+	@Override
+	protected Optional<QueryLookupStrategy> getQueryLookupStrategy(Key key,
+			QueryMethodEvaluationContextProvider evaluationContextProvider) {
+		try {
+			QueryLookupStrategy resolvedStrategy = MirageQueryLookupStrategy.create(sqlManager, key);
+			return Optional.of(resolvedStrategy);
+		} catch (IllegalArgumentException e) {
+			return super.getQueryLookupStrategy(key, evaluationContextProvider);
+		}
 	}
 	
 	private boolean isIdentifiableJdbcRepository(EntityInformation<?, Serializable> entityInformation) {

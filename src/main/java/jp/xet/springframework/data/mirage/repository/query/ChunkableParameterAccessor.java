@@ -17,11 +17,11 @@ package jp.xet.springframework.data.mirage.repository.query;
 
 import org.springframework.data.repository.query.ParameterAccessor;
 
-import jp.xet.sparwings.spring.data.chunk.Chunkable;
+import org.ws2ten1.chunks.Chunkable;
 
 /**
  * TODO for daisuke
- * 
+ *
  * @since TODO for daisuke
  * @version $Id$
  * @author daisuke
@@ -30,7 +30,7 @@ public interface ChunkableParameterAccessor extends ParameterAccessor {
 	
 	/**
 	 * Returns the {@link Chunkable} of the parameters, if available. Returns {@code null} otherwise.
-	 * 
+	 *
 	 * @return
 	 */
 	Chunkable getChunkable();

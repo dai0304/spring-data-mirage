@@ -9,18 +9,21 @@ buildscript {
 	dependencies {
 		classpath "com.diffplug.spotless:spotless-plugin-gradle:3.10.0"
 		classpath "de.thetaphi:forbiddenapis:2.2"
-		classpath "de.aaschmid:gradle-cpd-plugin:1.0"
+		classpath "de.aaschmid:gradle-cpd-plugin:1.2"
 	}
 }
 
 plugins {
-	id 'java'
-	id 'maven'
+	id 'java-library'
+	id 'org.springframework.boot' version '2.1.3.RELEASE'
+	id "com.jfrog.bintray" version "1.8.4"
 	id 'maven-publish'
-	id "com.jfrog.bintray" version "1.7.3"
 }
 
-// ======== code quality ========
+// basic plugins
+apply plugin: 'io.spring.dependency-management'
+
+// code quality plugins
 apply plugin: "checkstyle"
 apply plugin: "findbugs"
 apply plugin: "pmd"
@@ -38,6 +41,7 @@ apply from: "${rootProject.projectDir}/gradle/quality/jacoco.gradle"
 apply from: "${rootProject.projectDir}/gradle/quality/forbiddenapis.gradle"
 apply from: "${rootProject.projectDir}/gradle/quality/spotless.gradle"
 
+// custom configuration
 apply from: "${rootProject.projectDir}/gradle/version.gradle"
 apply from: "${rootProject.projectDir}/gradle/resolveDependencies.gradle"
 apply from: "${rootProject.projectDir}/gradle/sourceArtifact.gradle"
@@ -66,7 +70,7 @@ javadoc {
 repositories {
 	jcenter()
 	mavenCentral()
-	maven { url 'http://dl.bintray.com/dai0304/spar-wings' }
+	maven { url 'http://dl.bintray.com/ws2ten1/maven-release' }
 }
 
 configurations {
@@ -74,21 +78,19 @@ configurations {
 }
 
 dependencies {
-	compile "org.slf4j:slf4j-api:$slf4jVersion"
-	compile "com.google.guava:guava:$guavaVersion"
-	compile "org.springframework.data:spring-data-commons:$springDataCommonsVersion"
-	compile "com.miragesql:miragesql:$mirageVersion"
-	compileOnly "org.springframework:spring-context:$springVersion"
-	compileOnly "org.springframework:spring-jdbc:$springVersion"
-	compileOnly "jp.xet.spar-wings:spar-wings-spring-data-chunk:$sparWingsVersion"
+	api "org.springframework.data:spring-data-commons"
+	api "com.miragesql:miragesql:$mirageVersion"
+	api "org.ws2ten1:ws2ten1-chunks:1.0.0-rc2"
+	api "org.ws2ten1:ws2ten1-repositories:1.0.0-rc2"
+	implementation "org.slf4j:slf4j-api"
+	implementation "com.google.guava:guava:$guavaVersion"
+	compileOnly "org.springframework:spring-context"
+	compileOnly "org.springframework:spring-jdbc"
 
 	// tests
-	testCompile "junit:junit:$junitVersion"
-	testCompile "org.hamcrest:hamcrest-library:$hamcrestVersion"
-	testCompile "org.mockito:mockito-core:$mockitoVersion"
-	testCompile "org.springframework:spring-test:$springVersion"
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testCompile "com.h2database:h2:$h2DatabaseVersion"
-	testCompile "ch.qos.logback:logback-classic:$logbackVersion"
+	testCompile "ch.qos.logback:logback-classic"
 
 	pmd 'net.sourceforge.pmd:pmd-java:5.8.1'
 	pmd 'org.ow2.asm:asm:6.1'
@@ -106,6 +108,14 @@ configurations.all {
 			details.useTarget "org.slf4j:log4j-over-slf4j:$slf4jVersion"
 		}
 	}
+}
+
+bootJar {
+		enabled = false
+}
+
+jar {
+		enabled = true
 }
 
 // ======== wrapper ========
