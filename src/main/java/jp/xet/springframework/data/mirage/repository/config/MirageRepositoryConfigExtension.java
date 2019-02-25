@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2018 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import jp.xet.springframework.data.mirage.repository.support.MirageRepositoryFac
 /**
  * Mirage specific configuration extension parsing custom attributes from the XML namespace and
  * {@link EnableMirageRepositories} annotation.
- * 
+ *
  * @author Oliver Gierke
  * @author Eberhard Wolff
  * @author Gil Markham
@@ -62,8 +62,19 @@ public class MirageRepositoryConfigExtension extends RepositoryConfigurationExte
 	@Override
 	public void postProcess(BeanDefinitionBuilder builder, XmlRepositoryConfigurationSource config) {
 		Element element = config.getElement();
-		postProcess(builder, element.getAttribute("sql-manager-ref"), element.getAttribute("transaction-manager-ref"),
+		String sqlManagerRef = element.getAttribute("sql-manager-ref");
+		String transactionManagerRef = element.getAttribute("transaction-manager-ref");
+		postProcess(builder,
+				StringUtils.hasText(sqlManagerRef) ? sqlManagerRef : DEFAULT_SQL_MANAGER_BEAN_NAME,
+				StringUtils.hasText(transactionManagerRef) ? transactionManagerRef
+						: DEFAULT_TRANSACTION_MANAGER_BEAN_NAME,
 				config.getSource());
+	}
+	
+	private void postProcess(BeanDefinitionBuilder builder, String sqlManager, String transactionManager,
+			Object source) { // NOPMD
+		builder.addPropertyReference("sqlManager", sqlManager);
+		builder.addPropertyValue("transactionManager", transactionManager);
 	}
 	
 	@Override
@@ -71,30 +82,17 @@ public class MirageRepositoryConfigExtension extends RepositoryConfigurationExte
 			RepositoryConfigurationSource configurationSource) {
 		super.registerBeansForRoot(registry, configurationSource);
 		
-		if (!hasBean(PET_POST_PROCESSOR, registry)) {
+		if (hasBean(PET_POST_PROCESSOR, registry) == false) {
 			AbstractBeanDefinition definition =
 					BeanDefinitionBuilder.rootBeanDefinition(PET_POST_PROCESSOR).getBeanDefinition();
-			registerWithSourceAndGeneratedBeanName(registry, definition, configurationSource.getSource());
+			Object source = configurationSource.getSource();
+			assert source != null;
+			registerWithSourceAndGeneratedBeanName(definition, registry, source);
 		}
 	}
 	
 	@Override
 	protected String getModulePrefix() {
 		return "mirage";
-	}
-	
-	private void postProcess(BeanDefinitionBuilder builder, String sqlManagerRef, String transactionManagerRef,
-			Object source) {
-		if (StringUtils.hasText(sqlManagerRef)) {
-			builder.addPropertyReference("sqlManager", sqlManagerRef);
-		} else {
-			builder.addPropertyReference("sqlManager", DEFAULT_SQL_MANAGER_BEAN_NAME);
-		}
-		
-		if (StringUtils.hasText(transactionManagerRef)) {
-			builder.addPropertyValue("transactionManager", transactionManagerRef);
-		} else {
-			builder.addPropertyValue("transactionManager", DEFAULT_TRANSACTION_MANAGER_BEAN_NAME);
-		}
 	}
 }

@@ -7,9 +7,9 @@ buildscript {
 		maven { url "https://plugins.gradle.org/m2/" }
 	}
 	dependencies {
-		classpath "com.diffplug.spotless:spotless-plugin-gradle:3.18.0"
 		classpath "de.thetaphi:forbiddenapis:2.6"
 		classpath "de.aaschmid:gradle-cpd-plugin:2.0"
+		classpath "gradle.plugin.com.github.spotbugs:spotbugs-gradle-plugin:$spotbugsPluginVersion"
 	}
 }
 
@@ -18,6 +18,8 @@ plugins {
 	id 'org.springframework.boot' version '2.1.5.RELEASE'
 	id 'maven-publish'
 	id "com.jfrog.bintray" version "1.8.4"
+	id "pmd"
+	id "com.diffplug.gradle.spotless" version "3.23.1"
 }
 
 // basic plugins
@@ -25,21 +27,19 @@ apply plugin: 'io.spring.dependency-management'
 
 // code quality plugins
 apply plugin: "checkstyle"
-apply plugin: "findbugs"
-apply plugin: "pmd"
+apply plugin: "com.github.spotbugs"
 apply plugin: "cpd"
 apply plugin: "jacoco"
 apply plugin: "de.thetaphi.forbiddenapis"
-apply plugin: "com.diffplug.gradle.spotless"
 
 // code quality configuration
-apply from: "${rootProject.projectDir}/gradle/quality/checkstyle.gradle"
-apply from: "${rootProject.projectDir}/gradle/quality/findbugs.gradle"
-apply from: "${rootProject.projectDir}/gradle/quality/pmd.gradle"
-apply from: "${rootProject.projectDir}/gradle/quality/cpd.gradle"
-apply from: "${rootProject.projectDir}/gradle/quality/jacoco.gradle"
-apply from: "${rootProject.projectDir}/gradle/quality/forbiddenapis.gradle"
-apply from: "${rootProject.projectDir}/gradle/quality/spotless.gradle"
+apply from: "${rootProject.projectDir}/config/checkstyle.gradle"
+apply from: "${rootProject.projectDir}/config/spotbugs.gradle"
+apply from: "${rootProject.projectDir}/config/pmd.gradle"
+apply from: "${rootProject.projectDir}/config/cpd.gradle"
+apply from: "${rootProject.projectDir}/config/jacoco.gradle"
+apply from: "${rootProject.projectDir}/config/forbiddenapis.gradle"
+apply from: "${rootProject.projectDir}/config/spotless.gradle"
 
 // custom configuration
 apply from: "${rootProject.projectDir}/gradle/version.gradle"
@@ -68,7 +68,7 @@ javadoc {
 repositories {
 	jcenter()
 	mavenCentral()
-	maven { url 'http://dl.bintray.com/dai0304/spar-wings' }
+	maven { url 'http://dl.bintray.com/ws2ten1/maven-release' }
 }
 
 configurations {
@@ -82,14 +82,21 @@ dependencyManagement {
 }
 
 dependencies {
+	api "com.miragesql:miragesql:2.1.0"
+	api "com.miragesql:miragesql-integration:2.1.0"
+	api "org.ws2ten1:ws2ten1-repositories:1.0.0-rc10"
+	api "org.ws2ten1:ws2ten1-chunks:1.0.0-rc9"
 	implementation "org.slf4j:slf4j-api"
-	implementation "com.google.guava:guava:$guavaVersion"
+	implementation "com.google.guava:guava:24.1-jre"
 	implementation "org.springframework.data:spring-data-commons"
-	implementation "com.miragesql:miragesql:$mirageVersion"
-	implementation "com.miragesql:miragesql-integration:$mirageVersion"
 	compileOnly "org.springframework:spring-context"
 	compileOnly "org.springframework:spring-jdbc"
-	compileOnly "jp.xet.spar-wings:spar-wings-spring-data-chunk:$sparWingsVersion"
+
+	// lombok
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+	testCompileOnly 'org.projectlombok:lombok'
+	testAnnotationProcessor 'org.projectlombok:lombok'
 
 	// tests
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -103,4 +110,23 @@ dependencies {
 wrapper {
 	gradleVersion = '5.2.1'
 	distributionType = Wrapper.DistributionType.ALL
+}
+
+bootJar {
+	enabled = false
+}
+
+jar {
+	enabled = true
+}
+
+tasks.withType(com.github.spotbugs.SpotBugsTask) {
+	reports {
+		html {
+			enabled = true
+		}
+		xml {
+			enabled = false
+		}
+	}
 }

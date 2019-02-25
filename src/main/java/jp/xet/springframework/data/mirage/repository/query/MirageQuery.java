@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2018 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,51 +24,43 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.repository.query.Parameter;
 import org.springframework.data.repository.query.QueryMethod;
 import org.springframework.data.repository.query.RepositoryQuery;
 import org.springframework.util.Assert;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.ws2ten1.chunks.ChunkImpl;
+import org.ws2ten1.chunks.Chunkable;
+import org.ws2ten1.chunks.Chunkable.PaginationRelation;
+import org.ws2ten1.chunks.Direction;
+import org.ws2ten1.chunks.PaginationTokenEncoder;
 
 import com.miragesql.miragesql.SqlManager;
 import com.miragesql.miragesql.SqlResource;
 import com.miragesql.miragesql.StringSqlResource;
-
-import jp.xet.sparwings.spring.data.chunk.ChunkImpl;
-import jp.xet.sparwings.spring.data.chunk.Chunkable;
-import jp.xet.sparwings.spring.data.chunk.Chunkable.PaginationRelation;
-import jp.xet.sparwings.spring.data.chunk.PaginationTokenEncoder;
-import jp.xet.sparwings.spring.data.chunk.SimplePaginationTokenEncoder;
 
 import jp.xet.springframework.data.mirage.repository.ScopeClasspathSqlResource;
 import jp.xet.springframework.data.mirage.repository.SqlResourceCandidate;
 
 /**
  * {@link RepositoryQuery} implementation for spring-data-mirage.
- * 
- * @since 0.1
- * @version $Id$
- * @author daisuke
  */
-public class MirageQuery implements RepositoryQuery {
-	
-	private static Logger log = LoggerFactory.getLogger(MirageQuery.class);
+@Slf4j
+public class MirageQuery implements RepositoryQuery { // NOPMD God class
 	
 	private static final int BUFFER_SIZE = 1024 * 4;
 	
@@ -88,7 +80,7 @@ public class MirageQuery implements RepositoryQuery {
 			}
 			sb.append(')');
 			return sb.toString();
-		} catch (Exception e) {
+		} catch (Exception e) { // NOPMD
 			return "<" + e + ">";
 		}
 	}
@@ -99,10 +91,7 @@ public class MirageQuery implements RepositoryQuery {
 		}
 		params.put("offset", pageable.getOffset());
 		params.put("size", pageable.getPageSize());
-		if (pageable.getSort() != null) {
-			Sort sort = pageable.getSort();
-			addSortParam(params, sort);
-		}
+		addSortParam(params, pageable.getSort());
 	}
 	
 	private static void addSortParam(Map<String, Object> params, Sort sort) {
@@ -113,8 +102,8 @@ public class MirageQuery implements RepositoryQuery {
 		for (Order order : sort) {
 			orders.add(String.format(Locale.ENGLISH, "%s %s", order.getProperty(), order.getDirection().name()));
 		}
-		if (orders.size() != 0) {
-			params.put("orders", join(orders));
+		if (orders.isEmpty() == false) {
+			params.put("orders", String.join(", ", orders));
 		}
 	}
 	
@@ -127,30 +116,17 @@ public class MirageQuery implements RepositoryQuery {
 					dimensions++;
 					cl = cl.getComponentType();
 				}
-				StringBuffer sb = new StringBuffer();
+				StringBuilder sb = new StringBuilder();
 				sb.append(cl.getName());
 				for (int i = 0; i < dimensions; i++) {
 					sb.append("[]");
 				}
 				return sb.toString();
-			} catch (Throwable e) {
-				//$FALL-THROUGH$
+			} catch (Throwable e) { // NOPMD
+				// NOPMD fall through
 			}
 		}
 		return type.getName();
-	}
-	
-	private static String join(List<String> orders) {
-		StringBuilder sb = new StringBuilder();
-		Iterator<String> parts = orders.iterator();
-		if (parts.hasNext()) {
-			sb.append(parts.next());
-			while (parts.hasNext()) {
-				sb.append(", ");
-				sb.append(parts.next());
-			}
-		}
-		return sb.toString();
 	}
 	
 	
@@ -158,21 +134,22 @@ public class MirageQuery implements RepositoryQuery {
 	
 	private final SqlManager sqlManager;
 	
-	private PaginationTokenEncoder encoder = new SimplePaginationTokenEncoder();
+	private final PaginationTokenEncoder encoder;
 	
 	
 	/**
 	 * インスタンスを生成する。
-	 * 
+	 *
 	 * @param mirageQueryMethod {@link MirageQueryMethod}
 	 * @param sqlManager {@link SqlManager}
 	 * @throws IllegalArgumentException if the argument is {@code null}
 	 */
-	public MirageQuery(MirageQueryMethod mirageQueryMethod, SqlManager sqlManager) {
+	public MirageQuery(MirageQueryMethod mirageQueryMethod, SqlManager sqlManager, PaginationTokenEncoder encoder) {
 		Assert.notNull(mirageQueryMethod, "MirageQueryMethod must not to be null");
 		Assert.notNull(sqlManager, "SqlManager must not to be null");
 		this.mirageQueryMethod = mirageQueryMethod;
 		this.sqlManager = sqlManager;
+		this.encoder = encoder;
 		sqlResource = createSqlResource();
 	}
 	
@@ -187,10 +164,7 @@ public class MirageQuery implements RepositoryQuery {
 		if (mirageQueryMethod.isModifyingQuery()) {
 			return sqlManager.executeUpdate(sqlResource, parameterMap);
 		} else if (mirageQueryMethod.isCollectionQuery()) {
-			Sort sort = accessor.getSort();
-			if (sort != null) {
-				addSortParam(parameterMap, sort);
-			}
+			addSortParam(parameterMap, accessor.getSort());
 			return sqlManager.getResultList(returnedDomainType, sqlResource, parameterMap);
 		} else if (mirageQueryMethod.isChunkQuery()) {
 			return processChunkQuery(sqlResource, parameterMap, returnedDomainType, accessor);
@@ -214,7 +188,7 @@ public class MirageQuery implements RepositoryQuery {
 		}
 		boolean ascending = isAscending(chunkable);
 		boolean forward = isForward(chunkable);
-		log.debug("Chunk param for {} {}", ascending ? "ascending" : "descending", forward ? "forward" : "backword");
+		log.debug("Chunk param for {} {}", ascending ? "ascending" : "descending", forward ? "forward" : "backward");
 		
 		if (chunkable.getPaginationToken() != null) {
 			String key;
@@ -236,7 +210,7 @@ public class MirageQuery implements RepositoryQuery {
 		}
 	}
 	
-	private Map<String, Object> createParameterMap(Object[] parameters) {
+	private Map<String, Object> createParameterMap(Object... parameters) {
 		Map<String, Object> parameterMap = new HashMap<String, Object>();
 		parameterMap.put("orders", null);
 		for (Parameter p : mirageQueryMethod.getParameters()) {
@@ -259,25 +233,23 @@ public class MirageQuery implements RepositoryQuery {
 		String name = mirageQueryMethod.getAnnotatedQuery();
 		if (name != null) {
 			return new SqlResourceCandidate[] {
-				new SqlResourceCandidate(mirageQueryMethod.getDeclaringClass(), name)
+				new SqlResourceCandidate(mirageQueryMethod.getDeclaringClass(), name),
 			};
 		}
 		
 		List<SqlResourceCandidate> candidates = new ArrayList<SqlResourceCandidate>();
 		for (Class<?> clazz : new Class<?>[] {
 			mirageQueryMethod.getRepositoryInterface(),
-			mirageQueryMethod.getDeclaringClass()
+			mirageQueryMethod.getDeclaringClass(),
 		}) {
 			String simpleName = clazz.getSimpleName();
 			String args = getArgsPartOfSignature(mirageQueryMethod.asMethod());
 			candidates.addAll(Arrays.asList(
-					new SqlResourceCandidate(clazz, simpleName + "#" + mirageQueryMethod.getName() + args + ".sql"),
-					new SqlResourceCandidate(clazz, simpleName + "#" + mirageQueryMethod.getName() + ".sql"),
 					new SqlResourceCandidate(clazz, simpleName + "_" + mirageQueryMethod.getName() + args + ".sql"),
 					new SqlResourceCandidate(clazz, simpleName + "_" + mirageQueryMethod.getName() + ".sql"),
 					new SqlResourceCandidate(clazz, simpleName + ".sql")));
 		}
-		return candidates.toArray(new SqlResourceCandidate[candidates.size()]);
+		return candidates.toArray(new SqlResourceCandidate[0]);
 	}
 	
 	private SqlResource createSqlResource() {
@@ -298,7 +270,7 @@ public class MirageQuery implements RepositoryQuery {
 					field.setAccessible(true);
 					try {
 						return field.get(entity);
-					} catch (Exception e) {
+					} catch (Exception e) { // NOPMD
 						// ignore
 					}
 				}
@@ -309,24 +281,15 @@ public class MirageQuery implements RepositoryQuery {
 	}
 	
 	private int getTotalCount(SqlResource sqlResource) {
-		Reader reader = null;
-		try {
-			reader = new InputStreamReader(sqlResource.getInputStream(), StandardCharsets.UTF_8);
+		try (Reader reader = new InputStreamReader(sqlResource.getInputStream(), StandardCharsets.UTF_8)) {
 			String query = toString(reader);
 			if (query.contains("SQL_CALC_FOUND_ROWS")) { // TODO MySQL固有処理
 				return sqlManager.getSingleResult(Integer.class, new StringSqlResource("SELECT FOUND_ROWS()"));
 			}
 		} catch (IOException e) {
 			log.error("IOException", e);
-		} finally {
-			if (reader != null) {
-				try {
-					reader.close();
-				} catch (IOException e) {
-					// ignore
-				}
-			}
 		}
+		// ignore
 		return Integer.MAX_VALUE;
 	}
 	
@@ -363,12 +326,7 @@ public class MirageQuery implements RepositoryQuery {
 	private Object processPageQuery(SqlResource sqlResource, Map<String, Object> parameterMap,
 			Class<?> returnedDomainType, ChunkableParameterAccessor accessor) {
 		Pageable pageable = accessor.getPageable();
-		if (pageable != null) {
-			addPageParam(parameterMap, pageable);
-		} else if (accessor.getSort() != null) {
-			Sort sort = accessor.getSort();
-			addSortParam(parameterMap, sort);
-		}
+		addPageParam(parameterMap, pageable);
 		
 		List<?> resultList = sqlManager.getResultList(returnedDomainType, sqlResource, parameterMap);
 		
@@ -384,12 +342,7 @@ public class MirageQuery implements RepositoryQuery {
 	private Object processSliceQuery(SqlResource sqlResource, Map<String, Object> parameterMap,
 			Class<?> returnedDomainType, ChunkableParameterAccessor accessor) {
 		Pageable pageable = accessor.getPageable();
-		if (pageable != null) {
-			addPageParam(parameterMap, pageable);
-		} else if (accessor.getSort() != null) {
-			Sort sort = accessor.getSort();
-			addSortParam(parameterMap, sort);
-		}
+		addPageParam(parameterMap, pageable);
 		
 		List<?> resultList = sqlManager.getResultList(returnedDomainType, sqlResource, parameterMap);
 		
@@ -401,10 +354,10 @@ public class MirageQuery implements RepositoryQuery {
 	}
 	
 	private String toString(Reader input) throws IOException {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		char[] buffer = new char[BUFFER_SIZE];
 		int n = 0;
-		while ((n = input.read(buffer)) != -1) {
+		while ((n = input.read(buffer)) != -1) { // NOPMD
 			sb.append(buffer, 0, n);
 		}
 		return sb.toString();

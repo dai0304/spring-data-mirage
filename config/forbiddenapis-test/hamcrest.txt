@@ -1,1 +1,0 @@
-org.hamcrest.CoreMatchers#is(java.lang.Object) @ Use org.hamcrest.Matchers#is

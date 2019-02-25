@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2018 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,14 +23,10 @@ import org.springframework.core.MethodParameter;
 import org.springframework.data.repository.query.DefaultParameters;
 import org.springframework.data.repository.query.Parameters;
 
-import jp.xet.sparwings.spring.data.chunk.Chunkable;
+import org.ws2ten1.chunks.Chunkable;
 
 /**
  * TODO for daisuke
- * 
- * @since TODO for daisuke
- * @version $Id$
- * @author daisuke
  */
 public class ChunkableSupportedParameters
 		extends Parameters<ChunkableSupportedParameters, ChunkableSupportedParameter> {
@@ -40,7 +36,7 @@ public class ChunkableSupportedParameters
 	
 	/**
 	 * Creates a new {@link DefaultParameters} instance from the given {@link Method}.
-	 * 
+	 *
 	 * @param method must not be {@literal null}.
 	 */
 	public ChunkableSupportedParameters(Method method) {
@@ -65,7 +61,7 @@ public class ChunkableSupportedParameters
 	/**
 	 * Returns the index of the {@link Chunkable} {@link Method} parameter if available. Will return {@literal -1} if there
 	 * is no {@link Chunkable} argument in the {@link Method}'s parameter list.
-	 * 
+	 *
 	 * @return the pageableIndex
 	 */
 	public int getChunkableIndex() {
@@ -74,7 +70,7 @@ public class ChunkableSupportedParameters
 	
 	/**
 	 * Returns whether the method the {@link Parameters} was created for contains a {@link Chunkable} argument.
-	 * 
+	 *
 	 * @return
 	 */
 	public boolean hasChunkableParameter() {

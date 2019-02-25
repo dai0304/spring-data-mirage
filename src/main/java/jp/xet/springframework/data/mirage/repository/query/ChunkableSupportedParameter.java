@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2018 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,14 +23,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.query.Parameter;
 
-import jp.xet.sparwings.spring.data.chunk.Chunkable;
+import org.ws2ten1.chunks.Chunkable;
 
 /**
  * TODO for daisuke
- * 
- * @since TODO for daisuke
- * @version $Id$
- * @author daisuke
  */
 public class ChunkableSupportedParameter extends Parameter {
 	
@@ -41,7 +37,7 @@ public class ChunkableSupportedParameter extends Parameter {
 	
 	/**
 	 * インスタンスを生成する。
-	 * 
+	 *
 	 * @param parameter
 	 */
 	public ChunkableSupportedParameter(MethodParameter parameter) {
@@ -56,7 +52,7 @@ public class ChunkableSupportedParameter extends Parameter {
 	
 	/**
 	 * Returns whether the {@link Parameter} is a {@link Chunkable} parameter.
-	 * 
+	 *
 	 * @return
 	 */
 	boolean isChunkable() {

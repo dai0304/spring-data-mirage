@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2018 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,24 +18,30 @@ package jp.xet.springframework.data.mirage.repository.support;
 import java.io.Serializable;
 
 import org.springframework.data.repository.core.EntityInformation;
+import org.springframework.lang.Nullable;
 
 /**
  * Extension of {@link EntityInformation} to capture aditional Mirage specific information about entities.
- * 
- * @param <T> 
- * @param <ID> 
- * @since 0.1
- * @version $Id$
- * @author daisuke
+ *
+ * @param <T>
+ * @param <ID>
  */
-public interface MirageEntityInformation<T, ID extends Serializable>extends EntityInformation<T, ID> {
+public interface MirageEntityInformation<T, ID extends Serializable, C>extends EntityInformation<T, ID> {
 	
 	/**
 	 * Returns the Mirage entity name.
-	 * 
+	 *
 	 * @return the Mirage entity name.
 	 * @since 0.1
 	 */
 	String getEntityName();
 	
+	/**
+	 * Returns the condition (typically version) of the given entity or {@code null} if none can be obtained.
+	 *
+	 * @param entity must never be {@code null}
+	 * @return
+	 */
+	@Nullable
+	C getCondition(T entity);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2018 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,15 @@
  */
 package jp.xet.springframework.data.mirage.repository.support;
 
-import java.io.Serializable;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
+
+import javax.sql.DataSource;
+
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.data.repository.core.EntityInformation;
 import org.springframework.data.repository.core.RepositoryInformation;
@@ -25,55 +32,54 @@ import org.springframework.data.repository.core.support.RepositoryFactorySupport
 import org.springframework.data.repository.query.QueryLookupStrategy;
 import org.springframework.data.repository.query.QueryLookupStrategy.Key;
 import org.springframework.data.repository.query.QueryMethodEvaluationContextProvider;
-import org.springframework.util.Assert;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.ws2ten1.chunks.PaginationTokenEncoder;
+import org.ws2ten1.chunks.SimplePaginationTokenEncoder;
 
 import com.miragesql.miragesql.SqlManager;
+import com.miragesql.miragesql.naming.DefaultNameConverter;
+import com.miragesql.miragesql.naming.NameConverter;
 
 import jp.xet.springframework.data.mirage.repository.DefaultMirageRepository;
-import jp.xet.springframework.data.mirage.repository.Identifiable;
-import jp.xet.springframework.data.mirage.repository.IdentifiableMirageRepository;
 import jp.xet.springframework.data.mirage.repository.NoSuchSqlResourceException;
+import jp.xet.springframework.data.mirage.repository.handler.RepositoryActionListener;
 import jp.xet.springframework.data.mirage.repository.query.MirageQueryLookupStrategy;
 
 /**
- * TODO for daisuke
- * 
- * @since 0.1
- * @version $Id$
- * @author daisuke
+ * Mirage Repository factory.
  */
+@Slf4j
+@RequiredArgsConstructor
 public class MirageRepositoryFactory extends RepositoryFactorySupport {
 	
-	private static Logger logger = LoggerFactory.getLogger(MirageRepositoryFactory.class);
-	
+	@NonNull
 	private final SqlManager sqlManager;
 	
+	private final NameConverter nameConverter;
 	
-	/**
-	 * インスタンスを生成する。
-	 * 
-	 * @param sqlManager {@link SqlManager}
-	 * @throws IllegalArgumentException if the argument is {@code null}
-	 * @since 0.1
-	 */
+	private final DataSource dataSource;
+	
+	@NonNull
+	private final List<RepositoryActionListener> handlers;
+	
+	private final PaginationTokenEncoder encoder;
+	
+	
 	public MirageRepositoryFactory(SqlManager sqlManager) {
-		Assert.notNull(sqlManager, "sqlManager is required");
-		this.sqlManager = sqlManager;
+		this(sqlManager, new DefaultNameConverter(), null, Collections.emptyList(),
+				new SimplePaginationTokenEncoder());
 	}
 	
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T, ID> EntityInformation<T, ID> getEntityInformation(Class<T> domainClass) {
-		return (EntityInformation<T, ID>) MirageEntityInformationSupport.getMetadata(domainClass, sqlManager);
+		return (EntityInformation<T, ID>) MirageEntityInformationSupport.getMetadata(domainClass, nameConverter);
 	}
 	
 	@Override
 	protected Optional<QueryLookupStrategy> getQueryLookupStrategy(Key key,
 			QueryMethodEvaluationContextProvider evaluationContextProvider) {
-		return Optional.of(MirageQueryLookupStrategy.create(sqlManager, key));
+		return Optional.of(MirageQueryLookupStrategy.create(key, sqlManager, encoder));
 	}
 	
 	@Override
@@ -88,25 +94,15 @@ public class MirageRepositoryFactory extends RepositoryFactorySupport {
 	})
 	protected Object getTargetRepository(RepositoryInformation metadata) {
 		Class<?> repositoryInterface = metadata.getRepositoryInterface();
-		EntityInformation<?, Serializable> entityInformation = getEntityInformation(metadata.getDomainType());
+		MirageEntityInformation mei = (MirageEntityInformation) getEntityInformation(metadata.getDomainType());
 		
-		DefaultMirageRepository repos;
-		if (isIdentifiableJdbcRepository(entityInformation)) {
-			repos = new IdentifiableMirageRepository<Identifiable>(
-					(EntityInformation<Identifiable, ? extends Serializable>) entityInformation, sqlManager);
-		} else {
-			repos = new DefaultMirageRepository(entityInformation, sqlManager);
-		}
+		DefaultMirageRepository repo = new DefaultMirageRepository(mei, sqlManager, handlers, encoder, dataSource);
 		try {
 			String name = repositoryInterface.getSimpleName() + ".sql";
-			repos.setBaseSelectSqlResource(DefaultMirageRepository.newSqlResource(repositoryInterface, name));
+			repo.setBaseSelectSqlResource(DefaultMirageRepository.newSqlResource(repositoryInterface, name));
 		} catch (NoSuchSqlResourceException e) {
-			logger.debug("Repository Default SQL [{}] not found, default used.", repositoryInterface);
+			log.debug("Repository Default SQL [{}] not found, default used.", repositoryInterface);
 		}
-		return repos;
-	}
-	
-	private boolean isIdentifiableJdbcRepository(EntityInformation<?, Serializable> entityInformation) {
-		return Identifiable.class.isAssignableFrom(entityInformation.getJavaType());
+		return repo;
 	}
 }

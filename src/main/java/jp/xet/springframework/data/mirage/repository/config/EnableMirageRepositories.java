@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2018 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,10 +36,6 @@ import jp.xet.springframework.data.mirage.repository.support.MirageRepositoryFac
 /**
  * Annotation to enable Mirage repositories. Will scan the package of the annotated configuration class for Spring Data
  * repositories by default.
- * 
- * @since 0.2.0
- * @version $Id$
- * @author daisuke
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
@@ -47,6 +43,12 @@ import jp.xet.springframework.data.mirage.repository.support.MirageRepositoryFac
 @Inherited
 @Import(MirageRepositoriesRegistrar.class)
 public @interface EnableMirageRepositories {
+	
+	/**
+	 * Alias for the {@link #basePackages()} attribute. Allows for more concise annotation declarations e.g.:
+	 * {@code @EnableMirageRepositories("org.my.pkg")} instead of {@code @EnableMirageRepositories(basePackages="org.my.pkg")}.
+	 */
+	String[] value() default {};
 	
 	/**
 	 * Type-safe alternative to {@link #basePackages()} for specifying the packages to scan for annotated components. The
@@ -73,16 +75,23 @@ public @interface EnableMirageRepositories {
 	Filter[] includeFilters() default {};
 	
 	/**
-	 * Configures the location of where to find the Spring Data named queries properties file. Will default to
-	 * {@code META-INFO/mirage-named-queries.properties}.
+	 * Returns the postfix to be used when looking up custom repository implementations. Defaults to {@literal Impl}. So
+	 * for a repository named {@code PersonRepository} the corresponding implementation class will be looked up scanning
+	 * for {@code PersonRepositoryImpl}.
+	 */
+	String repositoryImplementationPostfix() default "Impl";
+	
+	/**
+	 * Configures the location of where to find the Spring Data named queries properties file.
+	 * Will default to {@code META-INF/mirage-named-queries.properties}.
 	 */
 	String namedQueriesLocation() default "";
 	
 	/**
-	 * Returns the key of the {@link QueryLookupStrategy} to be used for lookup queries for query methods. Defaults to
-	 * {@link Key#CREATE_IF_NOT_FOUND}.
+	 * Returns the key of the {@link QueryLookupStrategy} to be used for lookup queries for query methods.
+	 * Defaults to {@link Key#USE_DECLARED_QUERY}.
 	 */
-	Key queryLookupStrategy() default Key.CREATE_IF_NOT_FOUND;
+	Key queryLookupStrategy() default Key.USE_DECLARED_QUERY;
 	
 	/**
 	 * Returns the {@link FactoryBean} class to be used for each repository instance. Defaults to
@@ -90,12 +99,7 @@ public @interface EnableMirageRepositories {
 	 */
 	Class<?> repositoryFactoryBeanClass() default MirageRepositoryFactoryBean.class;
 	
-	/**
-	 * Returns the postfix to be used when looking up custom repository implementations. Defaults to {@literal Impl}. So
-	 * for a repository named {@code PersonRepository} the corresponding implementation class will be looked up scanning
-	 * for {@code PersonRepositoryImpl}.
-	 */
-	String repositoryImplementationPostfix() default "Impl";
+	// Mirage specific configuration
 	
 	/**
 	 * Configures the name of the {@link SqlManager} bean definition to be used to create repositories
@@ -108,10 +112,4 @@ public @interface EnableMirageRepositories {
 	 * discovered through this annotation. Defaults to {@code transactionManager}.
 	 */
 	String transactionManagerRef() default "transactionManager";
-	
-	/**
-	 * Alias for the {@link #basePackages()} attribute. Allows for more concise annotation declarations e.g.:
-	 * {@code @EnableMirageRepositories("org.my.pkg")} instead of {@code @EnableMirageRepositories(basePackages="org.my.pkg")}.
-	 */
-	String[] value() default {};
 }

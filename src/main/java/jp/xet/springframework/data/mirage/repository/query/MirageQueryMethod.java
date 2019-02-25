@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2018 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,24 +28,24 @@ import org.springframework.data.repository.query.Parameters;
 import org.springframework.data.repository.query.QueryMethod;
 import org.springframework.data.repository.util.QueryExecutionConverters;
 import org.springframework.data.util.ClassTypeInformation;
+import org.springframework.data.util.TypeInformation;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import jp.xet.sparwings.spring.data.chunk.Chunk;
+import org.ws2ten1.chunks.Chunk;
 
 /**
  * TODO for daisuke
- * 
- * @since 0.1
- * @version $Id$
- * @author daisuke
  */
 public class MirageQueryMethod extends QueryMethod {
 	
 	private static Class<?> potentiallyUnwrapReturnTypeFor(Method method) {
 		if (QueryExecutionConverters.supports(method.getReturnType())) {
 			// unwrap only one level to handle cases like Future<List<Entity>> correctly.
-			return ClassTypeInformation.fromReturnTypeOf(method).getComponentType().getType();
+			TypeInformation<?> componentType = ClassTypeInformation.fromReturnTypeOf(method).getComponentType();
+			if (componentType != null) {
+				return componentType.getType();
+			}
 		}
 		
 		return method.getReturnType();
@@ -61,7 +61,7 @@ public class MirageQueryMethod extends QueryMethod {
 	
 	/**
 	 * インスタンスを生成する。
-	 * 
+	 *
 	 * @param method {@link Method} object of repository interface.
 	 * @param metadata
 	 * @since 0.1
@@ -72,13 +72,13 @@ public class MirageQueryMethod extends QueryMethod {
 		this.metadata = metadata;
 		unwrappedReturnType = potentiallyUnwrapReturnTypeFor(method);
 		
-		Assert.isTrue((isModifyingQuery() && getParameters().hasSpecialParameter()) == false,
+		Assert.isTrue((isModifyingQuery() && getParameters().hasSpecialParameter()) == false, // NOPMD
 				String.format(Locale.ENGLISH, "Modifying method must not contain %s!", Parameters.TYPES));
 	}
 	
 	/**
 	 * Retunrs as {@link Method}.
-	 * 
+	 *
 	 * @return the method
 	 * @since 0.2.1
 	 */
@@ -88,7 +88,7 @@ public class MirageQueryMethod extends QueryMethod {
 	
 	/**
 	 * TODO for daisuke
-	 * 
+	 *
 	 * @return
 	 * @since 0.1
 	 */
@@ -112,29 +112,27 @@ public class MirageQueryMethod extends QueryMethod {
 	
 	/**
 	 * TODO for daisuke
-	 * 
-	 * @return
-	 * @since 0.4.0.RELEASE
 	 */
 	public boolean isChunkQuery() {
-		return !isPageQuery() && org.springframework.util.ClassUtils.isAssignable(Chunk.class, unwrappedReturnType);
+		return isPageQuery() == false
+				&& org.springframework.util.ClassUtils.isAssignable(Chunk.class, unwrappedReturnType);
 	}
 	
 	/**
 	 * Returns whether the finder will actually return a collection of entities or a single one.
-	 * 
+	 *
 	 * @return
 	 */
 	@Override
 	public boolean isCollectionQuery() {
-		return !(isPageQuery() || isSliceQuery() || isChunkQuery())
+		return (isPageQuery() || isSliceQuery() || isChunkQuery()) == false
 				&& org.springframework.util.ClassUtils.isAssignable(Iterable.class, unwrappedReturnType)
 				|| unwrappedReturnType.isArray();
 	}
 	
 	/**
 	 * Returns whether the finder is a modifying one.
-	 * 
+	 *
 	 * @return {@code true} if the finder is a modifying one
 	 */
 	@Override
@@ -150,7 +148,7 @@ public class MirageQueryMethod extends QueryMethod {
 	/**
 	 * Returns the query string declared in a {@link Query} annotation or {@code null} if neither the annotation found
 	 * nor the attribute was specified.
-	 * 
+	 *
 	 * @return annotated query or {@code null} if none
 	 */
 	String getAnnotatedQuery() {
@@ -165,7 +163,7 @@ public class MirageQueryMethod extends QueryMethod {
 	/**
 	 * Returns the countQuery string declared in a {@link Query} annotation or {@code null} if neither the annotation
 	 * found nor the attribute was specified.
-	 * 
+	 *
 	 * @return countQuery string
 	 */
 	String getCountQuery() {
@@ -187,7 +185,7 @@ public class MirageQueryMethod extends QueryMethod {
 	
 	/**
 	 * Returns the actual return type of the method.
-	 * 
+	 *
 	 * @return {@link Class}
 	 */
 	Class<?> getReturnType() {
@@ -196,7 +194,7 @@ public class MirageQueryMethod extends QueryMethod {
 	
 	/**
 	 * Returns the {@link Query} annotation that is applied to the method or {@code null} if none available.
-	 * 
+	 *
 	 * @return {@link Query}
 	 */
 	private Query getQueryAnnotation() {

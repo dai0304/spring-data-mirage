@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2018 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,16 +18,12 @@ package jp.xet.springframework.data.mirage.repository.query;
 import org.springframework.data.repository.query.Parameters;
 import org.springframework.data.repository.query.ParametersParameterAccessor;
 
-import jp.xet.sparwings.spring.data.chunk.Chunkable;
+import org.ws2ten1.chunks.Chunkable;
 
 /**
  * TODO for daisuke
- * 
- * @since 0.4.0.RELEASE
- * @version $Id$
- * @author daisuke
  */
-public class ParameterChunkableParameterAccessor //
+public class ParameterChunkableParameterAccessor
 		extends ParametersParameterAccessor implements ChunkableParameterAccessor {
 	
 	private final Parameters<?, ?> parameters;
@@ -37,11 +33,11 @@ public class ParameterChunkableParameterAccessor //
 	
 	/**
 	 * インスタンスを生成する。
-	 * 
+	 *
 	 * @param parameters
 	 * @param values
 	 */
-	public ParameterChunkableParameterAccessor(Parameters<?, ?> parameters, Object[] values) {
+	public ParameterChunkableParameterAccessor(Parameters<?, ?> parameters, Object... values) {
 		super(parameters, values);
 		this.parameters = parameters;
 		this.values = values.clone();

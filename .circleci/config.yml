@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: openjdk:8-jdk
+      - image: circleci/openjdk:8u181-jdk
     environment:
       _JAVA_OPTIONS: -Xmx3G
       GRADLE_OPTS: -Dorg.gradle.daemon=false
@@ -11,11 +11,11 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - v0-{{ .Branch }}-{{ checksum ".circleci/config.yml" }}-{{ checksum "build.gradle" }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
-            - v0-{{ .Branch }}-{{ checksum ".circleci/config.yml" }}
-            - v0-{{ .Branch }}
-            - v0-develop
-            - v0-master
+            - v1-{{ .Branch }}-{{ checksum ".circleci/config.yml" }}-{{ checksum "build.gradle" }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
+            - v1-{{ .Branch }}-{{ checksum ".circleci/config.yml" }}
+            - v1-{{ .Branch }}
+            - v1-develop
+            - v1-master
       - run:
           name: Show version
           command: ./gradlew -v

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2018 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,6 @@ import java.lang.annotation.Target;
 
 /**
  * Annotation to declare finder queries directly on repository methods.
- * 
- * @since 0.1
- * @version $Id$
- * @author daisuke
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
@@ -34,16 +30,12 @@ import java.lang.annotation.Target;
 public @interface Query {
 	
 	/**
-	 * 
-	 * @return
-	 * @since 0.1
+	 * TODO
 	 */
 	String countQuery() default "";
 	
 	/**
-	 * 
-	 * @return
-	 * @since 0.1
+	 * SQL file name in the classpath.
 	 */
 	String value() default "";
 	

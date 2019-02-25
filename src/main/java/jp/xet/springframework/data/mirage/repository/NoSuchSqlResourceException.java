@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2018 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,29 +19,24 @@ import java.util.Arrays;
 
 /**
  * TODO for daisuke
- * 
- * @since 0.1
- * @version $Id$
- * @author daisuke
  */
 @SuppressWarnings("serial")
-public class NoSuchSqlResourceException extends RuntimeException {
+public class NoSuchSqlResourceException extends IllegalStateException {
 	
 	private final SqlResourceCandidate[] candidates;
 	
 	
 	/**
 	 * インスタンスを生成する。
-	 * 
+	 *
 	 * @param candidates array of SQL resource candidate
-	 * @since 0.2.1
 	 */
-	public NoSuchSqlResourceException(SqlResourceCandidate[] candidates) {
+	public NoSuchSqlResourceException(SqlResourceCandidate... candidates) {
 		super(Arrays.toString(candidates));
-		this.candidates = candidates;
+		this.candidates = candidates.clone();
 	}
 	
 	public SqlResourceCandidate[] getCandidates() {
-		return candidates;
+		return candidates.clone();
 	}
 }

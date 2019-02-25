@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <xsd:schema xmlns="http://www.springframework.org/schema/data/mirage"
-	xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
 	xmlns:tool="http://www.springframework.org/schema/tool"
-	xmlns:context="http://www.springframework.org/schema/context"
 	xmlns:repository="http://www.springframework.org/schema/data/repository"
 	targetNamespace="http://www.springframework.org/schema/data/mirage"
 	elementFormDefault="qualified" attributeFormDefault="unqualified">
@@ -13,7 +12,7 @@
 		schemaLocation="http://www.springframework.org/schema/context/spring-context.xsd" />
 	<xsd:import namespace="http://www.springframework.org/schema/data/repository"
 		schemaLocation="http://www.springframework.org/schema/data/repository/spring-repository-1.0.xsd" />
-		
+
 
 	<xsd:complexType name="mirage-repository">
 		<xsd:complexContent>
@@ -37,23 +36,6 @@
 			</xsd:complexContent>
 		</xsd:complexType>
 	</xsd:element>
-
-	<!--
-	<xsd:element name="auditing">
-		<xsd:complexType>
-			<xsd:attribute name="auditor-aware-ref">
-				<xsd:annotation>
-					<xsd:appinfo>
-						<tool:annotation kind="ref">
-							<tool:assignable-to type="org.synyx.hades.domain.auditing.AuditorAware" />
-						</tool:annotation>
-					</xsd:appinfo>
-				</xsd:annotation>
-			</xsd:attribute>
-			<xsd:attribute name="set-dates" default="true" type="xsd:boolean" />
-		</xsd:complexType>
-	</xsd:element>
-	-->
 
 	<xsd:simpleType name="sqlManagerRef">
 		<xsd:annotation>

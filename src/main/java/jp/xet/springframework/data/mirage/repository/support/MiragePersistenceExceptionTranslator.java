@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2018 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,9 @@
  */
 package jp.xet.springframework.data.mirage.repository.support;
 
-import java.sql.SQLException;
+import lombok.Getter;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
@@ -26,20 +27,14 @@ import com.miragesql.miragesql.exception.SQLRuntimeException;
 
 /**
  * TODO for daisuke
- * 
- * @since 0.1
- * @version $Id$
- * @author daisuke
  */
 public class MiragePersistenceExceptionTranslator implements PersistenceExceptionTranslator {
 	
+	@Getter
 	private SQLExceptionTranslator sqlExceptionTranslator = new SQLErrorCodeSQLExceptionTranslator();
 	
 	
-	/**
-	 * @param sqlExceptionTranslator {@link SQLExceptionTranslator}
-	 * @since 0.1
-	 */
+	@Autowired(required = false)
 	public void setSqlExceptionTranslator(SQLExceptionTranslator sqlExceptionTranslator) {
 		this.sqlExceptionTranslator = sqlExceptionTranslator;
 	}
@@ -48,8 +43,7 @@ public class MiragePersistenceExceptionTranslator implements PersistenceExceptio
 	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
 		if (ex instanceof SQLRuntimeException && sqlExceptionTranslator != null) {
 			SQLRuntimeException sqlRuntimeException = (SQLRuntimeException) ex;
-			SQLException sqlException = sqlRuntimeException.getCause();
-			return sqlExceptionTranslator.translate("", "unknown", sqlException);
+			return sqlExceptionTranslator.translate("unknown", null, sqlRuntimeException.getCause());
 		}
 		
 		if (ex.getClass().getPackage().getName().startsWith("com.miragesql.miragesql.exception")) {
@@ -60,10 +54,10 @@ public class MiragePersistenceExceptionTranslator implements PersistenceExceptio
 	
 	
 	@SuppressWarnings("serial")
-	private final class MirageDataAccessException extends DataAccessException {
+	private static final class MirageDataAccessException extends DataAccessException {
 		
-		private MirageDataAccessException(Throwable cause) {
-			super("unkwnown", cause);
+		private MirageDataAccessException(RuntimeException cause) {
+			super("unknown", cause);
 		}
 	}
 }
