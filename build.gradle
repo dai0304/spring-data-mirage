@@ -113,3 +113,11 @@ configurations.all {
 		}
 	}
 }
+
+bootJar {
+	enabled = false
+}
+
+jar {
+	enabled = true
+}
