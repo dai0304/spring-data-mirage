@@ -19,13 +19,14 @@ import java.io.Serializable;
 
 import org.springframework.data.repository.NoRepositoryBean;
 
-import jp.xet.sparwings.spring.data.repository.BatchReadableRepository;
-import jp.xet.sparwings.spring.data.repository.BatchWritableRepository;
-import jp.xet.sparwings.spring.data.repository.ScannableRepository;
+import org.ws2ten1.repositories.BatchDeletableRepository;
+import org.ws2ten1.repositories.BatchReadableRepository;
+import org.ws2ten1.repositories.BatchUpsertableRepository;
+import org.ws2ten1.repositories.ScannableRepository;
 
 /**
  * TODO
- * 
+ *
  * @param <E> the domain type the repository manages
  * @param <ID> the type of the id of the entity the repository manages
  * @since 0.1
@@ -35,5 +36,6 @@ import jp.xet.sparwings.spring.data.repository.ScannableRepository;
 @Deprecated
 @NoRepositoryBean
 public interface MirageRepository<E, ID extends Serializable>
-		extends ScannableRepository<E, ID>, BatchReadableRepository<E, ID>, BatchWritableRepository<E, ID> {
+		extends ScannableRepository<E, ID>, BatchReadableRepository<E, ID>, BatchUpsertableRepository<E, ID>,
+		BatchDeletableRepository<E, ID> {
 }

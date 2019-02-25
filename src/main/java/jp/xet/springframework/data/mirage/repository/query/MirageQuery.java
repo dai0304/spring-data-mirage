@@ -46,22 +46,22 @@ import org.springframework.util.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.ws2ten1.chunks.ChunkImpl;
+import org.ws2ten1.chunks.Chunkable;
+import org.ws2ten1.chunks.Chunkable.PaginationRelation;
+import org.ws2ten1.chunks.PaginationTokenEncoder;
+import org.ws2ten1.chunks.SimplePaginationTokenEncoder;
+
 import com.miragesql.miragesql.SqlManager;
 import com.miragesql.miragesql.SqlResource;
 import com.miragesql.miragesql.StringSqlResource;
-
-import jp.xet.sparwings.spring.data.chunk.ChunkImpl;
-import jp.xet.sparwings.spring.data.chunk.Chunkable;
-import jp.xet.sparwings.spring.data.chunk.Chunkable.PaginationRelation;
-import jp.xet.sparwings.spring.data.chunk.PaginationTokenEncoder;
-import jp.xet.sparwings.spring.data.chunk.SimplePaginationTokenEncoder;
 
 import jp.xet.springframework.data.mirage.repository.ScopeClasspathSqlResource;
 import jp.xet.springframework.data.mirage.repository.SqlResourceCandidate;
 
 /**
  * {@link RepositoryQuery} implementation for spring-data-mirage.
- * 
+ *
  * @since 0.1
  * @version $Id$
  * @author daisuke
@@ -163,7 +163,7 @@ public class MirageQuery implements RepositoryQuery {
 	
 	/**
 	 * インスタンスを生成する。
-	 * 
+	 *
 	 * @param mirageQueryMethod {@link MirageQueryMethod}
 	 * @param sqlManager {@link SqlManager}
 	 * @throws IllegalArgumentException if the argument is {@code null}

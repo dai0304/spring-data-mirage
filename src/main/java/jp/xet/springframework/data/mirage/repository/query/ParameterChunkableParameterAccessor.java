@@ -18,11 +18,11 @@ package jp.xet.springframework.data.mirage.repository.query;
 import org.springframework.data.repository.query.Parameters;
 import org.springframework.data.repository.query.ParametersParameterAccessor;
 
-import jp.xet.sparwings.spring.data.chunk.Chunkable;
+import org.ws2ten1.chunks.Chunkable;
 
 /**
  * TODO for daisuke
- * 
+ *
  * @since 0.4.0.RELEASE
  * @version $Id$
  * @author daisuke
@@ -37,7 +37,7 @@ public class ParameterChunkableParameterAccessor //
 	
 	/**
 	 * インスタンスを生成する。
-	 * 
+	 *
 	 * @param parameters
 	 * @param values
 	 */

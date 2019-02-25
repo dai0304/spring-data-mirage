@@ -31,11 +31,11 @@ import org.springframework.data.util.ClassTypeInformation;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import jp.xet.sparwings.spring.data.chunk.Chunk;
+import org.ws2ten1.chunks.Chunk;
 
 /**
  * TODO for daisuke
- * 
+ *
  * @since 0.1
  * @version $Id$
  * @author daisuke
@@ -61,7 +61,7 @@ public class MirageQueryMethod extends QueryMethod {
 	
 	/**
 	 * インスタンスを生成する。
-	 * 
+	 *
 	 * @param method {@link Method} object of repository interface.
 	 * @param metadata
 	 * @since 0.1
@@ -78,7 +78,7 @@ public class MirageQueryMethod extends QueryMethod {
 	
 	/**
 	 * Retunrs as {@link Method}.
-	 * 
+	 *
 	 * @return the method
 	 * @since 0.2.1
 	 */
@@ -88,7 +88,7 @@ public class MirageQueryMethod extends QueryMethod {
 	
 	/**
 	 * TODO for daisuke
-	 * 
+	 *
 	 * @return
 	 * @since 0.1
 	 */
@@ -112,7 +112,7 @@ public class MirageQueryMethod extends QueryMethod {
 	
 	/**
 	 * TODO for daisuke
-	 * 
+	 *
 	 * @return
 	 * @since 0.4.0.RELEASE
 	 */
@@ -122,7 +122,7 @@ public class MirageQueryMethod extends QueryMethod {
 	
 	/**
 	 * Returns whether the finder will actually return a collection of entities or a single one.
-	 * 
+	 *
 	 * @return
 	 */
 	@Override
@@ -134,7 +134,7 @@ public class MirageQueryMethod extends QueryMethod {
 	
 	/**
 	 * Returns whether the finder is a modifying one.
-	 * 
+	 *
 	 * @return {@code true} if the finder is a modifying one
 	 */
 	@Override
@@ -150,7 +150,7 @@ public class MirageQueryMethod extends QueryMethod {
 	/**
 	 * Returns the query string declared in a {@link Query} annotation or {@code null} if neither the annotation found
 	 * nor the attribute was specified.
-	 * 
+	 *
 	 * @return annotated query or {@code null} if none
 	 */
 	String getAnnotatedQuery() {
@@ -165,7 +165,7 @@ public class MirageQueryMethod extends QueryMethod {
 	/**
 	 * Returns the countQuery string declared in a {@link Query} annotation or {@code null} if neither the annotation
 	 * found nor the attribute was specified.
-	 * 
+	 *
 	 * @return countQuery string
 	 */
 	String getCountQuery() {
@@ -187,7 +187,7 @@ public class MirageQueryMethod extends QueryMethod {
 	
 	/**
 	 * Returns the actual return type of the method.
-	 * 
+	 *
 	 * @return {@link Class}
 	 */
 	Class<?> getReturnType() {
@@ -196,7 +196,7 @@ public class MirageQueryMethod extends QueryMethod {
 	
 	/**
 	 * Returns the {@link Query} annotation that is applied to the method or {@code null} if none available.
-	 * 
+	 *
 	 * @return {@link Query}
 	 */
 	private Query getQueryAnnotation() {

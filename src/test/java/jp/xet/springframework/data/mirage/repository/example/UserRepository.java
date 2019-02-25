@@ -15,13 +15,13 @@
  */
 package jp.xet.springframework.data.mirage.repository.example;
 
-import jp.xet.sparwings.spring.data.repository.BatchReadableRepository;
-import jp.xet.sparwings.spring.data.repository.ScannableRepository;
-import jp.xet.sparwings.spring.data.repository.UpsertableRepository;
+import org.ws2ten1.repositories.BatchReadableRepository;
+import org.ws2ten1.repositories.ScannableRepository;
+import org.ws2ten1.repositories.UpsertableRepository;
 
 /**
  * Repository interface for {@link Entity}.
- * 
+ *
  * @author daisuke
  */
 public interface UserRepository extends ScannableRepository<User, String>, UpsertableRepository<User, String>,

@@ -31,7 +31,7 @@ import jp.xet.springframework.data.mirage.repository.TestConfiguration;
 
 /**
  * Test for {@link UserRepository}.
- * 
+ *
  * @author daisuke
  */
 @RunWith(SpringRunner.class)
@@ -53,7 +53,7 @@ public class UserRepositoryTest {
 		repos.save(new User("bar", "barpass"));
 		assertThat(repos.count(), is(2L));
 		
-		User foundFoo = repos.findOne("foo");
+		User foundFoo = repos.findById("foo").orElse(null);
 		assertThat(foundFoo.getPassword(), is("foopass"));
 	}
 }

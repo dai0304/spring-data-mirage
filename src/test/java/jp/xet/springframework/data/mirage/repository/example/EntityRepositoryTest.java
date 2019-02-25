@@ -41,18 +41,17 @@ import org.slf4j.LoggerFactory;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.ws2ten1.chunks.Chunk;
+import org.ws2ten1.chunks.ChunkRequest;
+import org.ws2ten1.chunks.Chunkable;
 
 import com.google.common.collect.Iterables;
-
-import jp.xet.sparwings.spring.data.chunk.Chunk;
-import jp.xet.sparwings.spring.data.chunk.ChunkRequest;
-import jp.xet.sparwings.spring.data.chunk.Chunkable;
 
 import jp.xet.springframework.data.mirage.repository.TestConfiguration;
 
 /**
  * Test for {@link EntityRepository}.
- * 
+ *
  * @author daisuke
  */
 @RunWith(SpringRunner.class)
@@ -82,11 +81,11 @@ public class EntityRepositoryTest {
 		repo.save(new Entity("bar2"));
 		repo.save(new Entity("bar3"));
 		
-		Entity foundFoo = repo.findOne(foo.getId());
+		Entity foundFoo = repo.findById(foo.getId()).orElse(null);
 		assertThat(foundFoo.getId(), is(foo.getId()));
 		assertThat(foundFoo.getStr(), is("foo"));
 		
-		Entity foundBar = repo.findOne(bar.getId());
+		Entity foundBar = repo.findById(bar.getId()).orElse(null);
 		assertThat(foundBar.getId(), is(bar.getId()));
 		assertThat(foundBar.getStr(), is("bar"));
 		
@@ -126,11 +125,11 @@ public class EntityRepositoryTest {
 		repo.save(new Entity("bar2"));
 		repo.save(new Entity("bar3"));
 		
-		Entity foundFoo = repo.findOne(foo.getId());
+		Entity foundFoo = repo.findById(foo.getId()).orElse(null);
 		assertThat(foundFoo.getId(), is(foo.getId()));
 		assertThat(foundFoo.getStr(), is("foo"));
 		
-		Entity foundBar = repo.findOne(bar.getId());
+		Entity foundBar = repo.findById(bar.getId()).orElse(null);
 		assertThat(foundBar.getId(), is(bar.getId()));
 		assertThat(foundBar.getStr(), is("bar"));
 		
@@ -150,7 +149,7 @@ public class EntityRepositoryTest {
 		bar = repo.update(bar);
 		assertThat(repo.count(), is(1L));
 		
-		Entity foundFoo = repo.findOne(foo.getId());
+		Entity foundFoo = repo.findById(foo.getId()).orElse(null);
 		assertThat(foundFoo.getId(), is(foo.getId()));
 		assertThat(foundFoo.getStr(), is("bar"));
 	}
@@ -322,7 +321,7 @@ public class EntityRepositoryTest {
 		repo.save(new Entity("bar2"));
 		repo.save(new Entity("bar3"));
 		
-		Page<Entity> page1 = repo.findAll(new PageRequest(1/*zero based*/, 2, Direction.ASC, "str"));
+		Page<Entity> page1 = repo.findAll(PageRequest.of(1/*zero based*/, 2, Direction.ASC, "str"));
 		assertThat(page1.getNumber(), is(1));
 		assertThat(page1.getNumberOfElements(), is(2));
 		assertThat(page1.getTotalElements(), is(7L));
@@ -330,7 +329,7 @@ public class EntityRepositoryTest {
 		assertThat(page1.getContent().get(0).getStr(), is("bar3"));
 		assertThat(page1.getContent().get(1).getStr(), is("foo"));
 		
-		Page<Entity> page2 = repo.findAll(new PageRequest(2/*zero based*/, 2, Direction.ASC, "str"));
+		Page<Entity> page2 = repo.findAll(PageRequest.of(2/*zero based*/, 2, Direction.ASC, "str"));
 		assertThat(page2.getNumber(), is(2));
 		assertThat(page2.getNumberOfElements(), is(2));
 		assertThat(page2.getTotalElements(), is(7L));

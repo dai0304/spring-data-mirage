@@ -48,6 +48,22 @@ import org.springframework.util.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.ws2ten1.chunks.Chunk;
+import org.ws2ten1.chunks.ChunkImpl;
+import org.ws2ten1.chunks.Chunkable;
+import org.ws2ten1.chunks.Chunkable.PaginationRelation;
+import org.ws2ten1.chunks.PaginationTokenEncoder;
+import org.ws2ten1.chunks.SimplePaginationTokenEncoder;
+import org.ws2ten1.repositories.BatchCreatableRepository;
+import org.ws2ten1.repositories.BatchDeletableRepository;
+import org.ws2ten1.repositories.BatchReadableRepository;
+import org.ws2ten1.repositories.BatchUpsertableRepository;
+import org.ws2ten1.repositories.ChunkableRepository;
+import org.ws2ten1.repositories.LockableCrudRepository;
+import org.ws2ten1.repositories.PageableRepository;
+import org.ws2ten1.repositories.ScannableRepository;
+import org.ws2ten1.repositories.TruncatableRepository;
+
 import com.miragesql.miragesql.IterationCallback;
 import com.miragesql.miragesql.SqlManager;
 import com.miragesql.miragesql.SqlResource;
@@ -57,31 +73,18 @@ import com.miragesql.miragesql.naming.NameConverter;
 import com.miragesql.miragesql.util.MirageUtil;
 import com.miragesql.miragesql.util.Validate;
 
-import jp.xet.sparwings.spring.data.chunk.Chunk;
-import jp.xet.sparwings.spring.data.chunk.ChunkImpl;
-import jp.xet.sparwings.spring.data.chunk.Chunkable;
-import jp.xet.sparwings.spring.data.chunk.Chunkable.PaginationRelation;
-import jp.xet.sparwings.spring.data.chunk.PaginationTokenEncoder;
-import jp.xet.sparwings.spring.data.chunk.SimplePaginationTokenEncoder;
-import jp.xet.sparwings.spring.data.repository.BatchReadableRepository;
-import jp.xet.sparwings.spring.data.repository.BatchWritableRepository;
-import jp.xet.sparwings.spring.data.repository.ChunkableRepository;
-import jp.xet.sparwings.spring.data.repository.LockableCrudRepository;
-import jp.xet.sparwings.spring.data.repository.PageableRepository;
-import jp.xet.sparwings.spring.data.repository.ScannableRepository;
-import jp.xet.sparwings.spring.data.repository.TruncatableRepository;
-
 /**
  * Mirage SQLを利用した repository 実装クラス。
- * 
+ *
  * @param <E> the domain type the repository manages
  * @param <ID> the type of the id of the entity the repository manages
  * @since 0.1
  * @author daisuke
  */
 public class DefaultMirageRepository<E, ID extends Serializable> implements ScannableRepository<E, ID>,
-		BatchReadableRepository<E, ID>, BatchWritableRepository<E, ID>, LockableCrudRepository<E, ID>,
-		ChunkableRepository<E, ID>, PageableRepository<E, ID>, TruncatableRepository<E, ID> {
+		BatchReadableRepository<E, ID>, BatchCreatableRepository<E, ID>, BatchUpsertableRepository<E, ID>,
+		BatchDeletableRepository<E, ID>, LockableCrudRepository<E, ID>, TruncatableRepository<E, ID>,
+		ChunkableRepository<E, ID>, PageableRepository<E, ID> {
 	
 	private static Logger log = LoggerFactory.getLogger(DefaultMirageRepository.class);
 	
@@ -91,7 +94,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	
 	/**
 	 * 新しい {@link SqlResource} を生成する。
-	 * 
+	 *
 	 * @param scope クラスパス上のSQLの位置を表すクラス。無名パッケージの場合は{@code null}
 	 * @param filename クラスパス上のSQLファイル名
 	 * @return {@link SqlResource}
@@ -149,7 +152,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	
 	/**
 	 * インスタンスを生成する。
-	 * 
+	 *
 	 * @param entityClass エンティティの型
 	 * @throws IllegalArgumentException 引数に{@code null}を与えた場合
 	 * @since 0.1
@@ -161,7 +164,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	
 	/**
 	 * インスタンスを生成する。
-	 * 
+	 *
 	 * @param entityInformation
 	 * @param sqlManager {@link SqlManager}
 	 * @since 0.1
@@ -205,8 +208,8 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	}
 	
 	@Override
-	public void delete(ID id) {
-		E found = findOne(id);
+	public void deleteById(ID id) {
+		E found = findById(id).orElse(null);
 		if (found != null) {
 			try {
 				sqlManager.deleteEntity(found);
@@ -220,7 +223,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	
 	@Override
 	@SuppressWarnings("unchecked")
-	public void delete(Iterable<? extends E> entities) {
+	public void deleteAll(Iterable<? extends E> entities) {
 		if (entities == null) {
 			throw new NullPointerException("entities is null"); //$NON-NLS-1$
 		}
@@ -240,14 +243,14 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	@Override
 	public void deleteAll() {
 		try {
-			delete(findAll());
+			deleteAll(findAll());
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("deleteAll", null, e.getCause());
 		}
 	}
 	
 	@Override
-	public boolean exists(ID id) {
+	public boolean existsById(ID id) {
 		return exists(id, false);
 	}
 	
@@ -335,16 +338,16 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	}
 	
 	@Override
-	public E findOne(ID id) {
-		return findOne(id, false);
+	public Optional<E> findById(ID id) {
+		return findById(id, false);
 	}
 	
 	@Override
-	public E findOne(ID id, boolean forUpdate) {
+	public Optional<E> findById(ID id, boolean forUpdate) {
 		Assert.notNull(id, "id must not be null");
 		
 		try {
-			return getSingleResult(getBaseSelectSqlResource(), createParams(id, forUpdate));
+			return Optional.ofNullable(getSingleResult(getBaseSelectSqlResource(), createParams(id, forUpdate)));
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("findOne", null, e.getCause());
 		}
@@ -373,7 +376,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	}
 	
 	@Override
-	public <S extends E> Iterable<S> save(Iterable<S> entities) {
+	public <S extends E> Iterable<S> saveAll(Iterable<S> entities) {
 		if (entities == null) {
 			return Collections.emptyList();
 		}
@@ -527,7 +530,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	
 	/**
 	 * TODO for daisuke
-	 * 
+	 *
 	 * @param chunkable
 	 * @return
 	 * @since 0.1
@@ -540,7 +543,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	
 	/**
 	 * TODO for daisuke
-	 * 
+	 *
 	 * @param id
 	 * @param forUpdate
 	 * @return
@@ -555,7 +558,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	
 	/**
 	 * TODO for daisuke
-	 * 
+	 *
 	 * @param pageable
 	 * @return
 	 * @since 0.1
@@ -568,7 +571,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	
 	/**
 	 * TODO for daisuke
-	 * 
+	 *
 	 * @param sort
 	 * @return
 	 * @since 0.1
@@ -619,7 +622,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	}
 	
 	/**
-	 * @see SqlManager#executeUpdate(SqlResource, Object) 
+	 * @see SqlManager#executeUpdate(SqlResource)
 	 */
 	@SuppressWarnings("javadoc")
 	protected int executeUpdate(SqlResource resource) {
@@ -632,7 +635,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	}
 	
 	/**
-	 * @see SqlManager#executeUpdate(SqlResource, Object) 
+	 * @see SqlManager#executeUpdate(SqlResource, Object)
 	 */
 	@SuppressWarnings("javadoc")
 	protected int executeUpdate(SqlResource resource, Object param) {
@@ -646,7 +649,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	
 	/**
 	 * TODO for daisuke
-	 * 
+	 *
 	 * @return
 	 * @since 0.1
 	 */
@@ -655,7 +658,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	}
 	
 	/**
-	 * @see SqlManager#getCount(SqlResource) 
+	 * @see SqlManager#getCount(SqlResource)
 	 */
 	@SuppressWarnings("javadoc")
 	protected int getCount(SqlResource resource) {
@@ -668,7 +671,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	}
 	
 	/**
-	 * @see SqlManager#getCount(SqlResource, Object) 
+	 * @see SqlManager#getCount(SqlResource, Object)
 	 */
 	@SuppressWarnings("javadoc")
 	protected int getCount(SqlResource resource, Object param) {
@@ -682,7 +685,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	
 	/**
 	 * TODO for daisuke
-	 * 
+	 *
 	 * @return
 	 * @since 0.1
 	 */
@@ -699,7 +702,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	
 	/**
 	 * TODO for daisuke
-	 * 
+	 *
 	 * @return
 	 * @since 0.1
 	 */
@@ -708,7 +711,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	}
 	
 	/**
-	 * @see SqlManager#getResultList(Class, SqlResource) 
+	 * @see SqlManager#getResultList(Class, SqlResource)
 	 */
 	@SuppressWarnings("javadoc")
 	protected List<E> getResultList(SqlResource resource) {
@@ -721,7 +724,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	}
 	
 	/**
-	 * @see SqlManager#getResultList(Class, SqlResource, Object) 
+	 * @see SqlManager#getResultList(Class, SqlResource, Object)
 	 * @throws IllegalArgumentException 引数に{@code null}を与えた場合
 	 */
 	@SuppressWarnings("javadoc")
@@ -735,7 +738,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	}
 	
 	/**
-	 * @see SqlManager#getSingleResult(Class, SqlResource) 
+	 * @see SqlManager#getSingleResult(Class, SqlResource)
 	 */
 	@SuppressWarnings("javadoc")
 	protected E getSingleResult(SqlResource resource) {
@@ -748,7 +751,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	}
 	
 	/**
-	 * @see SqlManager#getSingleResult(Class, SqlResource, Object) 
+	 * @see SqlManager#getSingleResult(Class, SqlResource, Object)
 	 */
 	@SuppressWarnings("javadoc")
 	protected E getSingleResult(SqlResource resource, Object param) {
@@ -762,7 +765,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	
 	/**
 	 * TODO for daisuke
-	 * 
+	 *
 	 * @return
 	 * @since 0.1
 	 */
@@ -797,6 +800,22 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 		}
 	}
 	
+	@Override
+	public <S extends E> Iterable<S> createAll(Iterable<S> entities) {
+		try {
+			List<S> list = newArrayList(entities);
+			sqlManager.insertBatch(list);
+			return list;
+		} catch (SQLRuntimeException e) {
+			throw getExceptionTranslator().translate("insertBatch", null, e.getCause());
+		}
+	}
+	
+	@Override
+	public Iterable<E> deleteAllById(Iterable<ID> ids) {
+		return null;
+	}
+	
 	/**
 	 * @see SqlManager#insertEntity(Object)
 	 */
@@ -810,7 +829,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	}
 	
 	/**
-	 * @see SqlManager#iterate(Class, IterationCallback, SqlResource) 
+	 * @see SqlManager#iterate(Class, IterationCallback, SqlResource)
 	 */
 	@SuppressWarnings("javadoc")
 	protected <R> R iterate(IterationCallback<E, R> callback, SqlResource resource) {
@@ -823,7 +842,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	}
 	
 	/**
-	 * @see SqlManager#iterate(Class, IterationCallback, SqlResource, Object) 
+	 * @see SqlManager#iterate(Class, IterationCallback, SqlResource, Object)
 	 */
 	@SuppressWarnings("javadoc")
 	protected <R> R iterate(IterationCallback<E, R> callback, SqlResource resource, Object param) {
