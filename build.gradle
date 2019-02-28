@@ -81,20 +81,17 @@ configurations {
 }
 
 dependencies {
-	compile "org.slf4j:slf4j-api:$slf4jVersion"
-	compile "com.google.guava:guava:$guavaVersion"
-	compile "com.miragesql:miragesql:$mirageVersion"
-	compile "org.ws2ten1:ws2ten1-repositories:1.0.0-rc3"
-	compileOnly "org.springframework:spring-context"
-	compileOnly "org.springframework:spring-jdbc"
+	api "com.miragesql:miragesql:$mirageVersion"
+	api "org.ws2ten1:ws2ten1-repositories:1.0.0-rc5"
+	implementation "org.slf4j:slf4j-api"
+	implementation "com.google.guava:guava:$guavaVersion"
+	implementation "org.springframework:spring-context"
+	implementation "org.springframework:spring-jdbc"
 
 	// tests
-	testCompile "junit:junit:$junitVersion"
-	testCompile "org.hamcrest:hamcrest-library:$hamcrestVersion"
-	testCompile "org.mockito:mockito-core:$mockitoVersion"
-	testCompile "org.springframework:spring-test:$springVersion"
-	testCompile "com.h2database:h2:$h2DatabaseVersion"
-	testCompile "ch.qos.logback:logback-classic:$logbackVersion"
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation "com.h2database:h2"
+	testImplementation "ch.qos.logback:logback-classic"
 
 	pmd 'net.sourceforge.pmd:pmd-java:5.8.1'
 	pmd 'org.ow2.asm:asm:6.1'
