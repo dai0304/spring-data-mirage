@@ -16,7 +16,9 @@
 package jp.xet.springframework.data.mirage.repository.support;
 
 import java.io.Serializable;
+import java.lang.reflect.Field;
 
+import org.springframework.data.annotation.Id;
 import org.springframework.data.repository.core.support.AbstractEntityInformation;
 import org.springframework.util.StringUtils;
 
@@ -25,9 +27,9 @@ import com.miragesql.miragesql.annotation.Table;
 
 /**
  * TODO for daisuke
- * 
- * @param <T> 
- * @param <ID> 
+ *
+ * @param <T>
+ * @param <ID>
  * @since 0.1
  * @version $Id$
  * @author daisuke
@@ -37,7 +39,7 @@ public class MirageEntityInformationSupport<T, ID extends Serializable>extends A
 	
 	/**
 	 * Creates a {@link MirageEntityInformation} for the given domain class and {@link SqlManager}.
-	 * 
+	 *
 	 * @param domainClass
 	 * @param sqlManager {@link SqlManager}
 	 * @return
@@ -49,7 +51,7 @@ public class MirageEntityInformationSupport<T, ID extends Serializable>extends A
 	
 	/**
 	 * Creates a new {@link MirageEntityInformationSupport} with the given domain class.
-	 * 
+	 *
 	 * @param domainClass
 	 * @since 0.1
 	 */
@@ -66,13 +68,42 @@ public class MirageEntityInformationSupport<T, ID extends Serializable>extends A
 	
 	@Override
 	public ID getId(T entity) {
-		// TODO Auto-generated method stub
+		Class<?> c = getJavaType();
+		while (c != null && c != Object.class) {
+			Field[] declaredFields = c.getDeclaredFields();
+			for (Field field : declaredFields) {
+				Id idAnnotation = field.getAnnotation(Id.class);
+				if (idAnnotation != null) {
+					field.setAccessible(true);
+					try {
+						@SuppressWarnings("unchecked")
+						ID id = (ID) field.get(entity);
+						return id;
+					} catch (Exception e) {
+						// ignore
+					}
+				}
+			}
+			c = c.getSuperclass();
+		}
 		return null;
 	}
 	
 	@Override
 	public Class<ID> getIdType() {
-		// TODO Auto-generated method stub
+		Class<?> c = getJavaType();
+		while (c != null && c != Object.class) {
+			Field[] declaredFields = c.getDeclaredFields();
+			for (Field field : declaredFields) {
+				Id idAnnotation = field.getAnnotation(Id.class);
+				if (idAnnotation != null) {
+					@SuppressWarnings("unchecked")
+					Class<ID> idType = (Class<ID>) field.getType();
+					return idType;
+				}
+			}
+			c = c.getSuperclass();
+		}
 		return null;
 	}
 }

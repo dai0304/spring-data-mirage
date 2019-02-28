@@ -24,7 +24,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -61,10 +60,6 @@ import jp.xet.springframework.data.mirage.repository.SqlResourceCandidate;
 
 /**
  * {@link RepositoryQuery} implementation for spring-data-mirage.
- *
- * @since 0.1
- * @version $Id$
- * @author daisuke
  */
 public class MirageQuery implements RepositoryQuery {
 	
@@ -99,10 +94,7 @@ public class MirageQuery implements RepositoryQuery {
 		}
 		params.put("offset", pageable.getOffset());
 		params.put("size", pageable.getPageSize());
-		if (pageable.getSort() != null) {
-			Sort sort = pageable.getSort();
-			addSortParam(params, sort);
-		}
+		addSortParam(params, pageable.getSort());
 	}
 	
 	private static void addSortParam(Map<String, Object> params, Sort sort) {
@@ -114,7 +106,7 @@ public class MirageQuery implements RepositoryQuery {
 			orders.add(String.format(Locale.ENGLISH, "%s %s", order.getProperty(), order.getDirection().name()));
 		}
 		if (orders.size() != 0) {
-			params.put("orders", join(orders));
+			params.put("orders", String.join(", ", orders));
 		}
 	}
 	
@@ -127,7 +119,7 @@ public class MirageQuery implements RepositoryQuery {
 					dimensions++;
 					cl = cl.getComponentType();
 				}
-				StringBuffer sb = new StringBuffer();
+				StringBuilder sb = new StringBuilder();
 				sb.append(cl.getName());
 				for (int i = 0; i < dimensions; i++) {
 					sb.append("[]");
@@ -138,19 +130,6 @@ public class MirageQuery implements RepositoryQuery {
 			}
 		}
 		return type.getName();
-	}
-	
-	private static String join(List<String> orders) {
-		StringBuilder sb = new StringBuilder();
-		Iterator<String> parts = orders.iterator();
-		if (parts.hasNext()) {
-			sb.append(parts.next());
-			while (parts.hasNext()) {
-				sb.append(", ");
-				sb.append(parts.next());
-			}
-		}
-		return sb.toString();
 	}
 	
 	
@@ -187,10 +166,7 @@ public class MirageQuery implements RepositoryQuery {
 		if (mirageQueryMethod.isModifyingQuery()) {
 			return sqlManager.executeUpdate(sqlResource, parameterMap);
 		} else if (mirageQueryMethod.isCollectionQuery()) {
-			Sort sort = accessor.getSort();
-			if (sort != null) {
-				addSortParam(parameterMap, sort);
-			}
+			addSortParam(parameterMap, accessor.getSort());
 			return sqlManager.getResultList(returnedDomainType, sqlResource, parameterMap);
 		} else if (mirageQueryMethod.isChunkQuery()) {
 			return processChunkQuery(sqlResource, parameterMap, returnedDomainType, accessor);
@@ -271,13 +247,11 @@ public class MirageQuery implements RepositoryQuery {
 			String simpleName = clazz.getSimpleName();
 			String args = getArgsPartOfSignature(mirageQueryMethod.asMethod());
 			candidates.addAll(Arrays.asList(
-					new SqlResourceCandidate(clazz, simpleName + "#" + mirageQueryMethod.getName() + args + ".sql"),
-					new SqlResourceCandidate(clazz, simpleName + "#" + mirageQueryMethod.getName() + ".sql"),
 					new SqlResourceCandidate(clazz, simpleName + "_" + mirageQueryMethod.getName() + args + ".sql"),
 					new SqlResourceCandidate(clazz, simpleName + "_" + mirageQueryMethod.getName() + ".sql"),
 					new SqlResourceCandidate(clazz, simpleName + ".sql")));
 		}
-		return candidates.toArray(new SqlResourceCandidate[candidates.size()]);
+		return candidates.toArray(new SqlResourceCandidate[0]);
 	}
 	
 	private SqlResource createSqlResource() {
@@ -309,24 +283,15 @@ public class MirageQuery implements RepositoryQuery {
 	}
 	
 	private int getTotalCount(SqlResource sqlResource) {
-		Reader reader = null;
-		try {
-			reader = new InputStreamReader(sqlResource.getInputStream(), StandardCharsets.UTF_8);
+		try (Reader reader = new InputStreamReader(sqlResource.getInputStream(), StandardCharsets.UTF_8)) {
 			String query = toString(reader);
 			if (query.contains("SQL_CALC_FOUND_ROWS")) { // TODO MySQL固有処理
 				return sqlManager.getSingleResult(Integer.class, new StringSqlResource("SELECT FOUND_ROWS()"));
 			}
 		} catch (IOException e) {
 			log.error("IOException", e);
-		} finally {
-			if (reader != null) {
-				try {
-					reader.close();
-				} catch (IOException e) {
-					// ignore
-				}
-			}
 		}
+		// ignore
 		return Integer.MAX_VALUE;
 	}
 	
@@ -365,9 +330,8 @@ public class MirageQuery implements RepositoryQuery {
 		Pageable pageable = accessor.getPageable();
 		if (pageable != null) {
 			addPageParam(parameterMap, pageable);
-		} else if (accessor.getSort() != null) {
-			Sort sort = accessor.getSort();
-			addSortParam(parameterMap, sort);
+		} else {
+			addSortParam(parameterMap, accessor.getSort());
 		}
 		
 		List<?> resultList = sqlManager.getResultList(returnedDomainType, sqlResource, parameterMap);
@@ -386,9 +350,8 @@ public class MirageQuery implements RepositoryQuery {
 		Pageable pageable = accessor.getPageable();
 		if (pageable != null) {
 			addPageParam(parameterMap, pageable);
-		} else if (accessor.getSort() != null) {
-			Sort sort = accessor.getSort();
-			addSortParam(parameterMap, sort);
+		} else {
+			addSortParam(parameterMap, accessor.getSort());
 		}
 		
 		List<?> resultList = sqlManager.getResultList(returnedDomainType, sqlResource, parameterMap);
@@ -401,7 +364,7 @@ public class MirageQuery implements RepositoryQuery {
 	}
 	
 	private String toString(Reader input) throws IOException {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		char[] buffer = new char[BUFFER_SIZE];
 		int n = 0;
 		while ((n = input.read(buffer)) != -1) {

@@ -16,8 +16,11 @@
 package jp.xet.springframework.data.mirage.repository;
 
 import java.io.Serializable;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -73,13 +76,14 @@ import com.miragesql.miragesql.naming.NameConverter;
 import com.miragesql.miragesql.util.MirageUtil;
 import com.miragesql.miragesql.util.Validate;
 
+import jp.xet.springframework.data.mirage.repository.query.BeforeCreate;
+import jp.xet.springframework.data.mirage.repository.query.BeforeUpdate;
+
 /**
- * Mirage SQLを利用した repository 実装クラス。
+ * Default {@link org.springframework.data.repository.Repository} implementation using Mirage SQL.
  *
  * @param <E> the domain type the repository manages
  * @param <ID> the type of the id of the entity the repository manages
- * @since 0.1
- * @author daisuke
  */
 public class DefaultMirageRepository<E, ID extends Serializable> implements
 		ScannableRepository<E, ID>, BatchCreatableRepository<E, ID>, BatchReadableRepository<E, ID>,
@@ -177,6 +181,25 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 		this.sqlManager = sqlManager;
 	}
 	
+	private void preProcess(E entity, Class<? extends Annotation> annotation) {
+		Class<?> c = entityClass;
+		while (c != null && c != Object.class) {
+			Method[] declaredMethods = c.getDeclaredMethods();
+			for (Method method : declaredMethods) {
+				Annotation idAnnotation = method.getAnnotation(annotation);
+				if (idAnnotation != null) {
+					method.setAccessible(true);
+					try {
+						method.invoke(entity);
+					} catch (Exception e) {
+						// ignore
+					}
+				}
+			}
+			c = c.getSuperclass();
+		}
+	}
+	
 	@Override
 	public long count() {
 		return getCount(getBaseSelectSqlResource(), createParams());
@@ -188,6 +211,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 			return null;
 		}
 		try {
+			preProcess(entity, BeforeCreate.class);
 			sqlManager.insertEntity(entity);
 			log.debug("entity inserted: {}", entity);
 		} catch (SQLRuntimeException e) {
@@ -395,7 +419,9 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 					}
 				}
 			}
+			toUpdate.stream().forEach(e -> preProcess(e, BeforeUpdate.class));
 			sqlManager.updateBatch(toUpdate);
+			toUpdate.stream().forEach(e -> preProcess(e, BeforeCreate.class));
 			sqlManager.insertBatch(toInsert);
 			return newArrayList(entities);
 		} catch (SQLRuntimeException e) {
@@ -410,9 +436,11 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 		}
 		try {
 			if (exists(getId(entity), true)) {
+				preProcess(entity, BeforeUpdate.class);
 				sqlManager.updateEntity(entity);
 				log.debug("entity updated: {}", entity);
 			} else {
+				preProcess(entity, BeforeCreate.class);
 				sqlManager.insertEntity(entity);
 				log.debug("entity inserted: {}", entity);
 			}
@@ -436,6 +464,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 			return null;
 		}
 		try {
+			preProcess(entity, BeforeUpdate.class);
 			int rowCount = sqlManager.updateEntity(entity);
 			if (rowCount == 1) {
 				log.debug("entity updated: {}", entity);
@@ -783,6 +812,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 	})
 	protected int insertBatch(E... entities) {
 		try {
+			Arrays.stream(entities).forEach(e -> preProcess(e, BeforeCreate.class));
 			return sqlManager.insertBatch(entities);
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("insertBatch", null, e.getCause());
@@ -795,6 +825,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 	@SuppressWarnings("javadoc")
 	protected int insertBatch(List<E> entities) {
 		try {
+			entities.forEach(e -> preProcess(e, BeforeCreate.class));
 			return sqlManager.insertBatch(entities);
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("insertBatch", null, e.getCause());
@@ -805,6 +836,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 	public <S extends E> Iterable<S> createAll(Iterable<S> entities) {
 		try {
 			List<S> list = newArrayList(entities);
+			list.forEach(e -> preProcess(e, BeforeCreate.class));
 			sqlManager.insertBatch(list);
 			return list;
 		} catch (SQLRuntimeException e) {
@@ -864,6 +896,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 	})
 	protected int updateBatch(E... entities) {
 		try {
+			Arrays.stream(entities).forEach(e -> preProcess(e, BeforeUpdate.class));
 			return sqlManager.updateBatch(entities);
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("updateBatch", null, e.getCause());
@@ -876,6 +909,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 	@SuppressWarnings("javadoc")
 	protected int updateBatch(List<E> entities) {
 		try {
+			entities.forEach(e -> preProcess(e, BeforeUpdate.class));
 			return sqlManager.updateBatch(entities);
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("updateBatch", null, e.getCause());
@@ -886,8 +920,9 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 	 * @see SqlManager#updateEntity(Object)
 	 */
 	@SuppressWarnings("javadoc")
-	protected int updateEntity(Object entity) {
+	protected int updateEntity(E entity) {
 		try {
+			preProcess(entity, BeforeUpdate.class);
 			return sqlManager.updateEntity(entity);
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("updateEntity", null, e.getCause());
@@ -929,7 +964,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 	private void addPageParam(Map<String, Object> params, Pageable pageable) {
 		params.put("offset", pageable == null ? null : pageable.getOffset());
 		params.put("size", pageable == null ? null : pageable.getPageSize());
-		if (pageable != null && pageable.getSort() != null) {
+		if (pageable != null) {
 			List<String> orders = new ArrayList<String>();
 			Sort sort = pageable.getSort();
 			for (Order order : sort) {
