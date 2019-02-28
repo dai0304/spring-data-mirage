@@ -35,10 +35,6 @@ import org.ws2ten1.chunks.Chunk;
 
 /**
  * TODO for daisuke
- *
- * @since 0.1
- * @version $Id$
- * @author daisuke
  */
 public class MirageQueryMethod extends QueryMethod {
 	
@@ -112,9 +108,6 @@ public class MirageQueryMethod extends QueryMethod {
 	
 	/**
 	 * TODO for daisuke
-	 *
-	 * @return
-	 * @since 0.4.0.RELEASE
 	 */
 	public boolean isChunkQuery() {
 		return !isPageQuery() && org.springframework.util.ClassUtils.isAssignable(Chunk.class, unwrappedReturnType);

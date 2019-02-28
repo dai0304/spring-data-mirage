@@ -23,10 +23,6 @@ import java.lang.annotation.Target;
 
 /**
  * TODO for daisuke
- * 
- * @since 0.1
- * @version $Id$
- * @author daisuke
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
@@ -35,9 +31,8 @@ public @interface StaticParams {
 	
 	/**
 	 * Return the {@link StaticParam}s.
-	 * 
+	 *
 	 * @return the {@link StaticParam}s
-	 * @since 0.1
 	 */
 	StaticParam[] value();
 	

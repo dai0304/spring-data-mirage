@@ -23,10 +23,6 @@ import java.lang.annotation.Target;
 
 /**
  * Indicates a method should be regarded as modifying query.
- * 
- * @since 0.1
- * @version $Id$
- * @author daisuke
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
