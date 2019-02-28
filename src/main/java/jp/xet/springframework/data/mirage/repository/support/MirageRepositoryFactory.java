@@ -33,8 +33,6 @@ import org.slf4j.LoggerFactory;
 import com.miragesql.miragesql.SqlManager;
 
 import jp.xet.springframework.data.mirage.repository.DefaultMirageRepository;
-import jp.xet.springframework.data.mirage.repository.Identifiable;
-import jp.xet.springframework.data.mirage.repository.IdentifiableMirageRepository;
 import jp.xet.springframework.data.mirage.repository.NoSuchSqlResourceException;
 import jp.xet.springframework.data.mirage.repository.query.MirageQueryLookupStrategy;
 
@@ -90,23 +88,13 @@ public class MirageRepositoryFactory extends RepositoryFactorySupport {
 		Class<?> repositoryInterface = metadata.getRepositoryInterface();
 		EntityInformation<?, Serializable> entityInformation = getEntityInformation(metadata.getDomainType());
 		
-		DefaultMirageRepository repos;
-		if (isIdentifiableJdbcRepository(entityInformation)) {
-			repos = new IdentifiableMirageRepository<Identifiable>(
-					(EntityInformation<Identifiable, ? extends Serializable>) entityInformation, sqlManager);
-		} else {
-			repos = new DefaultMirageRepository(entityInformation, sqlManager);
-		}
+		DefaultMirageRepository repo = new DefaultMirageRepository(entityInformation, sqlManager);
 		try {
 			String name = repositoryInterface.getSimpleName() + ".sql";
-			repos.setBaseSelectSqlResource(DefaultMirageRepository.newSqlResource(repositoryInterface, name));
+			repo.setBaseSelectSqlResource(DefaultMirageRepository.newSqlResource(repositoryInterface, name));
 		} catch (NoSuchSqlResourceException e) {
 			logger.debug("Repository Default SQL [{}] not found, default used.", repositoryInterface);
 		}
-		return repos;
-	}
-	
-	private boolean isIdentifiableJdbcRepository(EntityInformation<?, Serializable> entityInformation) {
-		return Identifiable.class.isAssignableFrom(entityInformation.getJavaType());
+		return repo;
 	}
 }

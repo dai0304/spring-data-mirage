@@ -24,16 +24,14 @@ import com.miragesql.miragesql.annotation.PrimaryKey;
 import com.miragesql.miragesql.annotation.PrimaryKey.GenerationType;
 import com.miragesql.miragesql.annotation.Table;
 
-import jp.xet.springframework.data.mirage.repository.Identifiable;
-
 /**
  * Sample entity class.
- * 
+ *
  * @author daisuke
  */
 @Table(name = "samples")
 @SuppressWarnings("serial")
-public class Entity implements Identifiable, Serializable {
+public class Entity implements Serializable {
 	
 	@Id
 	@Column(name = "id")
@@ -46,7 +44,7 @@ public class Entity implements Identifiable, Serializable {
 	
 	/**
 	 * インスタンスを生成する。
-	 * 
+	 *
 	 * @param str string
 	 */
 	public Entity(String str) {
@@ -74,7 +72,6 @@ public class Entity implements Identifiable, Serializable {
 		return true;
 	}
 	
-	@Override
 	public long getId() {
 		return id;
 	}

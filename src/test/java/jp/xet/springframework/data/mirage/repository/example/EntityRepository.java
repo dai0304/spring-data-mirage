@@ -21,20 +21,18 @@ import org.springframework.data.repository.query.Param;
 
 import org.ws2ten1.chunks.Chunk;
 import org.ws2ten1.repositories.ChunkableRepository;
+import org.ws2ten1.repositories.CrudRepository;
 import org.ws2ten1.repositories.PageableRepository;
 import org.ws2ten1.repositories.ScannableRepository;
 import org.ws2ten1.repositories.UpsertableRepository;
-import org.ws2ten1.repositories.WritableRepository;
 
 import jp.xet.springframework.data.mirage.repository.query.StaticParam;
 
 /**
  * Repository interface for {@link Entity}.
- *
- * @author daisuke
  */
 public interface EntityRepository extends ScannableRepository<Entity, Long>, UpsertableRepository<Entity, Long>,
-		WritableRepository<Entity, Long>, ChunkableRepository<Entity, Long>, PageableRepository<Entity, Long> {
+		CrudRepository<Entity, Long>, ChunkableRepository<Entity, Long>, PageableRepository<Entity, Long> {
 	
 	/**
 	 * TODO for daisuke
@@ -58,6 +56,7 @@ public interface EntityRepository extends ScannableRepository<Entity, Long>, Ups
 	 * @return the xxx value
 	 */
 	@StaticParam(key = "str", value = "hoge")
+	@StaticParam(key = "str2", value = "hoge2")
 	List<Entity> findXxx();
 	
 	/**

@@ -17,16 +17,13 @@ package jp.xet.springframework.data.mirage.repository.query;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
  * TODO for daisuke
- * 
- * @since 0.1
- * @version $Id$
- * @author daisuke
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({
@@ -34,17 +31,18 @@ import java.lang.annotation.Target;
 	ElementType.ANNOTATION_TYPE
 })
 @Documented
+@Repeatable(StaticParams.class)
 public @interface StaticParam {
 	
 	/**
-	 * 
+	 *
 	 * @return
 	 * @since 0.1
 	 */
 	String key();
 	
 	/**
-	 * 
+	 *
 	 * @return
 	 * @since 0.1
 	 */

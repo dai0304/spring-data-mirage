@@ -21,10 +21,6 @@ import org.ws2ten1.chunks.Chunkable;
 
 /**
  * TODO for daisuke
- *
- * @since TODO for daisuke
- * @version $Id$
- * @author daisuke
  */
 public interface ChunkableParameterAccessor extends ParameterAccessor {
 	

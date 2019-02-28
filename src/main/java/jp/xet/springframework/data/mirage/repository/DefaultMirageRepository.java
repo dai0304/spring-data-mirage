@@ -81,9 +81,10 @@ import com.miragesql.miragesql.util.Validate;
  * @since 0.1
  * @author daisuke
  */
-public class DefaultMirageRepository<E, ID extends Serializable> implements ScannableRepository<E, ID>,
-		BatchReadableRepository<E, ID>, BatchCreatableRepository<E, ID>, BatchUpsertableRepository<E, ID>,
-		BatchDeletableRepository<E, ID>, LockableCrudRepository<E, ID>, TruncatableRepository<E, ID>,
+public class DefaultMirageRepository<E, ID extends Serializable> implements
+		ScannableRepository<E, ID>, BatchCreatableRepository<E, ID>, BatchReadableRepository<E, ID>,
+		BatchUpsertableRepository<E, ID>, BatchDeletableRepository<E, ID>,
+		LockableCrudRepository<E, ID>, TruncatableRepository<E, ID>,
 		ChunkableRepository<E, ID>, PageableRepository<E, ID> {
 	
 	private static Logger log = LoggerFactory.getLogger(DefaultMirageRepository.class);

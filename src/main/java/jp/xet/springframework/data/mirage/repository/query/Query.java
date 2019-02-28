@@ -23,10 +23,6 @@ import java.lang.annotation.Target;
 
 /**
  * Annotation to declare finder queries directly on repository methods.
- * 
- * @since 0.1
- * @version $Id$
- * @author daisuke
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
@@ -34,14 +30,14 @@ import java.lang.annotation.Target;
 public @interface Query {
 	
 	/**
-	 * 
+	 *
 	 * @return
 	 * @since 0.1
 	 */
 	String countQuery() default "";
 	
 	/**
-	 * 
+	 *
 	 * @return
 	 * @since 0.1
 	 */
