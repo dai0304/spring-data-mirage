@@ -1,4 +1,4 @@
--- EntityRepository_findXxx.sql
+-- IdGeneratedEntityRepository_findXxx.sql
 
 SELECT *
 FROM samples

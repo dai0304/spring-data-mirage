@@ -34,8 +34,8 @@ import com.miragesql.miragesql.annotation.Table;
  * @version $Id$
  * @author daisuke
  */
-public class MirageEntityInformationSupport<T, ID extends Serializable>extends AbstractEntityInformation<T, ID>
-		implements MirageEntityInformation<T, ID> {
+public class MirageEntityInformationSupport<T, ID extends Serializable>
+		extends AbstractEntityInformation<T, ID> implements MirageEntityInformation<T, ID> {
 	
 	/**
 	 * Creates a {@link MirageEntityInformation} for the given domain class and {@link SqlManager}.

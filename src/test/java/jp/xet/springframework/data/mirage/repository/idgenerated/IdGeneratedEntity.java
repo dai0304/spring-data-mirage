@@ -13,9 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package jp.xet.springframework.data.mirage.repository.example;
+package jp.xet.springframework.data.mirage.repository.idgenerated;
 
-import java.io.Serializable;
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 import org.springframework.data.annotation.Id;
 
@@ -30,12 +35,17 @@ import com.miragesql.miragesql.annotation.Table;
  * @author daisuke
  */
 @Table(name = "samples")
+@Data
+@EqualsAndHashCode(of = "id")
+@ToString(of = "str")
+@NoArgsConstructor(access = AccessLevel.PACKAGE)
 @SuppressWarnings("serial")
-public class Entity implements Serializable {
+public class IdGeneratedEntity {
 	
 	@Id
 	@Column(name = "id")
 	@PrimaryKey(generationType = GenerationType.IDENTITY)
+	@Setter(AccessLevel.PACKAGE)
 	private long id;
 	
 	@Column(name = "str")
@@ -47,58 +57,7 @@ public class Entity implements Serializable {
 	 *
 	 * @param str string
 	 */
-	public Entity(String str) {
+	public IdGeneratedEntity(String str) {
 		this.str = str;
-	}
-	
-	Entity() {
-	}
-	
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		Entity other = (Entity) obj;
-		if (id != other.id) {
-			return false;
-		}
-		return true;
-	}
-	
-	public long getId() {
-		return id;
-	}
-	
-	@SuppressWarnings("javadoc")
-	public String getStr() {
-		return str;
-	}
-	
-	@Override
-	public int hashCode() {
-		return (int) (id ^ (id >>> 32)); // CHECKSTYLE IGNORE THIS LINE
-	}
-	
-	@SuppressWarnings("javadoc")
-	public void setStr(String str) {
-		this.str = str;
-	}
-	
-	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("Entity[").append(str).append("]");
-		return builder.toString();
-	}
-	
-	void setId(long id) {
-		this.id = id;
 	}
 }

@@ -35,10 +35,9 @@ import org.junit.runner.RunWith;
 import com.google.common.collect.Iterables;
 import com.miragesql.miragesql.SqlManager;
 
+import jp.xet.springframework.data.mirage.repository.appgenerated.User;
+import jp.xet.springframework.data.mirage.repository.appgenerated.UserRepository;
 import jp.xet.springframework.data.mirage.repository.support.MirageRepositoryFactory;
-
-import jp.xet.springframework.data.mirage.repository.example.User;
-import jp.xet.springframework.data.mirage.repository.example.UserRepository;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = TestConfiguration.class)

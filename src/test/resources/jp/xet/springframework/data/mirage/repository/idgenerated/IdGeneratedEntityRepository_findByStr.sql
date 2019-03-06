@@ -1,7 +1,9 @@
--- EntityRepository_findChunk.sql
+-- IdGeneratedEntityRepository_findByStr.sql
 
 SELECT *
 FROM samples
+
+WHERE str = /*str*/'abc'
 
 /*IF orders != null*/
 ORDER BY /*$orders*/id

@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package jp.xet.springframework.data.mirage.repository.chunk;
+package jp.xet.springframework.data.mirage.repository.appgenerated;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
@@ -29,21 +30,22 @@ import com.miragesql.miragesql.annotation.PrimaryKey.GenerationType;
 import com.miragesql.miragesql.annotation.Table;
 
 /**
- * Sample entity class.
+ * User entity.
  */
-@Table(name = "sample_chunk")
+@Table(name = "users")
 @Data
-@AllArgsConstructor
+@EqualsAndHashCode(of = "username")
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
+@AllArgsConstructor
 @SuppressWarnings("serial")
-public class ChunkEntity {
+public class User {
 	
 	@Id
-	@Column(name = "id")
 	@PrimaryKey(generationType = GenerationType.APPLICATION)
+	@Column(name = "username")
 	@Setter(AccessLevel.PACKAGE)
-	private String id;
+	private String username;
 	
-	@Column(name = "str")
-	private String str;
+	@Column(name = "password")
+	private String password;
 }

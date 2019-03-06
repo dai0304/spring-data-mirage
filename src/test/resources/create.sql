@@ -13,3 +13,8 @@ CREATE TABLE sample_chunk (
 	str VARCHAR(64) NOT NULL
 );
 
+CREATE TABLE sample_preprocess (
+	id VARCHAR(64) PRIMARY KEY,
+	str VARCHAR(64) NOT NULL,
+	last_updated BIGINT NOT NULL
+);

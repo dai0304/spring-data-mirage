@@ -13,17 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package jp.xet.springframework.data.mirage.repository.example;
+package jp.xet.springframework.data.mirage.repository.handler;
 
-import org.ws2ten1.repositories.BatchReadableRepository;
-import org.ws2ten1.repositories.ScannableRepository;
-import org.ws2ten1.repositories.UpsertableRepository;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * Repository interface for {@link Entity}.
- *
- * @author daisuke
+ * Hook before update.
  */
-public interface UserRepository extends ScannableRepository<User, String>, UpsertableRepository<User, String>,
-		BatchReadableRepository<User, String> {
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+@Documented
+public @interface BeforeUpdate {
 }

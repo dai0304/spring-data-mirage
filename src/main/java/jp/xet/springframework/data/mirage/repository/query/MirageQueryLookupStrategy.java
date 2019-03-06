@@ -18,6 +18,9 @@ package jp.xet.springframework.data.mirage.repository.query;
 import java.lang.reflect.Method;
 import java.util.Locale;
 
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.data.projection.ProjectionFactory;
 import org.springframework.data.repository.core.NamedQueries;
 import org.springframework.data.repository.core.RepositoryMetadata;
@@ -28,19 +31,20 @@ import com.miragesql.miragesql.SqlManager;
 
 /**
  * Query lookup strategy to execute finders.
- * 
+ *
  * <p>Base class for {@link QueryLookupStrategy} implementations that need access to an {@link SqlManager}.</p>
- * 
+ *
  * @since 0.1
  * @version $Id$
  * @author daisuke
  */
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public abstract class MirageQueryLookupStrategy implements QueryLookupStrategy {
 	
 	/**
 	 * Creates a {@link QueryLookupStrategy} for the given {@link SqlManager} and
 	 * {@link org.springframework.data.repository.query.QueryLookupStrategy.Key}.
-	 * 
+	 *
 	 * @param sqlManager {@link SqlManager}
 	 * @param key
 	 * @return
@@ -68,10 +72,6 @@ public abstract class MirageQueryLookupStrategy implements QueryLookupStrategy {
 	private final SqlManager sqlManager;
 	
 	
-	MirageQueryLookupStrategy(SqlManager sqlManager) {
-		this.sqlManager = sqlManager;
-	}
-	
 	@Override
 	public RepositoryQuery resolveQuery(Method method, RepositoryMetadata metadata, ProjectionFactory factory,
 			NamedQueries namedQueries) {
@@ -80,7 +80,7 @@ public abstract class MirageQueryLookupStrategy implements QueryLookupStrategy {
 	
 	/**
 	 * TODO for daisuke
-	 * 
+	 *
 	 * @param method
 	 * @param sqlManager {@link SqlManager}
 	 * @param namedQueries

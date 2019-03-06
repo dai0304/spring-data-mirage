@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package jp.xet.springframework.data.mirage.repository.example;
+package jp.xet.springframework.data.mirage.repository.idgenerated;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -23,6 +23,8 @@ import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
@@ -34,9 +36,6 @@ import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -50,20 +49,19 @@ import com.google.common.collect.Iterables;
 import jp.xet.springframework.data.mirage.repository.TestConfiguration;
 
 /**
- * Test for {@link EntityRepository}.
+ * Test for {@link IdGeneratedEntityRepository}.
  *
  * @author daisuke
  */
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = TestConfiguration.class)
 @Transactional
+@Slf4j
 @SuppressWarnings("javadoc")
-public class EntityRepositoryTest {
-	
-	private static Logger log = LoggerFactory.getLogger(EntityRepositoryTest.class);
+public class IdGeneratedEntityRepositoryTest {
 	
 	@Autowired
-	EntityRepository repo;
+	IdGeneratedEntityRepository repo;
 	
 	
 	@Test
@@ -71,25 +69,25 @@ public class EntityRepositoryTest {
 	public void test_create_and_findOne() {
 		assertThat(repo, is(notNullValue()));
 		assertThat(repo.count(), is(0L));
-		Entity foo = repo.create(new Entity("foo"));
+		IdGeneratedEntity foo = repo.create(new IdGeneratedEntity("foo"));
 		assertThat(repo.count(), is(1L));
-		Entity bar = repo.create(new Entity("bar"));
+		IdGeneratedEntity bar = repo.create(new IdGeneratedEntity("bar"));
 		assertThat(repo.count(), is(2L));
-		repo.save(new Entity("foo"));
-		repo.save(new Entity("foo2"));
-		repo.save(new Entity("foo3"));
-		repo.save(new Entity("bar2"));
-		repo.save(new Entity("bar3"));
+		repo.save(new IdGeneratedEntity("foo"));
+		repo.save(new IdGeneratedEntity("foo2"));
+		repo.save(new IdGeneratedEntity("foo3"));
+		repo.save(new IdGeneratedEntity("bar2"));
+		repo.save(new IdGeneratedEntity("bar3"));
 		
-		Entity foundFoo = repo.findById(foo.getId()).orElse(null);
+		IdGeneratedEntity foundFoo = repo.findById(foo.getId()).orElse(null);
 		assertThat(foundFoo.getId(), is(foo.getId()));
 		assertThat(foundFoo.getStr(), is("foo"));
 		
-		Entity foundBar = repo.findById(bar.getId()).orElse(null);
+		IdGeneratedEntity foundBar = repo.findById(bar.getId()).orElse(null);
 		assertThat(foundBar.getId(), is(bar.getId()));
 		assertThat(foundBar.getStr(), is("bar"));
 		
-		Iterable<Entity> all = repo.findAll();
+		Iterable<IdGeneratedEntity> all = repo.findAll();
 		assertThat(Iterables.size(all), is(7));
 	}
 	
@@ -98,7 +96,7 @@ public class EntityRepositoryTest {
 	public void test_fail_to_create() {
 		assertThat(repo, is(notNullValue()));
 		assertThat(repo.count(), is(0L));
-		Entity foo = repo.create(new Entity("foo"));
+		IdGeneratedEntity foo = repo.create(new IdGeneratedEntity("foo"));
 		assertThat(repo.count(), is(1L));
 		foo.setStr("bar");
 		repo.create(foo);
@@ -108,32 +106,32 @@ public class EntityRepositoryTest {
 	public void test_fail_to_update() {
 		assertThat(repo, is(notNullValue()));
 		assertThat(repo.count(), is(0L));
-		repo.update(new Entity("foo"));
+		repo.update(new IdGeneratedEntity("foo"));
 	}
 	
 	@Test
 	public void test_save_and_findOne() {
 		assertThat(repo, is(notNullValue()));
 		assertThat(repo.count(), is(0L));
-		Entity foo = repo.save(new Entity("foo"));
+		IdGeneratedEntity foo = repo.save(new IdGeneratedEntity("foo"));
 		assertThat(repo.count(), is(1L));
-		Entity bar = repo.save(new Entity("bar"));
+		IdGeneratedEntity bar = repo.save(new IdGeneratedEntity("bar"));
 		assertThat(repo.count(), is(2L));
-		repo.save(new Entity("foo"));
-		repo.save(new Entity("foo2"));
-		repo.save(new Entity("foo3"));
-		repo.save(new Entity("bar2"));
-		repo.save(new Entity("bar3"));
+		repo.save(new IdGeneratedEntity("foo"));
+		repo.save(new IdGeneratedEntity("foo2"));
+		repo.save(new IdGeneratedEntity("foo3"));
+		repo.save(new IdGeneratedEntity("bar2"));
+		repo.save(new IdGeneratedEntity("bar3"));
 		
-		Entity foundFoo = repo.findById(foo.getId()).orElse(null);
+		IdGeneratedEntity foundFoo = repo.findById(foo.getId()).orElse(null);
 		assertThat(foundFoo.getId(), is(foo.getId()));
 		assertThat(foundFoo.getStr(), is("foo"));
 		
-		Entity foundBar = repo.findById(bar.getId()).orElse(null);
+		IdGeneratedEntity foundBar = repo.findById(bar.getId()).orElse(null);
 		assertThat(foundBar.getId(), is(bar.getId()));
 		assertThat(foundBar.getStr(), is("bar"));
 		
-		Iterable<Entity> all = repo.findAll();
+		Iterable<IdGeneratedEntity> all = repo.findAll();
 		assertThat(Iterables.size(all), is(7));
 	}
 	
@@ -142,14 +140,14 @@ public class EntityRepositoryTest {
 	public void test_update_and_findOne() {
 		assertThat(repo, is(notNullValue()));
 		assertThat(repo.count(), is(0L));
-		Entity foo = repo.create(new Entity("foo"));
+		IdGeneratedEntity foo = repo.create(new IdGeneratedEntity("foo"));
 		assertThat(repo.count(), is(1L));
-		Entity bar = foo;
+		IdGeneratedEntity bar = foo;
 		bar.setStr("bar");
 		bar = repo.update(bar);
 		assertThat(repo.count(), is(1L));
 		
-		Entity foundFoo = repo.findById(foo.getId()).orElse(null);
+		IdGeneratedEntity foundFoo = repo.findById(foo.getId()).orElse(null);
 		assertThat(foundFoo.getId(), is(foo.getId()));
 		assertThat(foundFoo.getStr(), is("bar"));
 	}
@@ -158,12 +156,12 @@ public class EntityRepositoryTest {
 	@Rollback
 	public void test_create_and_findChunk() {
 		assertThat(repo.count(), is(0L));
-		Entity foo = repo.create(new Entity("foo"));
+		IdGeneratedEntity foo = repo.create(new IdGeneratedEntity("foo"));
 		assertThat(repo.count(), is(1L));
-		Chunk<Entity> chunk = repo.findChunk();
+		Chunk<IdGeneratedEntity> chunk = repo.findChunk();
 		assertThat(chunk.getContent().size(), is(1));
 		
-		Entity foundFoo = chunk.iterator().next();
+		IdGeneratedEntity foundFoo = chunk.iterator().next();
 		assertThat(foundFoo.getId(), is(foo.getId()));
 		assertThat(foundFoo.getStr(), is("foo"));
 	}
@@ -172,23 +170,23 @@ public class EntityRepositoryTest {
 	@Rollback
 	public void testChunking_8items_ASC() {
 		assertThat(repo.count(), is(0L));
-		repo.save(new Entity("foo"));
-		repo.save(new Entity("bar"));
-		repo.save(new Entity("baz"));
-		repo.save(new Entity("qux"));
-		repo.save(new Entity("quux"));
-		repo.save(new Entity("courge"));
-		repo.save(new Entity("grault"));
-		repo.save(new Entity("garply"));
+		repo.save(new IdGeneratedEntity("foo"));
+		repo.save(new IdGeneratedEntity("bar"));
+		repo.save(new IdGeneratedEntity("baz"));
+		repo.save(new IdGeneratedEntity("qux"));
+		repo.save(new IdGeneratedEntity("quux"));
+		repo.save(new IdGeneratedEntity("courge"));
+		repo.save(new IdGeneratedEntity("grault"));
+		repo.save(new IdGeneratedEntity("garply"));
 		
-		List<Entity> list = new ArrayList<Entity>();
+		List<IdGeneratedEntity> list = new ArrayList<IdGeneratedEntity>();
 		
 		Chunkable req = new ChunkRequest(2);
-		Chunk<Entity> chunk = repo.findAll(req);
+		Chunk<IdGeneratedEntity> chunk = repo.findAll(req);
 		assertThat(chunk, is(notNullValue()));
 		log.info("{}", chunk.getContent());
 		assertThat(chunk.getContent(), hasSize(2));
-		assertThat(chunk.getContent().toString(), is("[Entity[foo], Entity[bar]]"));
+		assertThat(chunk.getContent().toString(), is("[IdGeneratedEntity(str=foo), IdGeneratedEntity(str=bar)]"));
 		list.addAll(chunk.getContent());
 		
 		do {
@@ -206,23 +204,23 @@ public class EntityRepositoryTest {
 	@Rollback
 	public void testChunking_ASC() {
 		assertThat(repo.count(), is(0L));
-		repo.save(new Entity("foo"));
-		repo.save(new Entity("bar"));
-		repo.save(new Entity("baz"));
-		repo.save(new Entity("qux"));
-		repo.save(new Entity("quux"));
-		repo.save(new Entity("courge"));
-		repo.save(new Entity("grault"));
+		repo.save(new IdGeneratedEntity("foo"));
+		repo.save(new IdGeneratedEntity("bar"));
+		repo.save(new IdGeneratedEntity("baz"));
+		repo.save(new IdGeneratedEntity("qux"));
+		repo.save(new IdGeneratedEntity("quux"));
+		repo.save(new IdGeneratedEntity("courge"));
+		repo.save(new IdGeneratedEntity("grault"));
 		
-		List<Entity> list = new ArrayList<Entity>();
+		List<IdGeneratedEntity> list = new ArrayList<IdGeneratedEntity>();
 		
 		log.info("==== 1st chunk");
 		Chunkable req = new ChunkRequest(2);
-		Chunk<Entity> chunk = repo.findAll(req);
+		Chunk<IdGeneratedEntity> chunk = repo.findAll(req);
 		assertThat(chunk, is(notNullValue()));
 		log.info("{}", chunk.getContent());
 		assertThat(chunk.getContent(), hasSize(2));
-		assertThat(chunk.getContent().toString(), is("[Entity[foo], Entity[bar]]"));
+		assertThat(chunk.getContent().toString(), is("[IdGeneratedEntity(str=foo), IdGeneratedEntity(str=bar)]"));
 		list.addAll(chunk.getContent());
 		
 		log.info("==== 2nd chunk");
@@ -231,7 +229,7 @@ public class EntityRepositoryTest {
 		assertThat(chunk, is(notNullValue()));
 		log.info("{}", chunk.getContent());
 		assertThat(chunk.getContent(), hasSize(2));
-		assertThat(chunk.getContent().toString(), is("[Entity[baz], Entity[qux]]"));
+		assertThat(chunk.getContent().toString(), is("[IdGeneratedEntity(str=baz), IdGeneratedEntity(str=qux)]"));
 		list.addAll(chunk.getContent());
 		
 		do {
@@ -244,7 +242,7 @@ public class EntityRepositoryTest {
 			list.addAll(chunk.getContent());
 		} while (chunk.hasNext());
 		assertThat(chunk.getContent(), hasSize(1));
-		assertThat(chunk.getContent().toString(), is("[Entity[grault]]"));
+		assertThat(chunk.getContent().toString(), is("[IdGeneratedEntity(str=grault)]"));
 		assertThat(list, hasSize(7));
 		
 		log.info("==== previous chunk");
@@ -253,30 +251,30 @@ public class EntityRepositoryTest {
 		assertThat(chunk, is(notNullValue()));
 		log.info("{}", chunk.getContent());
 		assertThat(chunk.getContent(), hasSize(2));
-		assertThat(chunk.getContent().toString(), is("[Entity[quux], Entity[courge]]"));
+		assertThat(chunk.getContent().toString(), is("[IdGeneratedEntity(str=quux), IdGeneratedEntity(str=courge)]"));
 	}
 	
 	@Test
 	@Rollback
 	public void testChunking_DESC() {
 		assertThat(repo.count(), is(0L));
-		repo.save(new Entity("foo"));
-		repo.save(new Entity("bar"));
-		repo.save(new Entity("baz"));
-		repo.save(new Entity("qux"));
-		repo.save(new Entity("quux"));
-		repo.save(new Entity("courge"));
-		repo.save(new Entity("grault"));
+		repo.save(new IdGeneratedEntity("foo"));
+		repo.save(new IdGeneratedEntity("bar"));
+		repo.save(new IdGeneratedEntity("baz"));
+		repo.save(new IdGeneratedEntity("qux"));
+		repo.save(new IdGeneratedEntity("quux"));
+		repo.save(new IdGeneratedEntity("courge"));
+		repo.save(new IdGeneratedEntity("grault"));
 		
-		List<Entity> list = new ArrayList<Entity>();
+		List<IdGeneratedEntity> list = new ArrayList<IdGeneratedEntity>();
 		
 		log.info("==== 1st chunk");
 		Chunkable req = new ChunkRequest(2, Direction.DESC);
-		Chunk<Entity> chunk = repo.findAll(req);
+		Chunk<IdGeneratedEntity> chunk = repo.findAll(req);
 		assertThat(chunk, is(notNullValue()));
 		log.info("{}", chunk.getContent());
 		assertThat(chunk.getContent(), hasSize(2));
-		assertThat(chunk.getContent().toString(), is("[Entity[grault], Entity[courge]]"));
+		assertThat(chunk.getContent().toString(), is("[IdGeneratedEntity(str=grault), IdGeneratedEntity(str=courge)]"));
 		list.addAll(chunk.getContent());
 		
 		log.info("==== 2nd chunk");
@@ -285,7 +283,7 @@ public class EntityRepositoryTest {
 		assertThat(chunk, is(notNullValue()));
 		log.info("{}", chunk.getContent());
 		assertThat(chunk.getContent(), hasSize(2));
-		assertThat(chunk.getContent().toString(), is("[Entity[quux], Entity[qux]]"));
+		assertThat(chunk.getContent().toString(), is("[IdGeneratedEntity(str=quux), IdGeneratedEntity(str=qux)]"));
 		list.addAll(chunk.getContent());
 		
 		do {
@@ -298,7 +296,7 @@ public class EntityRepositoryTest {
 			list.addAll(chunk.getContent());
 		} while (chunk.hasNext());
 		assertThat(chunk.getContent(), hasSize(1));
-		assertThat(chunk.getContent().toString(), is("[Entity[foo]]"));
+		assertThat(chunk.getContent().toString(), is("[IdGeneratedEntity(str=foo)]"));
 		assertThat(list, hasSize(7));
 		
 		log.info("==== previous chunk");
@@ -307,21 +305,21 @@ public class EntityRepositoryTest {
 		assertThat(chunk, is(notNullValue()));
 		log.info("{}", chunk.getContent());
 		assertThat(chunk.getContent(), hasSize(2));
-		assertThat(chunk.getContent().toString(), is("[Entity[baz], Entity[bar]]"));
+		assertThat(chunk.getContent().toString(), is("[IdGeneratedEntity(str=baz), IdGeneratedEntity(str=bar)]"));
 	}
 	
 	@Test
 	@Rollback
 	public void testPaging() {
-		repo.save(new Entity("foo"));
-		repo.save(new Entity("bar"));
-		repo.save(new Entity("foo"));
-		repo.save(new Entity("foo2"));
-		repo.save(new Entity("foo3"));
-		repo.save(new Entity("bar2"));
-		repo.save(new Entity("bar3"));
+		repo.save(new IdGeneratedEntity("foo"));
+		repo.save(new IdGeneratedEntity("bar"));
+		repo.save(new IdGeneratedEntity("foo"));
+		repo.save(new IdGeneratedEntity("foo2"));
+		repo.save(new IdGeneratedEntity("foo3"));
+		repo.save(new IdGeneratedEntity("bar2"));
+		repo.save(new IdGeneratedEntity("bar3"));
 		
-		Page<Entity> page1 = repo.findAll(PageRequest.of(1/*zero based*/, 2, Direction.ASC, "str"));
+		Page<IdGeneratedEntity> page1 = repo.findAll(PageRequest.of(1/*zero based*/, 2, Direction.ASC, "str"));
 		assertThat(page1.getNumber(), is(1));
 		assertThat(page1.getNumberOfElements(), is(2));
 		assertThat(page1.getTotalElements(), is(7L));
@@ -329,7 +327,7 @@ public class EntityRepositoryTest {
 		assertThat(page1.getContent().get(0).getStr(), is("bar3"));
 		assertThat(page1.getContent().get(1).getStr(), is("foo"));
 		
-		Page<Entity> page2 = repo.findAll(PageRequest.of(2/*zero based*/, 2, Direction.ASC, "str"));
+		Page<IdGeneratedEntity> page2 = repo.findAll(PageRequest.of(2/*zero based*/, 2, Direction.ASC, "str"));
 		assertThat(page2.getNumber(), is(2));
 		assertThat(page2.getNumberOfElements(), is(2));
 		assertThat(page2.getTotalElements(), is(7L));
@@ -337,29 +335,29 @@ public class EntityRepositoryTest {
 		assertThat(page2.getContent().get(0).getStr(), is("foo"));
 		assertThat(page2.getContent().get(1).getStr(), is("foo2"));
 		
-		List<Entity> foundFoos = repo.findByStr("foo");
+		List<IdGeneratedEntity> foundFoos = repo.findByStr("foo");
 		assertThat(foundFoos.size(), is(2));
 		
-		List<Entity> foundStartsWithFoos = repo.findByStrStartsWith("foo");
+		List<IdGeneratedEntity> foundStartsWithFoos = repo.findByStrStartsWith("foo");
 		assertThat(foundStartsWithFoos.size(), is(4));
 		
-		List<Entity> foundBars = repo.findByStr("bar");
+		List<IdGeneratedEntity> foundBars = repo.findByStr("bar");
 		assertThat(foundBars.size(), is(1));
 		
-		List<Entity> foundStartsWithBars = repo.findByStrStartsWith("bar");
+		List<IdGeneratedEntity> foundStartsWithBars = repo.findByStrStartsWith("bar");
 		assertThat(foundStartsWithBars.size(), is(3));
 		
-		List<Entity> foundQux = repo.findByStr("qux");
+		List<IdGeneratedEntity> foundQux = repo.findByStr("qux");
 		assertThat(foundQux.size(), is(0));
 	}
 	
 	@Test
 	@Rollback
 	public void testFindXxx() {
-		repo.save(new Entity("hoge"));
-		repo.save(new Entity("fuga"));
+		repo.save(new IdGeneratedEntity("hoge"));
+		repo.save(new IdGeneratedEntity("fuga"));
 		
-		List<Entity> foundXxx = repo.findXxx();
+		List<IdGeneratedEntity> foundXxx = repo.findXxx();
 		assertThat(foundXxx.size(), is(1));
 	}
 }

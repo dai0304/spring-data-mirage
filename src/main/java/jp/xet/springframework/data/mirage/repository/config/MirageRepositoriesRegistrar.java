@@ -22,10 +22,6 @@ import org.springframework.data.repository.config.RepositoryConfigurationExtensi
 
 /**
  * ImportBeanDefinitionRegistrar to enable {@link EnableMirageRepositories} annotation.
- * 
- * @since 0.2.0
- * @version $Id$
- * @author daisuke
  */
 class MirageRepositoriesRegistrar extends RepositoryBeanDefinitionRegistrarSupport {
 	

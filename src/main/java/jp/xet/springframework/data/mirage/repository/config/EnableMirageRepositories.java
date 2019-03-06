@@ -36,10 +36,6 @@ import jp.xet.springframework.data.mirage.repository.support.MirageRepositoryFac
 /**
  * Annotation to enable Mirage repositories. Will scan the package of the annotated configuration class for Spring Data
  * repositories by default.
- * 
- * @since 0.2.0
- * @version $Id$
- * @author daisuke
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package jp.xet.springframework.data.mirage.repository.chunk;
+package jp.xet.springframework.data.mirage.repository.preprocess;
 
 import org.ws2ten1.repositories.ChunkableRepository;
 import org.ws2ten1.repositories.CreatableRepository;
 
 /**
- * Repository interface for {@link ChunkEntity}.
+ * Repository interface for {@link PreProcessEntity}.
  */
-public interface ChunkEntityRepository
-		extends CreatableRepository<ChunkEntity, String>, ChunkableRepository<ChunkEntity, String> {
+public interface PreProcessEntityRepository
+		extends CreatableRepository<PreProcessEntity, String>, ChunkableRepository<PreProcessEntity, String> {
 }

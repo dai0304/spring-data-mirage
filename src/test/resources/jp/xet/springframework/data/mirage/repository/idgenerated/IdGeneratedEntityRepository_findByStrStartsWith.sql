@@ -1,9 +1,9 @@
--- EntityRepository_findByStr.sql
+-- IdGeneratedEntityRepository_findByStr.sql
 
 SELECT *
 FROM samples
 
-WHERE str = /*str*/'abc'
+WHERE str LIKE concat(/*str*/'abc', '%')
 
 /*IF orders != null*/
 ORDER BY /*$orders*/id

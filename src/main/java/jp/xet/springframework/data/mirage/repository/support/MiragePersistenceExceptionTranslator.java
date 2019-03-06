@@ -17,6 +17,8 @@ package jp.xet.springframework.data.mirage.repository.support;
 
 import java.sql.SQLException;
 
+import lombok.Setter;
+
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
@@ -26,23 +28,16 @@ import com.miragesql.miragesql.exception.SQLRuntimeException;
 
 /**
  * TODO for daisuke
- * 
+ *
  * @since 0.1
  * @version $Id$
  * @author daisuke
  */
 public class MiragePersistenceExceptionTranslator implements PersistenceExceptionTranslator {
 	
+	@Setter
 	private SQLExceptionTranslator sqlExceptionTranslator = new SQLErrorCodeSQLExceptionTranslator();
 	
-	
-	/**
-	 * @param sqlExceptionTranslator {@link SQLExceptionTranslator}
-	 * @since 0.1
-	 */
-	public void setSqlExceptionTranslator(SQLExceptionTranslator sqlExceptionTranslator) {
-		this.sqlExceptionTranslator = sqlExceptionTranslator;
-	}
 	
 	@Override
 	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {

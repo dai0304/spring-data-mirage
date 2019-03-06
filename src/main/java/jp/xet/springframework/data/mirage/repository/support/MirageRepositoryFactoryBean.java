@@ -16,6 +16,11 @@
 package jp.xet.springframework.data.mirage.repository.support;
 
 import java.io.Serializable;
+import java.util.List;
+
+import javax.sql.DataSource;
+
+import lombok.Setter;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.Repository;
@@ -24,27 +29,36 @@ import org.springframework.data.repository.core.support.TransactionalRepositoryF
 import org.springframework.util.Assert;
 
 import com.miragesql.miragesql.SqlManager;
+import com.miragesql.miragesql.naming.NameConverter;
+
+import jp.xet.springframework.data.mirage.repository.handler.RepositoryActionListener;
 
 /**
- * TODO for daisuke
- * 
- * @param <T>
- * @param <S>
- * @param <ID>
- * @since 0.1
- * @version $Id$
- * @author daisuke
+ * {@link org.springframework.beans.factory.FactoryBean} for {@link MirageRepositoryFactory}.
+ *
+ * @param <T> type of repository
+ * @param <S> type of entity
+ * @param <ID> type of entity ID
  */
 public class MirageRepositoryFactoryBean<T extends Repository<S, ID>, S, ID extends Serializable>
 		extends TransactionalRepositoryFactoryBeanSupport<T, S, ID> {
 	
+	@Setter
+	private SqlManager sqlManager;
+	
+	@Autowired(required = false)
+	NameConverter nameConverter;
+	
+	@Autowired(required = false)
+	DataSource dataSource;
+	
+	@Autowired
+	List<RepositoryActionListener> handlers;
+	
+	
 	protected MirageRepositoryFactoryBean(Class<? extends T> repositoryInterface) {
 		super(repositoryInterface);
 	}
-	
-	
-	private SqlManager sqlManager;
-	
 	
 	@Override
 	public void afterPropertiesSet() {
@@ -52,19 +66,8 @@ public class MirageRepositoryFactoryBean<T extends Repository<S, ID>, S, ID exte
 		Assert.notNull(sqlManager, "sqlManager is required");
 	}
 	
-	/**
-	 * TODO for daisuke
-	 * 
-	 * @param sqlManager {@link SqlManager}
-	 * @since 0.1
-	 */
-	@Autowired
-	public void setSqlManager(SqlManager sqlManager) {
-		this.sqlManager = sqlManager;
-	}
-	
 	@Override
 	protected RepositoryFactorySupport doCreateRepositoryFactory() {
-		return new MirageRepositoryFactory(sqlManager);
+		return new MirageRepositoryFactory(sqlManager, nameConverter, dataSource, handlers);
 	}
 }

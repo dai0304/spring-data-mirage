@@ -25,10 +25,6 @@ import org.springframework.data.domain.AuditorAware;
 
 /**
  * TODO daisuke
- * 
- * @since 0.2.0
- * @version $Id$
- * @author daisuke
  */
 public class AuditingBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
 	
@@ -52,7 +48,7 @@ public class AuditingBeanFactoryPostProcessor implements BeanFactoryPostProcesso
 	
 	/**
 	 * Returns whether we have a bean factory for which {@code &lt;context:spring-configured&gt;} was activated.
-	 * 
+	 *
 	 * @param factory {@link BeanFactory}
 	 * @return {@code true} if {@code context:spring-configured} was activated
 	 */

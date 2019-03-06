@@ -19,10 +19,6 @@ import java.util.Arrays;
 
 /**
  * TODO for daisuke
- * 
- * @since 0.1
- * @version $Id$
- * @author daisuke
  */
 @SuppressWarnings("serial")
 public class NoSuchSqlResourceException extends RuntimeException {
@@ -32,7 +28,7 @@ public class NoSuchSqlResourceException extends RuntimeException {
 	
 	/**
 	 * インスタンスを生成する。
-	 * 
+	 *
 	 * @param candidates array of SQL resource candidate
 	 * @since 0.2.1
 	 */

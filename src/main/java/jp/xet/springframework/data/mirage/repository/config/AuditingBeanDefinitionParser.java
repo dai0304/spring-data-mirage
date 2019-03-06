@@ -26,10 +26,6 @@ import org.w3c.dom.Element;
 
 /**
  * TODO for daisuke
- * 
- * @since 0.2.0
- * @version $Id$
- * @author daisuke
  */
 public class AuditingBeanDefinitionParser implements BeanDefinitionParser {
 	
@@ -47,7 +43,7 @@ public class AuditingBeanDefinitionParser implements BeanDefinitionParser {
 	
 	/**
 	 * Copied code of SpringConfiguredBeanDefinitionParser until this class gets public.
-	 * 
+	 *
 	 * @see <a href="http://jira.springframework.org/browse/SPR-7340">Make SpringConfiguredBeanDefinitionParser public</a>
 	 * @author Juergen Hoeller
 	 */

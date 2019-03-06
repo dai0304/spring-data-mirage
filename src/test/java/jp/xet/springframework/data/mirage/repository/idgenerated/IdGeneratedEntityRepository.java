@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package jp.xet.springframework.data.mirage.repository.example;
+package jp.xet.springframework.data.mirage.repository.idgenerated;
 
 import java.util.List;
 
@@ -29,10 +29,12 @@ import org.ws2ten1.repositories.UpsertableRepository;
 import jp.xet.springframework.data.mirage.repository.query.StaticParam;
 
 /**
- * Repository interface for {@link Entity}.
+ * Repository interface for {@link IdGeneratedEntity}.
  */
-public interface EntityRepository extends ScannableRepository<Entity, Long>, UpsertableRepository<Entity, Long>,
-		CrudRepository<Entity, Long>, ChunkableRepository<Entity, Long>, PageableRepository<Entity, Long> {
+public interface IdGeneratedEntityRepository
+		extends ScannableRepository<IdGeneratedEntity, Long>, UpsertableRepository<IdGeneratedEntity, Long>,
+		CrudRepository<IdGeneratedEntity, Long>, ChunkableRepository<IdGeneratedEntity, Long>,
+		PageableRepository<IdGeneratedEntity, Long> {
 	
 	/**
 	 * TODO for daisuke
@@ -40,7 +42,7 @@ public interface EntityRepository extends ScannableRepository<Entity, Long>, Ups
 	 * @param str strプロパティ指定
 	 * @return the entities found
 	 */
-	List<Entity> findByStr(@Param("str") String str);
+	List<IdGeneratedEntity> findByStr(@Param("str") String str);
 	
 	/**
 	 * TODO for daisuke
@@ -48,7 +50,7 @@ public interface EntityRepository extends ScannableRepository<Entity, Long>, Ups
 	 * @param str strプロパティ指定
 	 * @return the entities found
 	 */
-	List<Entity> findByStrStartsWith(@Param("str") String str);
+	List<IdGeneratedEntity> findByStrStartsWith(@Param("str") String str);
 	
 	/**
 	 * TODO for daisuke
@@ -57,13 +59,13 @@ public interface EntityRepository extends ScannableRepository<Entity, Long>, Ups
 	 */
 	@StaticParam(key = "str", value = "hoge")
 	@StaticParam(key = "str2", value = "hoge2")
-	List<Entity> findXxx();
+	List<IdGeneratedEntity> findXxx();
 	
 	/**
 	 * TODO for wreulicke
 	 *
 	 * @return the entities found
 	 */
-	Chunk<Entity> findChunk();
+	Chunk<IdGeneratedEntity> findChunk();
 	
 }

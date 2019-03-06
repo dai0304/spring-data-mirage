@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package jp.xet.springframework.data.mirage.repository.chunk;
+package jp.xet.springframework.data.mirage.repository.preprocess;
+
+import java.time.Instant;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -28,15 +30,18 @@ import com.miragesql.miragesql.annotation.PrimaryKey;
 import com.miragesql.miragesql.annotation.PrimaryKey.GenerationType;
 import com.miragesql.miragesql.annotation.Table;
 
+import jp.xet.springframework.data.mirage.repository.handler.BeforeCreate;
+import jp.xet.springframework.data.mirage.repository.handler.BeforeUpdate;
+
 /**
  * Sample entity class.
  */
-@Table(name = "sample_chunk")
+@Table(name = "sample_preprocess")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
 @SuppressWarnings("serial")
-public class ChunkEntity {
+public class PreProcessEntity {
 	
 	@Id
 	@Column(name = "id")
@@ -46,4 +51,14 @@ public class ChunkEntity {
 	
 	@Column(name = "str")
 	private String str;
+	
+	@Column(name = "last_updated")
+	private long lastUpdated;
+	
+	
+	@BeforeCreate
+	@BeforeUpdate
+	public void preProcess() {
+		lastUpdated = Instant.now().toEpochMilli();
+	}
 }

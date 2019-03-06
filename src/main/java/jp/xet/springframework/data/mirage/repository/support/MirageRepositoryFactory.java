@@ -16,7 +16,15 @@
 package jp.xet.springframework.data.mirage.repository.support;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
+
+import javax.sql.DataSource;
+
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.data.repository.core.EntityInformation;
 import org.springframework.data.repository.core.RepositoryInformation;
@@ -25,41 +33,34 @@ import org.springframework.data.repository.core.support.RepositoryFactorySupport
 import org.springframework.data.repository.query.QueryLookupStrategy;
 import org.springframework.data.repository.query.QueryLookupStrategy.Key;
 import org.springframework.data.repository.query.QueryMethodEvaluationContextProvider;
-import org.springframework.util.Assert;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.miragesql.miragesql.SqlManager;
+import com.miragesql.miragesql.naming.NameConverter;
 
 import jp.xet.springframework.data.mirage.repository.DefaultMirageRepository;
 import jp.xet.springframework.data.mirage.repository.NoSuchSqlResourceException;
+import jp.xet.springframework.data.mirage.repository.handler.RepositoryActionListener;
 import jp.xet.springframework.data.mirage.repository.query.MirageQueryLookupStrategy;
 
 /**
- * TODO for daisuke
- *
- * @since 0.1
- * @version $Id$
- * @author daisuke
+ * Mirage Repository factory.
  */
+@Slf4j
+@RequiredArgsConstructor
 public class MirageRepositoryFactory extends RepositoryFactorySupport {
 	
-	private static Logger logger = LoggerFactory.getLogger(MirageRepositoryFactory.class);
-	
+	@NonNull
 	private final SqlManager sqlManager;
 	
+	private final NameConverter nameConverter;
 	
-	/**
-	 * インスタンスを生成する。
-	 *
-	 * @param sqlManager {@link SqlManager}
-	 * @throws IllegalArgumentException if the argument is {@code null}
-	 * @since 0.1
-	 */
+	private final DataSource dataSource;
+	
+	private final List<RepositoryActionListener> handlers;
+	
+	
 	public MirageRepositoryFactory(SqlManager sqlManager) {
-		Assert.notNull(sqlManager, "sqlManager is required");
-		this.sqlManager = sqlManager;
+		this(sqlManager, null, null, Collections.emptyList());
 	}
 	
 	@Override
@@ -88,12 +89,13 @@ public class MirageRepositoryFactory extends RepositoryFactorySupport {
 		Class<?> repositoryInterface = metadata.getRepositoryInterface();
 		EntityInformation<?, Serializable> entityInformation = getEntityInformation(metadata.getDomainType());
 		
-		DefaultMirageRepository repo = new DefaultMirageRepository(entityInformation, sqlManager);
+		DefaultMirageRepository repo = new DefaultMirageRepository(entityInformation, sqlManager,
+				nameConverter, dataSource, handlers);
 		try {
 			String name = repositoryInterface.getSimpleName() + ".sql";
 			repo.setBaseSelectSqlResource(DefaultMirageRepository.newSqlResource(repositoryInterface, name));
 		} catch (NoSuchSqlResourceException e) {
-			logger.debug("Repository Default SQL [{}] not found, default used.", repositoryInterface);
+			log.debug("Repository Default SQL [{}] not found, default used.", repositoryInterface);
 		}
 		return repo;
 	}

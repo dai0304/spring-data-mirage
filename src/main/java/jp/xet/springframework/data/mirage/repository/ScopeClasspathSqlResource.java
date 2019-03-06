@@ -20,24 +20,17 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import org.springframework.util.Assert;
+import lombok.extern.slf4j.Slf4j;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.util.Assert;
 
 import com.miragesql.miragesql.ClasspathSqlResource;
 
 /**
  * TODO daisuke
- * 
- * @since 0.1
- * @version $Id$
- * @author daisuke
  */
+@Slf4j
 public class ScopeClasspathSqlResource extends ClasspathSqlResource {
-	
-	private static Logger log = LoggerFactory.getLogger(ScopeClasspathSqlResource.class);
-	
 	
 	private static boolean existsResource(String absolutePath) {
 		if (absolutePath == null) {
@@ -111,7 +104,7 @@ public class ScopeClasspathSqlResource extends ClasspathSqlResource {
 	
 	/**
 	 * インスタンスを生成する。
-	 * 
+	 *
 	 * @param scope
 	 * @param name
 	 * @throws NoSuchSqlResourceException 指定したリソースが見つからない場合
@@ -124,7 +117,7 @@ public class ScopeClasspathSqlResource extends ClasspathSqlResource {
 	
 	/**
 	 * インスタンスを生成する。
-	 * 
+	 *
 	 * @param candidate
 	 * @since 0.2.5
 	 */
@@ -136,7 +129,7 @@ public class ScopeClasspathSqlResource extends ClasspathSqlResource {
 	
 	/**
 	 * インスタンスを生成する。
-	 * 
+	 *
 	 * @param candidates
 	 * @since 0.2.5
 	 */

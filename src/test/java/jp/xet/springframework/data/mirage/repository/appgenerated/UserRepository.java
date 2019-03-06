@@ -13,14 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package jp.xet.springframework.data.mirage.repository.chunk;
+package jp.xet.springframework.data.mirage.repository.appgenerated;
 
-import org.ws2ten1.repositories.ChunkableRepository;
+import org.ws2ten1.repositories.BatchReadableRepository;
 import org.ws2ten1.repositories.CreatableRepository;
+import org.ws2ten1.repositories.ScannableRepository;
+import org.ws2ten1.repositories.UpsertableRepository;
 
 /**
- * Repository interface for {@link ChunkEntity}.
+ * Repository interface for {@link User}.
+ *
+ * @author daisuke
  */
-public interface ChunkEntityRepository
-		extends CreatableRepository<ChunkEntity, String>, ChunkableRepository<ChunkEntity, String> {
+public interface UserRepository extends ScannableRepository<User, String>, CreatableRepository<User, String>,
+		UpsertableRepository<User, String>, BatchReadableRepository<User, String> {
 }

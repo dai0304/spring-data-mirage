@@ -16,9 +16,7 @@
 package jp.xet.springframework.data.mirage.repository;
 
 import java.io.Serializable;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,7 +30,8 @@ import java.util.Optional;
 
 import javax.sql.DataSource;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.domain.Page;
@@ -45,11 +44,7 @@ import org.springframework.data.repository.core.EntityInformation;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
-import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.Assert;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import org.ws2ten1.chunks.Chunk;
 import org.ws2ten1.chunks.ChunkImpl;
@@ -76,8 +71,7 @@ import com.miragesql.miragesql.naming.NameConverter;
 import com.miragesql.miragesql.util.MirageUtil;
 import com.miragesql.miragesql.util.Validate;
 
-import jp.xet.springframework.data.mirage.repository.query.BeforeCreate;
-import jp.xet.springframework.data.mirage.repository.query.BeforeUpdate;
+import jp.xet.springframework.data.mirage.repository.handler.RepositoryActionListener;
 
 /**
  * Default {@link org.springframework.data.repository.Repository} implementation using Mirage SQL.
@@ -85,13 +79,12 @@ import jp.xet.springframework.data.mirage.repository.query.BeforeUpdate;
  * @param <E> the domain type the repository manages
  * @param <ID> the type of the id of the entity the repository manages
  */
+@Slf4j
 public class DefaultMirageRepository<E, ID extends Serializable> implements
 		ScannableRepository<E, ID>, BatchCreatableRepository<E, ID>, BatchReadableRepository<E, ID>,
 		BatchUpsertableRepository<E, ID>, BatchDeletableRepository<E, ID>,
 		LockableCrudRepository<E, ID>, TruncatableRepository<E, ID>,
 		ChunkableRepository<E, ID>, PageableRepository<E, ID> {
-	
-	private static Logger log = LoggerFactory.getLogger(DefaultMirageRepository.class);
 	
 	static final SqlResource BASE_SELECT_SQL =
 			new ScopeClasspathSqlResource(DefaultMirageRepository.class, "baseSelect.sql");
@@ -134,17 +127,13 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 	}
 	
 	
-	@Autowired
-	SqlManager sqlManager;
+	private final SqlManager sqlManager;
 	
-	@Autowired
-	PlatformTransactionManager transactionManager;
+	private final NameConverter nameConverter; // nullable
 	
-	@Autowired
-	NameConverter nameConverter;
+	private final DataSource dataSource; // nullable
 	
-	@Autowired(required = false)
-	DataSource dataSource;
+	private final List<RepositoryActionListener> handlers;
 	
 	private SqlResource baseSelectSqlResource = BASE_SELECT_SQL;
 	
@@ -158,46 +147,18 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 	/**
 	 * インスタンスを生成する。
 	 *
-	 * @param entityClass エンティティの型
-	 * @throws IllegalArgumentException 引数に{@code null}を与えた場合
-	 * @since 0.1
-	 */
-	public DefaultMirageRepository(Class<E> entityClass) {
-		Assert.notNull(entityClass, "entityClass is required");
-		this.entityClass = entityClass;
-	}
-	
-	/**
-	 * インスタンスを生成する。
-	 *
 	 * @param entityInformation
 	 * @param sqlManager {@link SqlManager}
-	 * @since 0.1
 	 */
 	public DefaultMirageRepository(EntityInformation<E, ? extends Serializable> entityInformation,
-			SqlManager sqlManager) {
+			SqlManager sqlManager, NameConverter nameConverter,
+			DataSource dataSource, List<RepositoryActionListener> handlers) {
 		Assert.notNull(entityInformation, "entityInformation is required");
 		this.entityClass = entityInformation.getJavaType();
 		this.sqlManager = sqlManager;
-	}
-	
-	private void preProcess(E entity, Class<? extends Annotation> annotation) {
-		Class<?> c = entityClass;
-		while (c != null && c != Object.class) {
-			Method[] declaredMethods = c.getDeclaredMethods();
-			for (Method method : declaredMethods) {
-				Annotation idAnnotation = method.getAnnotation(annotation);
-				if (idAnnotation != null) {
-					method.setAccessible(true);
-					try {
-						method.invoke(entity);
-					} catch (Exception e) {
-						// ignore
-					}
-				}
-			}
-			c = c.getSuperclass();
-		}
+		this.handlers = handlers;
+		this.nameConverter = nameConverter;
+		this.dataSource = dataSource;
 	}
 	
 	@Override
@@ -211,7 +172,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 			return null;
 		}
 		try {
-			preProcess(entity, BeforeCreate.class);
+			handlers.forEach(handler -> handler.beforeCreate(entity));
 			sqlManager.insertEntity(entity);
 			log.debug("entity inserted: {}", entity);
 		} catch (SQLRuntimeException e) {
@@ -419,9 +380,10 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 					}
 				}
 			}
-			toUpdate.stream().forEach(e -> preProcess(e, BeforeUpdate.class));
+			
+			toUpdate.forEach(e -> handlers.forEach(handler -> handler.beforeUpdate(e)));
 			sqlManager.updateBatch(toUpdate);
-			toUpdate.stream().forEach(e -> preProcess(e, BeforeCreate.class));
+			toUpdate.forEach(e -> handlers.forEach(handler -> handler.beforeCreate(e)));
 			sqlManager.insertBatch(toInsert);
 			return newArrayList(entities);
 		} catch (SQLRuntimeException e) {
@@ -436,11 +398,11 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 		}
 		try {
 			if (exists(getId(entity), true)) {
-				preProcess(entity, BeforeUpdate.class);
+				handlers.forEach(handler -> handler.beforeUpdate(entity));
 				sqlManager.updateEntity(entity);
 				log.debug("entity updated: {}", entity);
 			} else {
-				preProcess(entity, BeforeCreate.class);
+				handlers.forEach(handler -> handler.beforeCreate(entity));
 				sqlManager.insertEntity(entity);
 				log.debug("entity inserted: {}", entity);
 			}
@@ -464,7 +426,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 			return null;
 		}
 		try {
-			preProcess(entity, BeforeUpdate.class);
+			handlers.forEach(handler -> handler.beforeUpdate(entity));
 			int rowCount = sqlManager.updateEntity(entity);
 			if (rowCount == 1) {
 				log.debug("entity updated: {}", entity);
@@ -717,7 +679,6 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 	 * TODO for daisuke
 	 *
 	 * @return
-	 * @since 0.1
 	 */
 	protected synchronized SQLExceptionTranslator getExceptionTranslator() {
 		if (this.exceptionTranslator == null) {
@@ -734,7 +695,6 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 	 * TODO for daisuke
 	 *
 	 * @return
-	 * @since 0.1
 	 */
 	protected Long getFoundRows() {
 		return null;
@@ -812,7 +772,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 	})
 	protected int insertBatch(E... entities) {
 		try {
-			Arrays.stream(entities).forEach(e -> preProcess(e, BeforeCreate.class));
+			Arrays.stream(entities).forEach(e -> handlers.forEach(handler -> handler.beforeCreate(e)));
 			return sqlManager.insertBatch(entities);
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("insertBatch", null, e.getCause());
@@ -825,7 +785,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 	@SuppressWarnings("javadoc")
 	protected int insertBatch(List<E> entities) {
 		try {
-			entities.forEach(e -> preProcess(e, BeforeCreate.class));
+			entities.forEach(e -> handlers.forEach(handler -> handler.beforeCreate(e)));
 			return sqlManager.insertBatch(entities);
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("insertBatch", null, e.getCause());
@@ -836,7 +796,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 	public <S extends E> Iterable<S> createAll(Iterable<S> entities) {
 		try {
 			List<S> list = newArrayList(entities);
-			list.forEach(e -> preProcess(e, BeforeCreate.class));
+			list.forEach(e -> handlers.forEach(handler -> handler.beforeCreate(e)));
 			sqlManager.insertBatch(list);
 			return list;
 		} catch (SQLRuntimeException e) {
@@ -855,6 +815,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 	@SuppressWarnings("javadoc")
 	protected int insertEntity(Object entity) {
 		try {
+			// handlers.forEach(handler -> handler.processBeforeInsert(entity));
 			return sqlManager.insertEntity(entity);
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("insertEntity", null, e.getCause());
@@ -896,7 +857,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 	})
 	protected int updateBatch(E... entities) {
 		try {
-			Arrays.stream(entities).forEach(e -> preProcess(e, BeforeUpdate.class));
+			Arrays.stream(entities).forEach(e -> handlers.forEach(handler -> handler.beforeUpdate(e)));
 			return sqlManager.updateBatch(entities);
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("updateBatch", null, e.getCause());
@@ -909,7 +870,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 	@SuppressWarnings("javadoc")
 	protected int updateBatch(List<E> entities) {
 		try {
-			entities.forEach(e -> preProcess(e, BeforeUpdate.class));
+			entities.forEach(e -> handlers.forEach(handler -> handler.beforeUpdate(e)));
 			return sqlManager.updateBatch(entities);
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("updateBatch", null, e.getCause());
@@ -922,7 +883,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 	@SuppressWarnings("javadoc")
 	protected int updateEntity(E entity) {
 		try {
-			preProcess(entity, BeforeUpdate.class);
+			handlers.forEach(handler -> handler.beforeUpdate(entity));
 			return sqlManager.updateEntity(entity);
 		} catch (SQLRuntimeException e) {
 			throw getExceptionTranslator().translate("updateEntity", null, e.getCause());

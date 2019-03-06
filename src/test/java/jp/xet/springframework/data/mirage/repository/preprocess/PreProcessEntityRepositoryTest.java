@@ -13,13 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package jp.xet.springframework.data.mirage.repository.example;
+package jp.xet.springframework.data.mirage.repository.preprocess;
 
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.UUID;
+
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,30 +33,25 @@ import org.junit.runner.RunWith;
 import jp.xet.springframework.data.mirage.repository.TestConfiguration;
 
 /**
- * Test for {@link UserRepository}.
- *
- * @author daisuke
+ * Test for {@link PreProcessEntityRepository}.
  */
+@Slf4j
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = TestConfiguration.class)
 @Transactional
 @SuppressWarnings("javadoc")
-public class UserRepositoryTest {
+public class PreProcessEntityRepositoryTest {
 	
 	@Autowired
-	UserRepository repos;
+	PreProcessEntityRepository repo;
 	
 	
 	@Test
-	public void test() {
-		assertThat(repos, is(notNullValue()));
-		assertThat(repos.count(), is(0L));
-		repos.save(new User("foo", "foopass"));
-		assertThat(repos.count(), is(1L));
-		repos.save(new User("bar", "barpass"));
-		assertThat(repos.count(), is(2L));
-		
-		User foundFoo = repos.findById("foo").orElse(null);
-		assertThat(foundFoo.getPassword(), is("foopass"));
+	@Rollback
+	public void testPreProcess() {
+		repo.create(new PreProcessEntity("foo", UUID.randomUUID().toString(), 0));
+		PreProcessEntity found = repo.findById("foo").orElse(null);
+		log.info("{}", found);
+		assertThat(found.getLastUpdated()).isGreaterThan(0);
 	}
 }
