@@ -277,7 +277,7 @@ public class MirageQuery implements RepositoryQuery {
 					new SqlResourceCandidate(clazz, simpleName + "_" + mirageQueryMethod.getName() + ".sql"),
 					new SqlResourceCandidate(clazz, simpleName + ".sql")));
 		}
-		return candidates.toArray(new SqlResourceCandidate[candidates.size()]);
+		return candidates.toArray(new SqlResourceCandidate[0]);
 	}
 	
 	private SqlResource createSqlResource() {
@@ -309,24 +309,15 @@ public class MirageQuery implements RepositoryQuery {
 	}
 	
 	private int getTotalCount(SqlResource sqlResource) {
-		Reader reader = null;
-		try {
-			reader = new InputStreamReader(sqlResource.getInputStream(), StandardCharsets.UTF_8);
+		try (Reader reader = new InputStreamReader(sqlResource.getInputStream(), StandardCharsets.UTF_8)) {
 			String query = toString(reader);
 			if (query.contains("SQL_CALC_FOUND_ROWS")) { // TODO MySQL固有処理
 				return sqlManager.getSingleResult(Integer.class, new StringSqlResource("SELECT FOUND_ROWS()"));
 			}
 		} catch (IOException e) {
 			log.error("IOException", e);
-		} finally {
-			if (reader != null) {
-				try {
-					reader.close();
-				} catch (IOException e) {
-					// ignore
-				}
-			}
 		}
+		// ignore
 		return Integer.MAX_VALUE;
 	}
 	

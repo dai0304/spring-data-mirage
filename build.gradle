@@ -82,11 +82,17 @@ configurations {
 
 dependencies {
 	api "com.miragesql:miragesql:$mirageVersion"
+	api "com.miragesql:miragesql-integration:$mirageVersion"
 	api "org.ws2ten1:ws2ten1-repositories:1.0.0-rc5"
 	implementation "org.slf4j:slf4j-api"
 	implementation "com.google.guava:guava:$guavaVersion"
 	implementation "org.springframework:spring-context"
 	implementation "org.springframework:spring-jdbc"
+
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+	testCompileOnly 'org.projectlombok:lombok'
+	testAnnotationProcessor 'org.projectlombok:lombok'
 
 	// tests
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'

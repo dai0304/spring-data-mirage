@@ -7,3 +7,9 @@ CREATE TABLE users (
 	username VARCHAR(64) PRIMARY KEY,
 	password VARCHAR(64) NOT NULL
 );
+
+CREATE TABLE sample_chunk (
+	id VARCHAR(64) PRIMARY KEY,
+	str VARCHAR(64) NOT NULL
+);
+
