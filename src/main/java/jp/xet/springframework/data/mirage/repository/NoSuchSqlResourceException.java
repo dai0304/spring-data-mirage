@@ -33,10 +33,10 @@ public class NoSuchSqlResourceException extends RuntimeException {
 	 */
 	public NoSuchSqlResourceException(SqlResourceCandidate... candidates) {
 		super(Arrays.toString(candidates));
-		this.candidates = Arrays.copyOf(candidates, candidates.length);
+		this.candidates = candidates.clone();
 	}
 	
 	public SqlResourceCandidate[] getCandidates() {
-		return Arrays.copyOf(candidates, candidates.length);
+		return candidates.clone();
 	}
 }
