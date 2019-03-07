@@ -1,0 +1,2 @@
+@defaultMessage Use ModelMapper instead of BeanUtils
+org.springframework.beans.BeanUtils
