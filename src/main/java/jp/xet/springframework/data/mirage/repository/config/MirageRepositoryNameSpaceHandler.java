@@ -28,8 +28,6 @@ public class MirageRepositoryNameSpaceHandler extends NamespaceHandlerSupport {
 	public void init() {
 		RepositoryConfigurationExtension extension = new MirageRepositoryConfigExtension();
 		RepositoryBeanDefinitionParser repositoryBeanDefinitionParser = new RepositoryBeanDefinitionParser(extension);
-		
 		registerBeanDefinitionParser("repositories", repositoryBeanDefinitionParser);
-		registerBeanDefinitionParser("auditing", new AuditingBeanDefinitionParser());
 	}
 }

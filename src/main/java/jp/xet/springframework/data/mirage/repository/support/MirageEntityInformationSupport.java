@@ -28,7 +28,7 @@ import com.miragesql.miragesql.annotation.Table;
 /**
  * TODO for daisuke
  *
- * @param <T>
+ * @param <T> type of entity (domainClass)
  * @param <ID>
  */
 public class MirageEntityInformationSupport<T, ID extends Serializable>
@@ -37,20 +37,18 @@ public class MirageEntityInformationSupport<T, ID extends Serializable>
 	/**
 	 * Creates a {@link MirageEntityInformation} for the given domain class and {@link SqlManager}.
 	 *
-	 * @param domainClass
+	 * @param domainClass class of entity
 	 * @param sqlManager {@link SqlManager}
-	 * @return
-	 * @since 0.1
+	 * @return created {@link MirageEntityInformation}
 	 */
 	public static <T> MirageEntityInformation<T, ?> getMetadata(Class<T> domainClass, SqlManager sqlManager) {
-		return new MirageEntityInformationSupport<T, Serializable>(domainClass);
+		return new MirageEntityInformationSupport<>(domainClass);
 	}
 	
 	/**
 	 * Creates a new {@link MirageEntityInformationSupport} with the given domain class.
 	 *
 	 * @param domainClass
-	 * @since 0.1
 	 */
 	public MirageEntityInformationSupport(Class<T> domainClass) {
 		super(domainClass);

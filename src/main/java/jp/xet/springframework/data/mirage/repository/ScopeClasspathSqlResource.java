@@ -109,7 +109,6 @@ public class ScopeClasspathSqlResource extends ClasspathSqlResource {
 	 * @param name
 	 * @throws NoSuchSqlResourceException 指定したリソースが見つからない場合
 	 * @throws IllegalArgumentException 引数に{@code null}を与えた場合
-	 * @since 0.1
 	 */
 	public ScopeClasspathSqlResource(Class<?> scope, String name) {
 		this(new SqlResourceCandidate(scope, name));
@@ -119,7 +118,6 @@ public class ScopeClasspathSqlResource extends ClasspathSqlResource {
 	 * インスタンスを生成する。
 	 *
 	 * @param candidate
-	 * @since 0.2.5
 	 */
 	public ScopeClasspathSqlResource(SqlResourceCandidate candidate) {
 		this(new SqlResourceCandidate[] {
@@ -131,7 +129,6 @@ public class ScopeClasspathSqlResource extends ClasspathSqlResource {
 	 * インスタンスを生成する。
 	 *
 	 * @param candidates
-	 * @since 0.2.5
 	 */
 	public ScopeClasspathSqlResource(SqlResourceCandidate... candidates) {
 		super(toAbsolutePath(candidates));

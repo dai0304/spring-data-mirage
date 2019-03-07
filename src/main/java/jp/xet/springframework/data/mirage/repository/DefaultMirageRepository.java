@@ -99,7 +99,6 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements // N
 	 * @return {@link SqlResource}
 	 * @throws NoSuchSqlResourceException 指定したリソースが見つからない場合
 	 * @throws IllegalArgumentException 引数{@code filename}に{@code null}を与えた場合
-	 * @since 0.1
 	 */
 	public static SqlResource newSqlResource(Class<?> scope, String filename) {
 		Validate.notNull(filename);
@@ -120,7 +119,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements // N
 	}
 	
 	private static <E> List<E> newArrayList(Iterable<E> iterable) {
-		List<E> list = new ArrayList<E>();
+		List<E> list = new ArrayList<>();
 		for (E element : iterable) {
 			list.add(element);
 		}
@@ -148,7 +147,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements // N
 	/**
 	 * インスタンスを生成する。
 	 *
-	 * @param entityInformation
+	 * @param entityInformation {@link EntityInformation}
 	 * @param sqlManager {@link SqlManager}
 	 */
 	public DefaultMirageRepository(EntityInformation<E, ? extends Serializable> entityInformation,

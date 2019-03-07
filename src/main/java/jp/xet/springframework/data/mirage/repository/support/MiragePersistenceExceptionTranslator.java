@@ -17,8 +17,11 @@ package jp.xet.springframework.data.mirage.repository.support;
 
 import java.sql.SQLException;
 
+import lombok.NonNull;
 import lombok.Setter;
 
+import org.springframework.beans.factory.annotation.Autowire;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
@@ -31,16 +34,15 @@ import com.miragesql.miragesql.exception.SQLRuntimeException;
  */
 public class MiragePersistenceExceptionTranslator implements PersistenceExceptionTranslator {
 	
-	@Setter
-	private SQLExceptionTranslator sqlExceptionTranslator = new SQLErrorCodeSQLExceptionTranslator();
+	@Setter(onMethod = @_(@Autowired(required = false)))
+	private SQLErrorCodeSQLExceptionTranslator sqlExceptionTranslator = new SQLErrorCodeSQLExceptionTranslator();
 	
 	
 	@Override
 	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
 		if (ex instanceof SQLRuntimeException && sqlExceptionTranslator != null) {
 			SQLRuntimeException sqlRuntimeException = (SQLRuntimeException) ex;
-			SQLException sqlException = sqlRuntimeException.getCause();
-			return sqlExceptionTranslator.translate("", "unknown", sqlException);
+			return sqlExceptionTranslator.translate("unknown", null, sqlRuntimeException.getCause());
 		}
 		
 		if (ex.getClass().getPackage().getName().startsWith("com.miragesql.miragesql.exception")) {
@@ -54,7 +56,7 @@ public class MiragePersistenceExceptionTranslator implements PersistenceExceptio
 	private static final class MirageDataAccessException extends DataAccessException {
 		
 		private MirageDataAccessException(Throwable cause) {
-			super("unkwnown", cause);
+			super("unknown", cause);
 		}
 	}
 }
