@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!DOCTYPE import-control PUBLIC "-//Puppy Crawl//DTD Import Control 1.1//EN" "http://www.puppycrawl.com/dtds/import_control_1_1.dtd">
+<import-control pkg="@@your-package@@">
+
+  <!-- 明示的禁止以外は全て許可 -->
+  <allow class=".*" regex="true" />
+
+  <!-- これに引っかかるのは多分インポートミス -->
+  <disallow pkg="javax.annotation"/>
+  <disallow pkg="groovy"/>
+
+  <subpackage name="util">
+    <disallow pkg="@@your-package@@.web"/>
+  </subpackage>
+
+  <subpackage name="model">
+    <!-- モデルがWeb層やconfigに依存してはいけない -->
+    <disallow pkg="org.springframework.web.servlet"/>
+    <disallow pkg="org.springframework.security.oauth2.provider"/>
+    <disallow pkg="org.ws2ten1.httpexceptions"/>
+    <disallow pkg="@@your-package@@.web"/>
+  </subpackage>
+
+</import-control>
