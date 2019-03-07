@@ -34,7 +34,7 @@ import com.miragesql.miragesql.annotation.Table;
  *
  * @author daisuke
  */
-@Table(name = "samples")
+@Table(name = "id_generated_entities")
 @Data
 @EqualsAndHashCode(of = "id")
 @ToString(of = "str")

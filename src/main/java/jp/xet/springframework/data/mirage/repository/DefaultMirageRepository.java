@@ -268,8 +268,15 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements // N
 		try {
 			Map<String, Object> param = createParams(chunkable);
 			List<E> resultList = getResultList(getBaseSelectSqlResource(), param);
-			String pt = null;
-			if (resultList.isEmpty() == false) {
+			if (chunkable.getPaginationToken() != null && isForward(chunkable) == false
+					&& param.get("before") != null) {
+				Collections.reverse(resultList);
+			}
+			
+			String pt;
+			if (resultList.isEmpty()) {
+				pt = encoder.encode(null, null);
+			} else {
 				String firstKey = null;
 				if (chunkable.getPaginationToken() != null && resultList.isEmpty() == false) {
 					firstKey = Objects.toString(getId(resultList.get(0)));
@@ -289,6 +296,9 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements // N
 	@Override
 	public Iterable<E> findAll(Iterable<ID> ids) {
 		Assert.notNull(ids, "ids must not be null");
+		if (ids.iterator().hasNext() == false) {
+			return Collections.emptySet();
+		}
 		
 		Map<String, Object> params = createParams();
 		params.put("ids", ids);
@@ -513,7 +523,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements // N
 	}
 	
 	protected Map<String, Object> createParams() {
-		Map<String, Object> params = new HashMap<String, Object>();
+		Map<String, Object> params = new HashMap<>();
 		params.put("table", MirageUtil.getTableName(entityClass, nameConverter));
 		params.put("id", null); // 何故これが要るのだろう。無いとコケる
 		params.put("id_column_name", findIdColumnName());
@@ -897,7 +907,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements // N
 		}
 		boolean ascending = isAscending(chunkable);
 		boolean forward = isForward(chunkable);
-		log.debug("Chunk param for {} {}", ascending ? "ascending" : "descending", forward ? "forward" : "backword");
+		log.debug("Chunk param for {} {}", ascending ? "ascending" : "descending", forward ? "forward" : "backward");
 		
 		if (chunkable.getPaginationToken() != null) {
 			String key;
@@ -973,12 +983,15 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements // N
 	}
 	
 	private boolean isAscending(Chunkable chunkable) {
-		return Optional.ofNullable(chunkable.getDirection()).orElse(Direction.ASC) == Direction.ASC;
+		return Optional.ofNullable(chunkable.getDirection())
+			.map(Direction.ASC::equals)
+			.orElse(true);
 	}
 	
 	private boolean isForward(Chunkable chunkable) {
 		return Optional.ofNullable(chunkable.getPaginationRelation())
-			.orElse(PaginationRelation.NEXT) == PaginationRelation.NEXT;
+			.map(PaginationRelation.NEXT::equals)
+			.orElse(true);
 	}
 	
 	private DataAccessException dataAccessException(String task, SQLRuntimeException e) {

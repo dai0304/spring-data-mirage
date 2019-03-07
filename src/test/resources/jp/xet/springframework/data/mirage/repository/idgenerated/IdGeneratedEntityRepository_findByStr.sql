@@ -1,7 +1,7 @@
 -- IdGeneratedEntityRepository_findByStr.sql
 
 SELECT *
-FROM samples
+FROM id_generated_entities
 
 WHERE str = /*str*/'abc'
 

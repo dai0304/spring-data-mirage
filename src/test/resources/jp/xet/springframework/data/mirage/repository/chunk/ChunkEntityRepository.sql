@@ -1,5 +1,5 @@
 SELECT *
-FROM sample_chunk c
+FROM chunk_entities c
 
 /*BEGIN*/
 WHERE
@@ -14,6 +14,13 @@ WHERE
 		/*END*/
 	/*END*/
 
+	/*IF before != null*/
+		/*IF direction != 'DESC'*/
+		AND c.id < /*before*/'1'
+-- ELSE	AND c.id > /*before*/1
+		/*END*/
+	/*END*/
+
 	/*IF ids != null*/
 		/*IF ids.isEmpty() == false*/
 		AND c.id IN /*ids*/('1', '2', '3')
@@ -24,7 +31,7 @@ WHERE
 
 /*IF orders == null*/
 ORDER BY id
-	/*IF direction == null || direction == 'ASC'*/
+	/*IF (direction != 'DESC' && before == null) || (direction == 'DESC' && before != null)*/
 		ASC
 -- ELSE	DESC
 	/*END*/

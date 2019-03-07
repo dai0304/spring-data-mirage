@@ -1,13 +1,13 @@
 -- IdGeneratedEntityRepository_findXxx.sql
 
 SELECT *
-FROM samples
+FROM id_generated_entities
+
+WHERE str = /*str*/''
 
 /*IF orders != null*/
 ORDER BY /*$orders*/id
 /*END*/
-
-WHERE str = /*str*/''
 
 /*BEGIN*/
 LIMIT

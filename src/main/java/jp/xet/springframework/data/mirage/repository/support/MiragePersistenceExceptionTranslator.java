@@ -15,17 +15,10 @@
  */
 package jp.xet.springframework.data.mirage.repository.support;
 
-import java.sql.SQLException;
-
-import lombok.NonNull;
-import lombok.Setter;
-
-import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
-import org.springframework.jdbc.support.SQLExceptionTranslator;
 
 import com.miragesql.miragesql.exception.SQLRuntimeException;
 
@@ -34,9 +27,18 @@ import com.miragesql.miragesql.exception.SQLRuntimeException;
  */
 public class MiragePersistenceExceptionTranslator implements PersistenceExceptionTranslator {
 	
-	@Setter(onMethod = @_(@Autowired(required = false)))
 	private SQLErrorCodeSQLExceptionTranslator sqlExceptionTranslator = new SQLErrorCodeSQLExceptionTranslator();
 	
+	
+	@Autowired(required = false)
+	public SQLErrorCodeSQLExceptionTranslator getSqlExceptionTranslator() {
+		return sqlExceptionTranslator;
+	}
+	
+	public void setSqlExceptionTranslator(
+			SQLErrorCodeSQLExceptionTranslator sqlExceptionTranslator) {
+		this.sqlExceptionTranslator = sqlExceptionTranslator;
+	}
 	
 	@Override
 	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {

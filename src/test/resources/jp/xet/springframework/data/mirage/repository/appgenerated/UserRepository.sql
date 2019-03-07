@@ -5,7 +5,7 @@ FROM users
 
 /*BEGIN*/
 WHERE
-	/*IF orders != null*/
+	/*IF username != null*/
 	username = /*username*/'abc'
 	/*END*/
 

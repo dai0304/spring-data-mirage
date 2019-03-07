@@ -1,7 +1,7 @@
 -- IdGeneratedEntityRepository_findChunk.sql
 
 SELECT *
-FROM samples
+FROM id_generated_entities
 
 /*IF orders != null*/
 ORDER BY /*$orders*/id

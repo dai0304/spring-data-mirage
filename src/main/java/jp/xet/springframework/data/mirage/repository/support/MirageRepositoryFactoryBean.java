@@ -16,6 +16,7 @@
 package jp.xet.springframework.data.mirage.repository.support;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -52,8 +53,8 @@ public class MirageRepositoryFactoryBean<T extends Repository<S, ID>, S, ID exte
 	@Autowired(required = false)
 	DataSource dataSource;
 	
-	@Autowired
-	List<RepositoryActionListener> handlers;
+	@Autowired(required = false)
+	List<RepositoryActionListener> handlers = Collections.emptyList();
 	
 	
 	protected MirageRepositoryFactoryBean(Class<? extends T> repositoryInterface) {

@@ -46,7 +46,7 @@ import org.ws2ten1.chunks.Chunkable;
 
 import com.google.common.collect.Iterables;
 
-import jp.xet.springframework.data.mirage.repository.TestConfiguration;
+import jp.xet.springframework.data.mirage.repository.MirageConfiguration;
 
 /**
  * Test for {@link IdGeneratedEntityRepository}.
@@ -54,7 +54,7 @@ import jp.xet.springframework.data.mirage.repository.TestConfiguration;
  * @author daisuke
  */
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = TestConfiguration.class)
+@ContextConfiguration(classes = MirageConfiguration.class)
 @Transactional
 @Slf4j
 @SuppressWarnings("javadoc")

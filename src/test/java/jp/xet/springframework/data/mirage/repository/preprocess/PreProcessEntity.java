@@ -36,7 +36,7 @@ import jp.xet.springframework.data.mirage.repository.handler.BeforeUpdate;
 /**
  * Sample entity class.
  */
-@Table(name = "sample_preprocess")
+@Table(name = "preprocess_entities")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PACKAGE)

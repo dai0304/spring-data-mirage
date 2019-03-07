@@ -35,8 +35,6 @@ import com.miragesql.miragesql.naming.RailsLikeNameConverter;
 import com.miragesql.miragesql.provider.ConnectionProvider;
 
 import jp.xet.springframework.data.mirage.repository.config.EnableMirageRepositories;
-import jp.xet.springframework.data.mirage.repository.handler.AnnotationRepositoryActionListener;
-import jp.xet.springframework.data.mirage.repository.handler.RepositoryActionListener;
 import jp.xet.springframework.data.mirage.repository.support.MiragePersistenceExceptionTranslator;
 
 /**
@@ -45,7 +43,7 @@ import jp.xet.springframework.data.mirage.repository.support.MiragePersistenceEx
 @Configuration
 @EnableTransactionManagement
 @EnableMirageRepositories
-public class TestConfiguration {
+public class MirageConfiguration {
 	
 	@Bean
 	public SqlManager sqlManager() {
@@ -88,10 +86,5 @@ public class TestConfiguration {
 	@Bean
 	public PlatformTransactionManager transactionManager() {
 		return new DataSourceTransactionManager(dataSource());
-	}
-	
-	@Bean
-	public RepositoryActionListener handler() {
-		return new AnnotationRepositoryActionListener();
 	}
 }

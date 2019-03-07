@@ -1,19 +1,19 @@
-CREATE TABLE samples (
+CREATE TABLE IF NOT EXISTS id_generated_entities (
 	id BIGINT PRIMARY KEY AUTO_INCREMENT,
 	str VARCHAR(64) NOT NULL
 );
 
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
 	username VARCHAR(64) PRIMARY KEY,
 	password VARCHAR(64) NOT NULL
 );
 
-CREATE TABLE sample_chunk (
+CREATE TABLE IF NOT EXISTS chunk_entities (
 	id VARCHAR(64) PRIMARY KEY,
-	str VARCHAR(64) NOT NULL
+	num BIGINT NOT NULL
 );
 
-CREATE TABLE sample_preprocess (
+CREATE TABLE IF NOT EXISTS preprocess_entities (
 	id VARCHAR(64) PRIMARY KEY,
 	str VARCHAR(64) NOT NULL,
 	last_updated BIGINT NOT NULL

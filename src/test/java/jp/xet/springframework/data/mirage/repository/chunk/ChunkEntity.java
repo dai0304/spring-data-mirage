@@ -31,12 +31,12 @@ import com.miragesql.miragesql.annotation.Table;
 /**
  * Sample entity class.
  */
-@Table(name = "sample_chunk")
+@Table(name = "chunk_entities")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
 @SuppressWarnings("serial")
-public class ChunkEntity {
+public class ChunkEntity implements Comparable<ChunkEntity> {
 	
 	@Id
 	@Column(name = "id")
@@ -44,6 +44,12 @@ public class ChunkEntity {
 	@Setter(AccessLevel.PACKAGE)
 	private String id;
 	
-	@Column(name = "str")
-	private String str;
+	@Column(name = "num")
+	private long num;
+	
+	
+	@Override
+	public int compareTo(ChunkEntity o) {
+		return this.id.compareTo(o.id);
+	}
 }
