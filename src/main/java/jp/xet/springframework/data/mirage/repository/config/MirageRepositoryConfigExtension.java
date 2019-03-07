@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2018 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,25 +66,8 @@ public class MirageRepositoryConfigExtension extends RepositoryConfigurationExte
 				config.getSource());
 	}
 	
-	@Override
-	public void registerBeansForRoot(BeanDefinitionRegistry registry,
-			RepositoryConfigurationSource configurationSource) {
-		super.registerBeansForRoot(registry, configurationSource);
-		
-		if (!hasBean(PET_POST_PROCESSOR, registry)) {
-			AbstractBeanDefinition definition =
-					BeanDefinitionBuilder.rootBeanDefinition(PET_POST_PROCESSOR).getBeanDefinition();
-			registerWithSourceAndGeneratedBeanName(definition, registry, configurationSource.getSource());
-		}
-	}
-	
-	@Override
-	protected String getModulePrefix() {
-		return "mirage";
-	}
-	
 	private void postProcess(BeanDefinitionBuilder builder, String sqlManagerRef, String transactionManagerRef,
-			Object source) {
+			Object source) { // NOPMD
 		if (StringUtils.hasText(sqlManagerRef)) {
 			builder.addPropertyReference("sqlManager", sqlManagerRef);
 		} else {
@@ -96,5 +79,24 @@ public class MirageRepositoryConfigExtension extends RepositoryConfigurationExte
 		} else {
 			builder.addPropertyValue("transactionManager", DEFAULT_TRANSACTION_MANAGER_BEAN_NAME);
 		}
+	}
+	
+	@Override
+	public void registerBeansForRoot(BeanDefinitionRegistry registry,
+			RepositoryConfigurationSource configurationSource) {
+		super.registerBeansForRoot(registry, configurationSource);
+		
+		if (hasBean(PET_POST_PROCESSOR, registry) == false) {
+			AbstractBeanDefinition definition =
+					BeanDefinitionBuilder.rootBeanDefinition(PET_POST_PROCESSOR).getBeanDefinition();
+			Object source = configurationSource.getSource();
+			assert source != null;
+			registerWithSourceAndGeneratedBeanName(definition, registry, source);
+		}
+	}
+	
+	@Override
+	protected String getModulePrefix() {
+		return "mirage";
 	}
 }

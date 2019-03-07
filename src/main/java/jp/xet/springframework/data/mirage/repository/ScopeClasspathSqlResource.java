@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2018 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,14 +46,14 @@ public class ScopeClasspathSqlResource extends ClasspathSqlResource {
 		if (parts.hasNext()) {
 			sb.append(parts.next());
 			while (parts.hasNext()) {
-				sb.append("/");
+				sb.append('/');
 				sb.append(parts.next());
 			}
 		}
 		return sb.toString();
 	}
 	
-	private static String toAbsolutePath(SqlResourceCandidate[] candidates) {
+	private static String toAbsolutePath(SqlResourceCandidate... candidates) {
 		Assert.noNullElements(candidates, "candidates must not be contains null element");
 		
 		for (SqlResourceCandidate candidate : candidates) {
@@ -72,7 +72,7 @@ public class ScopeClasspathSqlResource extends ClasspathSqlResource {
 	
 	private static String toAbsolutePath(final String packageName, final String relativePath) {
 		// Is path already absolute?
-		if (relativePath.startsWith("/")) {
+		if (relativePath.charAt(0) == '/') {
 			return relativePath;
 		} else {
 			// Break package into list of package names
@@ -86,7 +86,7 @@ public class ScopeClasspathSqlResource extends ClasspathSqlResource {
 				// Up one?
 				if ("..".equals(folder)) {
 					// Pop off stack
-					if (absolutePath.size() > 0) {
+					if (absolutePath.isEmpty() == false) {
 						absolutePath.remove(absolutePath.size() - 1);
 					} else {
 						throw new IllegalArgumentException("Invalid path " + relativePath);
@@ -123,7 +123,7 @@ public class ScopeClasspathSqlResource extends ClasspathSqlResource {
 	 */
 	public ScopeClasspathSqlResource(SqlResourceCandidate candidate) {
 		this(new SqlResourceCandidate[] {
-			candidate
+			candidate,
 		});
 	}
 	
@@ -133,7 +133,7 @@ public class ScopeClasspathSqlResource extends ClasspathSqlResource {
 	 * @param candidates
 	 * @since 0.2.5
 	 */
-	public ScopeClasspathSqlResource(SqlResourceCandidate[] candidates) {
+	public ScopeClasspathSqlResource(SqlResourceCandidate... candidates) {
 		super(toAbsolutePath(candidates));
 	}
 	

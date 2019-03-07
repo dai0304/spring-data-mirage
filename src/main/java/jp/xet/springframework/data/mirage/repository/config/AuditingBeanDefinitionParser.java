@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2018 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,6 @@ public class AuditingBeanDefinitionParser implements BeanDefinitionParser {
 	 * Copied code of SpringConfiguredBeanDefinitionParser until this class gets public.
 	 *
 	 * @see <a href="http://jira.springframework.org/browse/SPR-7340">Make SpringConfiguredBeanDefinitionParser public</a>
-	 * @author Juergen Hoeller
 	 */
 	private static class SpringConfiguredBeanDefinitionParser implements BeanDefinitionParser {
 		
@@ -62,8 +61,8 @@ public class AuditingBeanDefinitionParser implements BeanDefinitionParser {
 		@Override
 		public BeanDefinition parse(Element element, ParserContext parserContext) {
 			
-			if (!parserContext.getRegistry().containsBeanDefinition(BEAN_CONFIGURER_ASPECT_BEAN_NAME)) {
-				if (!ClassUtils.isPresent(BEAN_CONFIGURER_ASPECT_CLASS_NAME, getClass().getClassLoader())) {
+			if (parserContext.getRegistry().containsBeanDefinition(BEAN_CONFIGURER_ASPECT_BEAN_NAME) == false) {
+				if (ClassUtils.isPresent(BEAN_CONFIGURER_ASPECT_CLASS_NAME, getClass().getClassLoader()) == false) { // NOPMD
 					parserContext.getReaderContext().error(
 							"Could not configure Spring Data Mirage auditing-feature because"
 									+ " spring-aspects.jar is not on the classpath!\n"

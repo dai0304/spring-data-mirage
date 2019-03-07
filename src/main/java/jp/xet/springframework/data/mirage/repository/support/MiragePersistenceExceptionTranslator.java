@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2018 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,10 +28,6 @@ import com.miragesql.miragesql.exception.SQLRuntimeException;
 
 /**
  * TODO for daisuke
- *
- * @since 0.1
- * @version $Id$
- * @author daisuke
  */
 public class MiragePersistenceExceptionTranslator implements PersistenceExceptionTranslator {
 	
@@ -55,7 +51,7 @@ public class MiragePersistenceExceptionTranslator implements PersistenceExceptio
 	
 	
 	@SuppressWarnings("serial")
-	private final class MirageDataAccessException extends DataAccessException {
+	private static final class MirageDataAccessException extends DataAccessException {
 		
 		private MirageDataAccessException(Throwable cause) {
 			super("unkwnown", cause);

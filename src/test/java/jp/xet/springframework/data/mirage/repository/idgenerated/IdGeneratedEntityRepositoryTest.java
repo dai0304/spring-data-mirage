@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2018 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -142,9 +142,8 @@ public class IdGeneratedEntityRepositoryTest {
 		assertThat(repo.count(), is(0L));
 		IdGeneratedEntity foo = repo.create(new IdGeneratedEntity("foo"));
 		assertThat(repo.count(), is(1L));
-		IdGeneratedEntity bar = foo;
-		bar.setStr("bar");
-		bar = repo.update(bar);
+		foo.setStr("bar");
+		repo.update(foo);
 		assertThat(repo.count(), is(1L));
 		
 		IdGeneratedEntity foundFoo = repo.findById(foo.getId()).orElse(null);

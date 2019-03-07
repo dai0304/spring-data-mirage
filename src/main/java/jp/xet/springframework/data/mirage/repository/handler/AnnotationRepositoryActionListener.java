@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2018 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,13 @@ package jp.xet.springframework.data.mirage.repository.handler;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * @see BeforeCreate
  * @see BeforeUpdate
  */
+@Slf4j
 public class AnnotationRepositoryActionListener implements RepositoryActionListener {
 	
 	@Override
@@ -44,7 +47,8 @@ public class AnnotationRepositoryActionListener implements RepositoryActionListe
 					method.setAccessible(true);
 					try {
 						method.invoke(entity);
-					} catch (Exception e) {
+					} catch (Exception e) { // NOPMD
+						log.warn("failed to invoke: {}", method);
 						// ignore
 					}
 				}

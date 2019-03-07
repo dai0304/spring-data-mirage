@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2018 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,7 +65,7 @@ public class ChunkEntityRepositoryTest {
 			resultAsc.addAll(chunk.getContent());
 			String paginationToken = chunk.getPaginationToken();
 			log.info("token: {}", paginationToken);
-			requestAsc = chunk.hasNext() ? chunk.nextChunkable() : null;
+			requestAsc = chunk.hasNext() ? chunk.nextChunkable() : null; // NOPMD
 		} while (requestAsc != null);
 		
 		resultAsc.forEach(e -> log.info("{}", e));
@@ -107,7 +107,7 @@ public class ChunkEntityRepositoryTest {
 			resultDesc.addAll(chunk.getContent());
 			String paginationToken = chunk.getPaginationToken();
 			log.info("token: {}", paginationToken);
-			requestDesc = chunk.hasNext() ? chunk.nextChunkable() : null;
+			requestDesc = chunk.hasNext() ? chunk.nextChunkable() : null; // NOPMD
 		} while (requestDesc != null);
 		
 		resultDesc.forEach(e -> log.info("{}", e));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2018 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import javax.sql.DataSource;
 
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.domain.Page;
@@ -79,8 +80,8 @@ import jp.xet.springframework.data.mirage.repository.handler.RepositoryActionLis
  * @param <E> the domain type the repository manages
  * @param <ID> the type of the id of the entity the repository manages
  */
-@Slf4j
-public class DefaultMirageRepository<E, ID extends Serializable> implements
+@Slf4j // -@cs[MethodCount|ClassFanOutComplexity]
+public class DefaultMirageRepository<E, ID extends Serializable> implements // NOPMD God class
 		ScannableRepository<E, ID>, BatchCreatableRepository<E, ID>, BatchReadableRepository<E, ID>,
 		BatchUpsertableRepository<E, ID>, BatchDeletableRepository<E, ID>,
 		LockableCrudRepository<E, ID>, TruncatableRepository<E, ID>,
@@ -176,7 +177,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 			sqlManager.insertEntity(entity);
 			log.debug("entity inserted: {}", entity);
 		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("create", null, e.getCause());
+			throw dataAccessException("create", e);
 		}
 		return entity;
 	}
@@ -184,12 +185,12 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 	@Override
 	public void delete(E entity) {
 		if (entity == null) {
-			throw new NullPointerException("entity is null"); //$NON-NLS-1$
+			throw new NullPointerException("entity is null"); // NOPMD
 		}
 		try {
 			sqlManager.deleteEntity(entity);
 		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("delete", null, e.getCause());
+			throw dataAccessException("delete", e);
 		}
 	}
 	
@@ -200,7 +201,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 			try {
 				sqlManager.deleteEntity(found);
 			} catch (SQLRuntimeException e) {
-				throw getExceptionTranslator().translate("delete", null, e.getCause());
+				throw dataAccessException("delete", e);
 			}
 		} else {
 			log.warn("entity id [{}] not found", id);
@@ -211,18 +212,18 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 	@SuppressWarnings("unchecked")
 	public void deleteAll(Iterable<? extends E> entities) {
 		if (entities == null) {
-			throw new NullPointerException("entities is null"); //$NON-NLS-1$
+			throw new NullPointerException("entities is null"); // NOPMD
 		}
 		for (E entity : entities) {
 			if (entity == null) {
-				throw new NullPointerException("entity is null"); //$NON-NLS-1$
+				throw new NullPointerException("entity is null"); // NOPMD
 			}
 		}
 		
 		try {
 			sqlManager.deleteBatch(entities);
 		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("delete", null, e.getCause());
+			throw dataAccessException("delete", e);
 		}
 	}
 	
@@ -231,7 +232,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 		try {
 			deleteAll(findAll());
 		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("deleteAll", null, e.getCause());
+			throw dataAccessException("deleteAll", e);
 		}
 	}
 	
@@ -246,7 +247,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 		try {
 			return getCount(getBaseSelectSqlResource(), createParams(id, forUpdate)) > 0;
 		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("exists", null, e.getCause());
+			throw dataAccessException("exists", e);
 		}
 	}
 	
@@ -255,14 +256,14 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 		try {
 			return getResultList(getBaseSelectSqlResource(), createParams());
 		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("findAll", null, e.getCause());
+			throw dataAccessException("findAll", e);
 		}
 	}
 	
 	@Override
 	public Chunk<E> findAll(Chunkable chunkable) {
 		if (chunkable == null) {
-			return new ChunkImpl<E>(newArrayList(findAll()), null, chunkable);
+			return new ChunkImpl<E>(newArrayList(findAll()), null, null);
 		}
 		
 		try {
@@ -282,7 +283,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 			}
 			return new ChunkImpl<E>(resultList, pt, chunkable);
 		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("findAll", null, e.getCause());
+			throw dataAccessException("findAll", e);
 		}
 	}
 	
@@ -295,7 +296,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 		try {
 			return getResultList(getBaseSelectSqlResource(), params);
 		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("findAll", null, e.getCause());
+			throw dataAccessException("findAll", e);
 		}
 	}
 	
@@ -310,7 +311,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 			Long foundRows = getFoundRows();
 			return new PageImpl<E>(result, pageable, foundRows != null ? foundRows : count());
 		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("findAll", null, e.getCause());
+			throw dataAccessException("findAll", e);
 		}
 	}
 	
@@ -319,7 +320,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 		try {
 			return getResultList(getBaseSelectSqlResource(), createParams(sort));
 		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("findAll", null, e.getCause());
+			throw dataAccessException("findAll", e);
 		}
 	}
 	
@@ -335,7 +336,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 		try {
 			return Optional.ofNullable(getSingleResult(getBaseSelectSqlResource(), createParams(id, forUpdate)));
 		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("findOne", null, e.getCause());
+			throw dataAccessException("findOne", e);
 		}
 	}
 	
@@ -351,8 +352,9 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 					field.setAccessible(true);
 					try {
 						return (ID) field.get(entity);
-					} catch (Exception e) {
+					} catch (Exception e) { // NOPMD
 						// ignore
+						log.debug("failed", e);
 					}
 				}
 			}
@@ -387,7 +389,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 			sqlManager.insertBatch(toInsert);
 			return newArrayList(entities);
 		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("save", null, e.getCause());
+			throw dataAccessException("save", e);
 		}
 	}
 	
@@ -407,7 +409,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 				log.debug("entity inserted: {}", entity);
 			}
 		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("save", null, e.getCause());
+			throw dataAccessException("save", e);
 		}
 		return entity;
 	}
@@ -434,7 +436,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 				throw new IncorrectResultSizeDataAccessException(1, rowCount);
 			}
 		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("update", null, e.getCause());
+			throw dataAccessException("update", e);
 		}
 		return entity;
 	}
@@ -447,7 +449,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 		try {
 			return sqlManager.call(resultClass, functionName);
 		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("call", null, e.getCause());
+			throw dataAccessException("call", e);
 		}
 	}
 	
@@ -459,7 +461,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 		try {
 			return sqlManager.call(resultClass, functionName, param);
 		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("call", null, e.getCause());
+			throw dataAccessException("call", e);
 		}
 	}
 	
@@ -471,7 +473,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 		try {
 			sqlManager.call(procedureName);
 		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("call", null, e.getCause());
+			throw dataAccessException("call", e);
 		}
 	}
 	
@@ -483,7 +485,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 		try {
 			sqlManager.call(procedureName, parameter);
 		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("call", null, e.getCause());
+			throw dataAccessException("call", e);
 		}
 	}
 	
@@ -495,7 +497,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 		try {
 			return sqlManager.callForList(resultClass, functionName);
 		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("callForList", null, e.getCause());
+			throw dataAccessException("callForList", e);
 		}
 	}
 	
@@ -507,7 +509,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 		try {
 			return sqlManager.callForList(resultClass, functionName, param);
 		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("callForList", null, e.getCause());
+			throw dataAccessException("callForList", e);
 		}
 	}
 	
@@ -585,7 +587,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 		try {
 			return sqlManager.deleteBatch(entities);
 		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("deleteBatch", null, e.getCause());
+			throw dataAccessException("deleteBatch", e);
 		}
 	}
 	
@@ -597,7 +599,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 		try {
 			return sqlManager.deleteBatch(entities);
 		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("deleteBatch", null, e.getCause());
+			throw dataAccessException("deleteBatch", e);
 		}
 	}
 	
@@ -609,7 +611,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 		try {
 			return sqlManager.deleteEntity(entity);
 		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("deleteEntity", null, e.getCause());
+			throw dataAccessException("deleteEntity", e);
 		}
 	}
 	
@@ -622,7 +624,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 		try {
 			return sqlManager.executeUpdate(resource);
 		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("executeUpdate", null, e.getCause());
+			throw dataAccessException("executeUpdate", e);
 		}
 	}
 	
@@ -635,7 +637,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 		try {
 			return sqlManager.executeUpdate(resource, param);
 		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("executeUpdate", null, e.getCause());
+			throw dataAccessException("executeUpdate", e);
 		}
 	}
 	
@@ -658,7 +660,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 		try {
 			return sqlManager.getCount(resource);
 		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("getCount", null, e.getCause());
+			throw dataAccessException("getCount", e);
 		}
 	}
 	
@@ -671,7 +673,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 		try {
 			return sqlManager.getCount(resource, param);
 		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("getCount", null, e.getCause());
+			throw dataAccessException("getCount", e);
 		}
 	}
 	
@@ -680,7 +682,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 	 *
 	 * @return
 	 */
-	protected synchronized SQLExceptionTranslator getExceptionTranslator() {
+	protected synchronized SQLExceptionTranslator getExceptionTranslator() { // NOPMD
 		if (this.exceptionTranslator == null) {
 			if (dataSource != null) {
 				this.exceptionTranslator = new SQLErrorCodeSQLExceptionTranslator(dataSource);
@@ -709,7 +711,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 		try {
 			return sqlManager.getResultList(entityClass, resource);
 		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("getResultList", null, e.getCause());
+			throw dataAccessException("getResultList", e);
 		}
 	}
 	
@@ -723,7 +725,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 		try {
 			return sqlManager.getResultList(entityClass, resource, param);
 		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("getResultList", null, e.getCause());
+			throw dataAccessException("getResultList", e);
 		}
 	}
 	
@@ -736,7 +738,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 		try {
 			return sqlManager.getSingleResult(entityClass, resource);
 		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("getSingleResult", null, e.getCause());
+			throw dataAccessException("getSingleResult", e);
 		}
 	}
 	
@@ -749,7 +751,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 		try {
 			return sqlManager.getSingleResult(entityClass, resource, param);
 		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("getSingleResult", null, e.getCause());
+			throw dataAccessException("getSingleResult", e);
 		}
 	}
 	
@@ -775,7 +777,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 			Arrays.stream(entities).forEach(e -> handlers.forEach(handler -> handler.beforeCreate(e)));
 			return sqlManager.insertBatch(entities);
 		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("insertBatch", null, e.getCause());
+			throw dataAccessException("insertBatch", e);
 		}
 	}
 	
@@ -788,7 +790,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 			entities.forEach(e -> handlers.forEach(handler -> handler.beforeCreate(e)));
 			return sqlManager.insertBatch(entities);
 		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("insertBatch", null, e.getCause());
+			throw dataAccessException("insertBatch", e);
 		}
 	}
 	
@@ -800,7 +802,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 			sqlManager.insertBatch(list);
 			return list;
 		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("insertBatch", null, e.getCause());
+			throw dataAccessException("insertBatch", e);
 		}
 	}
 	
@@ -818,7 +820,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 			// handlers.forEach(handler -> handler.processBeforeInsert(entity));
 			return sqlManager.insertEntity(entity);
 		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("insertEntity", null, e.getCause());
+			throw dataAccessException("insertEntity", e);
 		}
 	}
 	
@@ -831,7 +833,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 		try {
 			return sqlManager.iterate(entityClass, callback, resource);
 		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("iterate", null, e.getCause());
+			throw dataAccessException("iterate", e);
 		}
 	}
 	
@@ -844,7 +846,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 		try {
 			return sqlManager.iterate(entityClass, callback, resource, param);
 		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("iterate", null, e.getCause());
+			throw dataAccessException("iterate", e);
 		}
 	}
 	
@@ -860,7 +862,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 			Arrays.stream(entities).forEach(e -> handlers.forEach(handler -> handler.beforeUpdate(e)));
 			return sqlManager.updateBatch(entities);
 		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("updateBatch", null, e.getCause());
+			throw dataAccessException("updateBatch", e);
 		}
 	}
 	
@@ -873,7 +875,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 			entities.forEach(e -> handlers.forEach(handler -> handler.beforeUpdate(e)));
 			return sqlManager.updateBatch(entities);
 		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("updateBatch", null, e.getCause());
+			throw dataAccessException("updateBatch", e);
 		}
 	}
 	
@@ -886,7 +888,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 			handlers.forEach(handler -> handler.beforeUpdate(entity));
 			return sqlManager.updateEntity(entity);
 		} catch (SQLRuntimeException e) {
-			throw getExceptionTranslator().translate("updateEntity", null, e.getCause());
+			throw dataAccessException("updateEntity", e);
 		}
 	}
 	
@@ -931,7 +933,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 			for (Order order : sort) {
 				orders.add(String.format(Locale.ENGLISH, "%s %s", order.getProperty(), order.getDirection().name()));
 			}
-			if (orders.size() != 0) {
+			if (orders.isEmpty() == false) {
 				params.put("orders", join(orders));
 			}
 		}
@@ -978,5 +980,9 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements
 	private boolean isForward(Chunkable chunkable) {
 		return Optional.ofNullable(chunkable.getPaginationRelation())
 			.orElse(PaginationRelation.NEXT) == PaginationRelation.NEXT;
+	}
+	
+	private DataAccessException dataAccessException(String task, SQLRuntimeException e) {
+		return getExceptionTranslator().translate(task, null, e.getCause());
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2018 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,9 +30,6 @@ import com.miragesql.miragesql.annotation.Table;
  *
  * @param <T>
  * @param <ID>
- * @since 0.1
- * @version $Id$
- * @author daisuke
  */
 public class MirageEntityInformationSupport<T, ID extends Serializable>
 		extends AbstractEntityInformation<T, ID> implements MirageEntityInformation<T, ID> {
@@ -79,8 +76,8 @@ public class MirageEntityInformationSupport<T, ID extends Serializable>
 						@SuppressWarnings("unchecked")
 						ID id = (ID) field.get(entity);
 						return id;
-					} catch (Exception e) {
-						// ignore
+					} catch (Exception e) { // NOPMD
+						// NOPMD ignore
 					}
 				}
 			}
@@ -104,6 +101,6 @@ public class MirageEntityInformationSupport<T, ID extends Serializable>
 			}
 			c = c.getSuperclass();
 		}
-		return null;
+		throw new IllegalStateException("Id annotation not found in: " + getJavaType());
 	}
 }

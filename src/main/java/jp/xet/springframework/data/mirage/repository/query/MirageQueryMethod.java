@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2018 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.springframework.data.repository.query.Parameters;
 import org.springframework.data.repository.query.QueryMethod;
 import org.springframework.data.repository.util.QueryExecutionConverters;
 import org.springframework.data.util.ClassTypeInformation;
+import org.springframework.data.util.TypeInformation;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -41,7 +42,10 @@ public class MirageQueryMethod extends QueryMethod {
 	private static Class<?> potentiallyUnwrapReturnTypeFor(Method method) {
 		if (QueryExecutionConverters.supports(method.getReturnType())) {
 			// unwrap only one level to handle cases like Future<List<Entity>> correctly.
-			return ClassTypeInformation.fromReturnTypeOf(method).getComponentType().getType();
+			TypeInformation<?> componentType = ClassTypeInformation.fromReturnTypeOf(method).getComponentType();
+			if (componentType != null) {
+				return componentType.getType();
+			}
 		}
 		
 		return method.getReturnType();
@@ -68,7 +72,7 @@ public class MirageQueryMethod extends QueryMethod {
 		this.metadata = metadata;
 		unwrappedReturnType = potentiallyUnwrapReturnTypeFor(method);
 		
-		Assert.isTrue((isModifyingQuery() && getParameters().hasSpecialParameter()) == false,
+		Assert.isTrue((isModifyingQuery() && getParameters().hasSpecialParameter()) == false, // NOPMD
 				String.format(Locale.ENGLISH, "Modifying method must not contain %s!", Parameters.TYPES));
 	}
 	
@@ -110,7 +114,8 @@ public class MirageQueryMethod extends QueryMethod {
 	 * TODO for daisuke
 	 */
 	public boolean isChunkQuery() {
-		return !isPageQuery() && org.springframework.util.ClassUtils.isAssignable(Chunk.class, unwrappedReturnType);
+		return isPageQuery() == false
+				&& org.springframework.util.ClassUtils.isAssignable(Chunk.class, unwrappedReturnType);
 	}
 	
 	/**
@@ -120,7 +125,7 @@ public class MirageQueryMethod extends QueryMethod {
 	 */
 	@Override
 	public boolean isCollectionQuery() {
-		return !(isPageQuery() || isSliceQuery() || isChunkQuery())
+		return (isPageQuery() || isSliceQuery() || isChunkQuery()) == false
 				&& org.springframework.util.ClassUtils.isAssignable(Iterable.class, unwrappedReturnType)
 				|| unwrappedReturnType.isArray();
 	}

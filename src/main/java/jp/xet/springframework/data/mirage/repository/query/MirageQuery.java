@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2018 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -41,9 +43,6 @@ import org.springframework.data.repository.query.Parameter;
 import org.springframework.data.repository.query.QueryMethod;
 import org.springframework.data.repository.query.RepositoryQuery;
 import org.springframework.util.Assert;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import org.ws2ten1.chunks.ChunkImpl;
 import org.ws2ten1.chunks.Chunkable;
@@ -61,9 +60,8 @@ import jp.xet.springframework.data.mirage.repository.SqlResourceCandidate;
 /**
  * {@link RepositoryQuery} implementation for spring-data-mirage.
  */
-public class MirageQuery implements RepositoryQuery {
-	
-	private static Logger log = LoggerFactory.getLogger(MirageQuery.class);
+@Slf4j
+public class MirageQuery implements RepositoryQuery { // NOPMD God class
 	
 	private static final int BUFFER_SIZE = 1024 * 4;
 	
@@ -83,7 +81,7 @@ public class MirageQuery implements RepositoryQuery {
 			}
 			sb.append(')');
 			return sb.toString();
-		} catch (Exception e) {
+		} catch (Exception e) { // NOPMD
 			return "<" + e + ">";
 		}
 	}
@@ -105,7 +103,7 @@ public class MirageQuery implements RepositoryQuery {
 		for (Order order : sort) {
 			orders.add(String.format(Locale.ENGLISH, "%s %s", order.getProperty(), order.getDirection().name()));
 		}
-		if (orders.size() != 0) {
+		if (orders.isEmpty() == false) {
 			params.put("orders", String.join(", ", orders));
 		}
 	}
@@ -125,8 +123,8 @@ public class MirageQuery implements RepositoryQuery {
 					sb.append("[]");
 				}
 				return sb.toString();
-			} catch (Throwable e) {
-				//$FALL-THROUGH$
+			} catch (Throwable e) { // NOPMD
+				// NOPMD fall through
 			}
 		}
 		return type.getName();
@@ -212,7 +210,7 @@ public class MirageQuery implements RepositoryQuery {
 		}
 	}
 	
-	private Map<String, Object> createParameterMap(Object[] parameters) {
+	private Map<String, Object> createParameterMap(Object... parameters) {
 		Map<String, Object> parameterMap = new HashMap<String, Object>();
 		parameterMap.put("orders", null);
 		for (Parameter p : mirageQueryMethod.getParameters()) {
@@ -235,14 +233,14 @@ public class MirageQuery implements RepositoryQuery {
 		String name = mirageQueryMethod.getAnnotatedQuery();
 		if (name != null) {
 			return new SqlResourceCandidate[] {
-				new SqlResourceCandidate(mirageQueryMethod.getDeclaringClass(), name)
+				new SqlResourceCandidate(mirageQueryMethod.getDeclaringClass(), name),
 			};
 		}
 		
 		List<SqlResourceCandidate> candidates = new ArrayList<SqlResourceCandidate>();
 		for (Class<?> clazz : new Class<?>[] {
 			mirageQueryMethod.getRepositoryInterface(),
-			mirageQueryMethod.getDeclaringClass()
+			mirageQueryMethod.getDeclaringClass(),
 		}) {
 			String simpleName = clazz.getSimpleName();
 			String args = getArgsPartOfSignature(mirageQueryMethod.asMethod());
@@ -272,7 +270,7 @@ public class MirageQuery implements RepositoryQuery {
 					field.setAccessible(true);
 					try {
 						return field.get(entity);
-					} catch (Exception e) {
+					} catch (Exception e) { // NOPMD
 						// ignore
 					}
 				}
@@ -328,11 +326,7 @@ public class MirageQuery implements RepositoryQuery {
 	private Object processPageQuery(SqlResource sqlResource, Map<String, Object> parameterMap,
 			Class<?> returnedDomainType, ChunkableParameterAccessor accessor) {
 		Pageable pageable = accessor.getPageable();
-		if (pageable != null) {
-			addPageParam(parameterMap, pageable);
-		} else {
-			addSortParam(parameterMap, accessor.getSort());
-		}
+		addPageParam(parameterMap, pageable);
 		
 		List<?> resultList = sqlManager.getResultList(returnedDomainType, sqlResource, parameterMap);
 		
@@ -348,11 +342,7 @@ public class MirageQuery implements RepositoryQuery {
 	private Object processSliceQuery(SqlResource sqlResource, Map<String, Object> parameterMap,
 			Class<?> returnedDomainType, ChunkableParameterAccessor accessor) {
 		Pageable pageable = accessor.getPageable();
-		if (pageable != null) {
-			addPageParam(parameterMap, pageable);
-		} else {
-			addSortParam(parameterMap, accessor.getSort());
-		}
+		addPageParam(parameterMap, pageable);
 		
 		List<?> resultList = sqlManager.getResultList(returnedDomainType, sqlResource, parameterMap);
 		
@@ -367,7 +357,7 @@ public class MirageQuery implements RepositoryQuery {
 		StringBuilder sb = new StringBuilder();
 		char[] buffer = new char[BUFFER_SIZE];
 		int n = 0;
-		while ((n = input.read(buffer)) != -1) {
+		while ((n = input.read(buffer)) != -1) { // NOPMD
 			sb.append(buffer, 0, n);
 		}
 		return sb.toString();
