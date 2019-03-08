@@ -60,7 +60,7 @@ public class ChunkEntityRepositoryTest {
 	public void testChunkingAsc() {
 		// setup
 		for (int i = 0; i < 10; i++) {
-			repo.create(new ChunkEntity(String.format("%03d", i), i));
+			repo.save(new ChunkEntity(String.format("%03d", i), i));
 		}
 		List<ChunkEntity> resultAsc = new ArrayList<>(10);
 		
@@ -83,7 +83,7 @@ public class ChunkEntityRepositoryTest {
 	@Rollback
 	public void testChunkingAsc_Under20() {
 		for (int i = 0; i < 20; i++) {
-			repo.create(new ChunkEntity(String.format("%03d", i), i));
+			repo.save(new ChunkEntity(String.format("%03d", i), i));
 		}
 		
 		Chunkable requestAsc = new ChunkRequest(8);
@@ -187,7 +187,7 @@ public class ChunkEntityRepositoryTest {
 	@Rollback
 	public void testChunkingAsc_Exact20() {
 		for (int i = 0; i < 20; i++) {
-			repo.create(new ChunkEntity(String.format("%03d", i), i));
+			repo.save(new ChunkEntity(String.format("%03d", i), i));
 		}
 		
 		Chunkable requestAsc = new ChunkRequest(20);
@@ -235,7 +235,7 @@ public class ChunkEntityRepositoryTest {
 	@Rollback
 	public void testChunkingAsc_Over20() {
 		for (int i = 0; i < 20; i++) {
-			repo.create(new ChunkEntity(String.format("%03d", i), i));
+			repo.save(new ChunkEntity(String.format("%03d", i), i));
 		}
 		
 		Chunkable requestAsc = new ChunkRequest(30);
@@ -258,7 +258,7 @@ public class ChunkEntityRepositoryTest {
 	@Rollback
 	public void testChunkingDesc() {
 		for (int i = 0; i < 100; i++) {
-			repo.create(new ChunkEntity(String.format("%03d", i), i));
+			repo.save(new ChunkEntity(String.format("%03d", i), i));
 		}
 		
 		List<ChunkEntity> resultDesc = new ArrayList<>(100);
@@ -282,7 +282,7 @@ public class ChunkEntityRepositoryTest {
 	@Rollback
 	public void testChunkingDesc_Under20() {
 		for (int i = 0; i < 20; i++) {
-			repo.create(new ChunkEntity(String.format("%03d", i), i));
+			repo.save(new ChunkEntity(String.format("%03d", i), i));
 		}
 		
 		Chunkable requestAsc = new ChunkRequest(8, Direction.DESC);
@@ -386,7 +386,7 @@ public class ChunkEntityRepositoryTest {
 	@Rollback
 	public void testChunkingDesc_Exact20() {
 		for (int i = 0; i < 20; i++) {
-			repo.create(new ChunkEntity(String.format("%03d", i), i));
+			repo.save(new ChunkEntity(String.format("%03d", i), i));
 		}
 		
 		Chunkable requestAsc = new ChunkRequest(20, Direction.DESC);
@@ -434,7 +434,7 @@ public class ChunkEntityRepositoryTest {
 	@Rollback
 	public void testChunkingDesc_Over20() {
 		for (int i = 0; i < 20; i++) {
-			repo.create(new ChunkEntity(String.format("%03d", i), i));
+			repo.save(new ChunkEntity(String.format("%03d", i), i));
 		}
 		
 		Chunkable requestAsc = new ChunkRequest(30, Direction.DESC);

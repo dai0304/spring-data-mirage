@@ -13,51 +13,64 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package jp.xet.springframework.data.mirage.repository.idgenerated;
+package jp.xet.springframework.data.mirage.repository.conditional;
 
 import lombok.AccessLevel;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Version;
 
 import com.miragesql.miragesql.annotation.Column;
 import com.miragesql.miragesql.annotation.PrimaryKey;
 import com.miragesql.miragesql.annotation.PrimaryKey.GenerationType;
 import com.miragesql.miragesql.annotation.Table;
 
+import jp.xet.springframework.data.mirage.repository.handler.BeforeCreate;
+import jp.xet.springframework.data.mirage.repository.handler.BeforeUpdate;
+
 /**
  * Sample entity class.
- *
- * @author daisuke
  */
-@Table(name = "id_generated_entities")
+@Table(name = "string_string_versioned")
 @Data
-@EqualsAndHashCode(of = "id")
-@ToString(of = "str")
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
 @SuppressWarnings("serial")
-public class IdGeneratedEntity {
+public class ConditionalEntity implements Comparable<ConditionalEntity> {
 	
 	@Id
 	@Column(name = "id")
-	@PrimaryKey(generationType = GenerationType.IDENTITY)
+	@PrimaryKey(generationType = GenerationType.APPLICATION)
 	@Setter(AccessLevel.PACKAGE)
-	private long id;
+	private String id;
 	
 	@Column(name = "str")
 	private String str;
 	
+	@Version
+	@Column(name = "version")
+	private long version;
 	
-	/**
-	 * インスタンスを生成する。
-	 *
-	 * @param str string
-	 */
-	public IdGeneratedEntity(String str) {
+	
+	public ConditionalEntity(String id, String str) {
+		this.id = id;
 		this.str = str;
+	}
+	
+	@BeforeCreate
+	public void initializeVersion() {
+		version = 1;
+	}
+	
+	@BeforeUpdate
+	public void incrementVersion() {
+		version += 1;
+	}
+	
+	@Override
+	public int compareTo(ConditionalEntity o) {
+		return this.id.compareTo(o.id);
 	}
 }

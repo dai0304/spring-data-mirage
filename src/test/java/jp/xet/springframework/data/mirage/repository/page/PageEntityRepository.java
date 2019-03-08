@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package jp.xet.springframework.data.mirage.repository.chunk;
+package jp.xet.springframework.data.mirage.repository.page;
 
-import org.ws2ten1.repositories.ChunkableRepository;
+import org.ws2ten1.repositories.PageableRepository;
 import org.ws2ten1.repositories.UpsertableRepository;
 
 /**
- * Repository interface for {@link ChunkEntity}.
+ * Repository interface for {@link PageEntity}.
  */
-public interface ChunkEntityRepository
-		extends UpsertableRepository<ChunkEntity, String>, ChunkableRepository<ChunkEntity, String> {
+public interface PageEntityRepository
+		extends UpsertableRepository<PageEntity, String>, PageableRepository<PageEntity, String> {
 }

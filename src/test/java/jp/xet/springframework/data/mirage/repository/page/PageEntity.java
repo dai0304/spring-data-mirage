@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package jp.xet.springframework.data.mirage.repository.chunk;
+package jp.xet.springframework.data.mirage.repository.page;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -36,7 +36,7 @@ import com.miragesql.miragesql.annotation.Table;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
 @SuppressWarnings("serial")
-public class ChunkEntity implements Comparable<ChunkEntity> {
+public class PageEntity implements Comparable<PageEntity> {
 	
 	@Id
 	@Column(name = "id")
@@ -49,7 +49,7 @@ public class ChunkEntity implements Comparable<ChunkEntity> {
 	
 	
 	@Override
-	public int compareTo(ChunkEntity o) {
+	public int compareTo(PageEntity o) {
 		return this.id.compareTo(o.id);
 	}
 }

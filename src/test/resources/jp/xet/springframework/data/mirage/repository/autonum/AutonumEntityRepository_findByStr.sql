@@ -1,7 +1,9 @@
--- IdGeneratedEntityRepository_findChunk.sql
+-- AutonumEntityRepository_findByStr.sql
 
 SELECT *
-FROM id_generated_entities
+FROM autonum_string
+
+WHERE str = /*str*/'abc'
 
 /*IF orders != null*/
 ORDER BY /*$orders*/id

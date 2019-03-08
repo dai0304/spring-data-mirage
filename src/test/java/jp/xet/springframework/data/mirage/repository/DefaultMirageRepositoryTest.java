@@ -63,9 +63,9 @@ public class DefaultMirageRepositoryTest {
 		Iterable<User> actual = repos.findAll();
 		// verify
 		assertThat(actual).hasSize(3);
-		assertThat(actual).contains(new User("foo", null));
-		assertThat(actual).contains(new User("bar", null));
-		assertThat(actual).contains(new User("baz", null));
+		assertThat(actual).contains(new User("foo", "foopass"));
+		assertThat(actual).contains(new User("bar", "barpass"));
+		assertThat(actual).contains(new User("baz", "bazpass"));
 	}
 	
 	@Test
@@ -79,8 +79,8 @@ public class DefaultMirageRepositoryTest {
 		Iterable<User> actual = repos.findAll(Arrays.asList("foo", "baz"));
 		// verify
 		assertThat(actual).hasSize(2);
-		assertThat(actual).contains(new User("foo", null));
-		assertThat(actual).doesNotContain(new User("bar", null));
-		assertThat(actual).contains(new User("baz", null));
+		assertThat(actual).contains(new User("foo", "foopass"));
+		assertThat(actual).doesNotContain(new User("bar", "barpass"));
+		assertThat(actual).contains(new User("baz", "bazpass"));
 	}
 }

@@ -60,10 +60,8 @@ public class PreProcessEntityRepositoryTest {
 		// exercise
 		repo.create(new PreProcessEntity("foo", UUID.randomUUID().toString(), 0));
 		// verify
-		PreProcessEntity found = repo.findById("foo").orElse(null);
-		
-		log.info("{}", found);
-		assertThat(found.getLastUpdated()).isGreaterThan(0);
+		assertThat(repo.findById("foo"))
+			.hasValueSatisfying(entity -> assertThat(entity.getLastUpdated()).isGreaterThan(0));
 	}
 	
 	

@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package jp.xet.springframework.data.mirage.repository.idgenerated;
+package jp.xet.springframework.data.mirage.repository.autonum;
 
 import java.util.List;
 
 import org.springframework.data.repository.query.Param;
 
 import org.ws2ten1.chunks.Chunk;
+import org.ws2ten1.repositories.BatchReadableRepository;
 import org.ws2ten1.repositories.ChunkableRepository;
 import org.ws2ten1.repositories.CrudRepository;
 import org.ws2ten1.repositories.PageableRepository;
@@ -29,12 +30,12 @@ import org.ws2ten1.repositories.UpsertableRepository;
 import jp.xet.springframework.data.mirage.repository.query.StaticParam;
 
 /**
- * Repository interface for {@link IdGeneratedEntity}.
+ * Repository interface for {@link AutonumEntity}.
  */
-public interface IdGeneratedEntityRepository
-		extends ScannableRepository<IdGeneratedEntity, Long>, UpsertableRepository<IdGeneratedEntity, Long>,
-		CrudRepository<IdGeneratedEntity, Long>, ChunkableRepository<IdGeneratedEntity, Long>,
-		PageableRepository<IdGeneratedEntity, Long> {
+public interface AutonumEntityRepository extends ScannableRepository<AutonumEntity, Long>,
+		CrudRepository<AutonumEntity, Long>, UpsertableRepository<AutonumEntity, Long>,
+		ChunkableRepository<AutonumEntity, Long>, PageableRepository<AutonumEntity, Long>,
+		BatchReadableRepository<AutonumEntity, Long> {
 	
 	/**
 	 * TODO for daisuke
@@ -42,7 +43,7 @@ public interface IdGeneratedEntityRepository
 	 * @param str strプロパティ指定
 	 * @return the entities found
 	 */
-	List<IdGeneratedEntity> findByStr(@Param("str") String str);
+	List<AutonumEntity> findByStr(@Param("str") String str);
 	
 	/**
 	 * TODO for daisuke
@@ -50,7 +51,7 @@ public interface IdGeneratedEntityRepository
 	 * @param str strプロパティ指定
 	 * @return the entities found
 	 */
-	List<IdGeneratedEntity> findByStrStartsWith(@Param("str") String str);
+	List<AutonumEntity> findByStrStartsWith(@Param("str") String str);
 	
 	/**
 	 * TODO for daisuke
@@ -59,13 +60,13 @@ public interface IdGeneratedEntityRepository
 	 */
 	@StaticParam(key = "str", value = "hoge")
 	@StaticParam(key = "str2", value = "hoge2")
-	List<IdGeneratedEntity> findXxx();
+	List<AutonumEntity> findXxx();
 	
 	/**
 	 * TODO for wreulicke
 	 *
 	 * @return the entities found
 	 */
-	Chunk<IdGeneratedEntity> findChunk();
+	Chunk<AutonumEntity> findChunk();
 	
 }

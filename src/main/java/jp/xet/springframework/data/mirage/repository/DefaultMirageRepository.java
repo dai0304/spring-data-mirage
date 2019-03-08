@@ -30,11 +30,15 @@ import java.util.Optional;
 
 import javax.sql.DataSource;
 
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Version;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -58,14 +62,19 @@ import org.ws2ten1.repositories.BatchDeletableRepository;
 import org.ws2ten1.repositories.BatchReadableRepository;
 import org.ws2ten1.repositories.BatchUpsertableRepository;
 import org.ws2ten1.repositories.ChunkableRepository;
+import org.ws2ten1.repositories.ConditionalDeletableRepository;
+import org.ws2ten1.repositories.ConditionalUpdatableRepository;
+import org.ws2ten1.repositories.CrudRepository;
 import org.ws2ten1.repositories.LockableCrudRepository;
 import org.ws2ten1.repositories.PageableRepository;
 import org.ws2ten1.repositories.ScannableRepository;
 import org.ws2ten1.repositories.TruncatableRepository;
 
+import com.google.common.collect.Lists;
 import com.miragesql.miragesql.IterationCallback;
 import com.miragesql.miragesql.SqlManager;
 import com.miragesql.miragesql.SqlResource;
+import com.miragesql.miragesql.StringSqlResource;
 import com.miragesql.miragesql.annotation.Column;
 import com.miragesql.miragesql.exception.SQLRuntimeException;
 import com.miragesql.miragesql.naming.NameConverter;
@@ -81,11 +90,12 @@ import jp.xet.springframework.data.mirage.repository.handler.RepositoryActionLis
  * @param <ID> the type of the id of the entity the repository manages
  */
 @Slf4j // -@cs[MethodCount|ClassFanOutComplexity]
-public class DefaultMirageRepository<E, ID extends Serializable> implements // NOPMD God class
-		ScannableRepository<E, ID>, BatchCreatableRepository<E, ID>, BatchReadableRepository<E, ID>,
-		BatchUpsertableRepository<E, ID>, BatchDeletableRepository<E, ID>,
-		LockableCrudRepository<E, ID>, TruncatableRepository<E, ID>,
-		ChunkableRepository<E, ID>, PageableRepository<E, ID> {
+public class DefaultMirageRepository<E, ID extends Serializable, C> implements // NOPMD God class
+		ScannableRepository<E, ID>, CrudRepository<E, ID>, LockableCrudRepository<E, ID>,
+		BatchCreatableRepository<E, ID>, BatchReadableRepository<E, ID>,
+		BatchDeletableRepository<E, ID>, BatchUpsertableRepository<E, ID>,
+		TruncatableRepository<E, ID>, ChunkableRepository<E, ID>, PageableRepository<E, ID>,
+		ConditionalUpdatableRepository<E, ID, C>, ConditionalDeletableRepository<E, ID, C> {
 	
 	static final SqlResource BASE_SELECT_SQL =
 			new ScopeClasspathSqlResource(DefaultMirageRepository.class, "baseSelect.sql");
@@ -127,6 +137,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements // N
 	}
 	
 	
+	@Getter(AccessLevel.PROTECTED)
 	private final SqlManager sqlManager;
 	
 	private final NameConverter nameConverter; // nullable
@@ -135,6 +146,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements // N
 	
 	private final List<RepositoryActionListener> handlers;
 	
+	@Getter(AccessLevel.PROTECTED)
 	private SqlResource baseSelectSqlResource = BASE_SELECT_SQL;
 	
 	private transient SQLExceptionTranslator exceptionTranslator;
@@ -161,193 +173,15 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements // N
 		this.dataSource = dataSource;
 	}
 	
-	@Override
-	public long count() {
-		return getCount(getBaseSelectSqlResource(), createParams());
-	}
-	
-	@Override
-	public <S extends E> S create(S entity) {
-		if (entity == null) {
-			return null;
-		}
-		try {
-			handlers.forEach(handler -> handler.beforeCreate(entity));
-			sqlManager.insertEntity(entity);
-			log.debug("entity inserted: {}", entity);
-		} catch (SQLRuntimeException e) {
-			throw dataAccessException("create", e);
-		}
-		return entity;
-	}
-	
-	@Override
-	public void delete(E entity) {
-		if (entity == null) {
-			throw new NullPointerException("entity is null"); // NOPMD
-		}
-		try {
-			sqlManager.deleteEntity(entity);
-		} catch (SQLRuntimeException e) {
-			throw dataAccessException("delete", e);
-		}
-	}
-	
-	@Override
-	public void deleteById(ID id) {
-		E found = findById(id).orElse(null);
-		if (found != null) {
-			try {
-				sqlManager.deleteEntity(found);
-			} catch (SQLRuntimeException e) {
-				throw dataAccessException("delete", e);
-			}
+	public void setBaseSelectSqlResource(SqlResource baseSelectSqlResource) {
+		if (baseSelectSqlResource == null) {
+			this.baseSelectSqlResource = BASE_SELECT_SQL;
 		} else {
-			log.warn("entity id [{}] not found", id);
+			this.baseSelectSqlResource = baseSelectSqlResource;
 		}
 	}
 	
-	@Override
-	@SuppressWarnings("unchecked")
-	public void deleteAll(Iterable<? extends E> entities) {
-		if (entities == null) {
-			throw new NullPointerException("entities is null"); // NOPMD
-		}
-		for (E entity : entities) {
-			if (entity == null) {
-				throw new NullPointerException("entity is null"); // NOPMD
-			}
-		}
-		
-		try {
-			sqlManager.deleteBatch(entities);
-		} catch (SQLRuntimeException e) {
-			throw dataAccessException("delete", e);
-		}
-	}
-	
-	@Override
-	public void deleteAll() {
-		try {
-			deleteAll(findAll());
-		} catch (SQLRuntimeException e) {
-			throw dataAccessException("deleteAll", e);
-		}
-	}
-	
-	@Override
-	public boolean existsById(ID id) {
-		return exists(id, false);
-	}
-	
-	@Override
-	public boolean exists(ID id, boolean forUpdate) {
-		Assert.notNull(id, "id must not be null");
-		try {
-			return getCount(getBaseSelectSqlResource(), createParams(id, forUpdate)) > 0;
-		} catch (SQLRuntimeException e) {
-			throw dataAccessException("exists", e);
-		}
-	}
-	
-	@Override
-	public Iterable<E> findAll() {
-		try {
-			return getResultList(getBaseSelectSqlResource(), createParams());
-		} catch (SQLRuntimeException e) {
-			throw dataAccessException("findAll", e);
-		}
-	}
-	
-	@Override
-	public Chunk<E> findAll(Chunkable chunkable) {
-		if (chunkable == null) {
-			return new ChunkImpl<E>(newArrayList(findAll()), null, null);
-		}
-		
-		try {
-			Map<String, Object> param = createParams(chunkable);
-			List<E> resultList = getResultList(getBaseSelectSqlResource(), param);
-			if (chunkable.getPaginationToken() != null && isForward(chunkable) == false
-					&& param.get("before") != null) {
-				Collections.reverse(resultList);
-			}
-			
-			String pt;
-			if (resultList.isEmpty()) {
-				pt = encoder.encode(null, null);
-			} else {
-				String firstKey = null;
-				if (chunkable.getPaginationToken() != null && resultList.isEmpty() == false) {
-					firstKey = Objects.toString(getId(resultList.get(0)));
-				}
-				String lastKey = null;
-				if (resultList.isEmpty() == false) {
-					lastKey = Objects.toString(getId(resultList.get(resultList.size() - 1)));
-				}
-				pt = encoder.encode(firstKey, lastKey);
-			}
-			return new ChunkImpl<E>(resultList, pt, chunkable);
-		} catch (SQLRuntimeException e) {
-			throw dataAccessException("findAll", e);
-		}
-	}
-	
-	@Override
-	public Iterable<E> findAll(Iterable<ID> ids) {
-		Assert.notNull(ids, "ids must not be null");
-		if (ids.iterator().hasNext() == false) {
-			return Collections.emptySet();
-		}
-		
-		Map<String, Object> params = createParams();
-		params.put("ids", ids);
-		try {
-			return getResultList(getBaseSelectSqlResource(), params);
-		} catch (SQLRuntimeException e) {
-			throw dataAccessException("findAll", e);
-		}
-	}
-	
-	@Override
-	public Page<E> findAll(Pageable pageable) {
-		if (null == pageable) {
-			return new PageImpl<E>(newArrayList(findAll()));
-		}
-		
-		try {
-			List<E> result = getResultList(getBaseSelectSqlResource(), createParams(pageable));
-			Long foundRows = getFoundRows();
-			return new PageImpl<E>(result, pageable, foundRows != null ? foundRows : count());
-		} catch (SQLRuntimeException e) {
-			throw dataAccessException("findAll", e);
-		}
-	}
-	
-	@Override
-	public List<E> findAll(Sort sort) {
-		try {
-			return getResultList(getBaseSelectSqlResource(), createParams(sort));
-		} catch (SQLRuntimeException e) {
-			throw dataAccessException("findAll", e);
-		}
-	}
-	
-	@Override
-	public Optional<E> findById(ID id) {
-		return findById(id, false);
-	}
-	
-	@Override
-	public Optional<E> findById(ID id, boolean forUpdate) {
-		Assert.notNull(id, "id must not be null");
-		
-		try {
-			return Optional.ofNullable(getSingleResult(getBaseSelectSqlResource(), createParams(id, forUpdate)));
-		} catch (SQLRuntimeException e) {
-			throw dataAccessException("findOne", e);
-		}
-	}
+	// BaseRepository
 	
 	@Override
 	@SuppressWarnings("unchecked")
@@ -372,35 +206,199 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements // N
 		return null;
 	}
 	
+	// ScannableRepository
+	
+	@Override
+	public Iterable<E> findAll() {
+		return getResultList("findAll", getBaseSelectSqlResource(), createParams());
+	}
+	
+	@Override
+	public List<E> findAll(Sort sort) {
+		return getResultList("findAll", getBaseSelectSqlResource(), createParams(sort));
+	}
+	
+	@Override
+	public long count() {
+		return getCount("count", getBaseSelectSqlResource(), createParams());
+	}
+	
+	// CreatableRepository
+	
+	@Override
+	public <S extends E> S create(S entity) {
+		if (entity == null) {
+			return null;
+		}
+		insertEntity("create", entity);
+		return entity;
+	}
+	
+	// DeletableRepository
+	
+	@Override
+	public void deleteById(ID id) {
+		Map<String, Object> params = createParams(id, false);
+		int rows = executeUpdate("deleteById", new StringSqlResource(
+				"DELETE FROM /*$table*/example_table WHERE /*$id_column_name*/id = /*id*/'aa'"), params);
+		if (rows == 0) {
+			log.warn("entity id [{}] not found", id);
+		} else if (rows > 1) {
+			throw new AssertionError(rows + " rows deleted by primary key!?");
+		}
+	}
+	
+	@Override
+	public void delete(E entity) {
+		if (entity == null) {
+			throw new NullPointerException("entity is null"); // NOPMD
+		}
+		deleteEntity("delete", entity);
+	}
+	
+	// BatchDeletableRepository
+	
+	@Override
+	public Iterable<E> deleteAllById(Iterable<ID> ids) {
+		Iterable<E> found = findAll(ids);
+		deleteAll(found);
+		return found;
+	}
+	
+	@Override
+	public void deleteAll(Iterable<? extends E> entities) {
+		if (entities == null) {
+			throw new NullPointerException("entities is null"); // NOPMD
+		}
+		for (E entity : entities) {
+			if (entity == null) {
+				throw new NullPointerException("entity is null"); // NOPMD
+			}
+		}
+		
+		String tableName = MirageUtil.getTableName(entityClass, nameConverter);
+		List<? extends E> entityList = Lists.newArrayList(entities);
+		deleteBatch("deleteAll", tableName, entityList);
+	}
+	
+	// TruncatableRepository
+	
+	@Override
+	public void deleteAll() {
+		executeUpdate("deleteAll", new StringSqlResource("TRUNCATE TABLE /*$table*/example_table"), createParams());
+	}
+	
+	// ReadableRepository
+	
+	@Override
+	public Optional<E> findById(ID id) {
+		return findById(id, false);
+	}
+	
+	@Override
+	public boolean existsById(ID id) {
+		return exists(id, false);
+	}
+	
+	// LockableCrudRepository
+	
+	@Override
+	public Optional<E> findById(ID id, boolean forUpdate) {
+		Assert.notNull(id, "id must not be null");
+		Map<String, Object> param = createParams(id, forUpdate);
+		return Optional.ofNullable(getSingleResult("findById", getBaseSelectSqlResource(), param));
+	}
+	
+	@Override
+	public boolean exists(ID id, boolean forUpdate) {
+		Assert.notNull(id, "id must not be null");
+		return getCount("exists", getBaseSelectSqlResource(), createParams(id, forUpdate)) > 0;
+	}
+	
+	// ChunkableRepository
+	
+	@Override
+	public Chunk<E> findAll(Chunkable chunkable) {
+		if (chunkable == null) {
+			return new ChunkImpl<>(newArrayList(findAll()), null, null);
+		}
+		
+		Map<String, Object> param = createParams(chunkable);
+		List<E> resultList = getResultList("findAll", getBaseSelectSqlResource(), param);
+		if (chunkable.getPaginationToken() != null && isForward(chunkable) == false
+				&& param.get("before") != null) {
+			Collections.reverse(resultList);
+		}
+		
+		String pt;
+		if (resultList.isEmpty()) {
+			pt = encoder.encode(null, null);
+		} else {
+			String firstKey = null;
+			if (chunkable.getPaginationToken() != null && resultList.isEmpty() == false) {
+				firstKey = Objects.toString(getId(resultList.get(0)));
+			}
+			String lastKey = null;
+			if (resultList.isEmpty() == false) {
+				lastKey = Objects.toString(getId(resultList.get(resultList.size() - 1)));
+			}
+			pt = encoder.encode(firstKey, lastKey);
+		}
+		return new ChunkImpl<>(resultList, pt, chunkable);
+	}
+	
+	// BatchReadableRepository
+	
+	@Override
+	public Iterable<E> findAll(Iterable<ID> ids) {
+		Assert.notNull(ids, "ids must not be null");
+		if (ids.iterator().hasNext() == false) {
+			return Collections.emptySet();
+		}
+		
+		Map<String, Object> params = createParams();
+		params.put("ids", ids);
+		return getResultList("findAll", getBaseSelectSqlResource(), params);
+	}
+	
+	// PageableRepository
+	
+	@Override
+	public Page<E> findAll(Pageable pageable) {
+		if (pageable == null || pageable == Pageable.unpaged()) {
+			return new PageImpl<>(newArrayList(findAll()));
+		}
+		
+		List<E> result = getResultList("findAll", getBaseSelectSqlResource(), createParams(pageable));
+		Long foundRows = getFoundRows();
+		return new PageImpl<>(result, pageable, foundRows != null ? foundRows : count());
+	}
+	
+	// BatchUpsertableRepository
+	
 	@Override
 	public <S extends E> Iterable<S> saveAll(Iterable<S> entities) {
 		if (entities == null) {
 			return Collections.emptyList();
 		}
-		List<E> toUpdate = new ArrayList<E>();
-		List<E> toInsert = new ArrayList<E>();
-		Iterator<? extends E> iterator = entities.iterator();
-		try {
-			while (iterator.hasNext()) {
-				E entity = iterator.next();
-				if (entity != null) {
-					if (exists(getId(entity), true)) {
-						toUpdate.add(entity);
-					} else {
-						toInsert.add(entity);
-					}
+		List<E> toUpdate = new ArrayList<>();
+		List<E> toInsert = new ArrayList<>();
+		for (S entity : entities) {
+			if (entity != null) {
+				if (exists(getId(entity), true)) {
+					toUpdate.add(entity);
+				} else {
+					toInsert.add(entity);
 				}
 			}
-			
-			toUpdate.forEach(e -> handlers.forEach(handler -> handler.beforeUpdate(e)));
-			sqlManager.updateBatch(toUpdate);
-			toUpdate.forEach(e -> handlers.forEach(handler -> handler.beforeCreate(e)));
-			sqlManager.insertBatch(toInsert);
-			return newArrayList(entities);
-		} catch (SQLRuntimeException e) {
-			throw dataAccessException("save", e);
 		}
+		
+		updateBatch("saveAll", toUpdate);
+		insertBatch("saveAll", toInsert);
+		return newArrayList(entities);
 	}
+	
+	// UpsertableRepository
 	
 	@Override
 	public <S extends E> S save(S entity) {
@@ -409,12 +407,10 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements // N
 		}
 		try {
 			if (exists(getId(entity), true)) {
-				handlers.forEach(handler -> handler.beforeUpdate(entity));
-				sqlManager.updateEntity(entity);
+				updateEntity("save", entity);
 				log.debug("entity updated: {}", entity);
 			} else {
-				handlers.forEach(handler -> handler.beforeCreate(entity));
-				sqlManager.insertEntity(entity);
+				insertEntity("save", entity);
 				log.debug("entity inserted: {}", entity);
 			}
 		} catch (SQLRuntimeException e) {
@@ -423,166 +419,202 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements // N
 		return entity;
 	}
 	
-	public void setBaseSelectSqlResource(SqlResource baseSelectSqlResource) {
-		if (baseSelectSqlResource == null) {
-			this.baseSelectSqlResource = BASE_SELECT_SQL;
-		} else {
-			this.baseSelectSqlResource = baseSelectSqlResource;
-		}
-	}
+	// UpdatableRepository
 	
 	@Override
 	public <S extends E> S update(S entity) {
 		if (entity == null) {
 			return null;
 		}
-		try {
-			handlers.forEach(handler -> handler.beforeUpdate(entity));
-			int rowCount = sqlManager.updateEntity(entity);
-			if (rowCount == 1) {
-				log.debug("entity updated: {}", entity);
-			} else {
-				throw new IncorrectResultSizeDataAccessException(1, rowCount);
-			}
-		} catch (SQLRuntimeException e) {
-			throw dataAccessException("update", e);
+		int rowCount = updateEntity("update", entity);
+		if (rowCount == 1) {
+			log.debug("entity updated: {}", entity);
+		} else {
+			throw new IncorrectResultSizeDataAccessException(1, rowCount);
 		}
 		return entity;
 	}
 	
+	// BatchCreatableRepository
+	
+	@Override
+	public <S extends E> Iterable<S> createAll(Iterable<S> entities) {
+		try {
+			insertBatch("createAll", newArrayList(entities));
+			return entities;
+		} catch (SQLRuntimeException e) {
+			throw dataAccessException("insertBatch", e);
+		}
+	}
+	
+	// ConditionalRepository
+	
+	@Override
+	@SuppressWarnings("unchecked")
+	public C getCondition(E entity) {
+		Class<?> c = entityClass;
+		while (c != null && c != Object.class) {
+			Field[] declaredFields = c.getDeclaredFields();
+			for (Field field : declaredFields) {
+				Version versionAnnotation = field.getAnnotation(Version.class);
+				if (versionAnnotation != null) {
+					field.setAccessible(true);
+					try {
+						return (C) field.get(entity);
+					} catch (Exception e) { // NOPMD
+						// ignore
+						log.debug("failed", e);
+					}
+				}
+			}
+			c = c.getSuperclass();
+		}
+		return null;
+	}
+	// ConditionalUpdatableRepository
+	
+	@Override
+	public <S extends E> S update(S entity, C condition) {
+		if (entity == null) {
+			return null;
+		}
+		try {
+			E found = findById(getId(entity), true)
+				.orElseThrow(() -> new IncorrectResultSizeDataAccessException(1, 0));
+			C actualCondition = getCondition(found);
+			if (condition == null || condition.equals(actualCondition)) {
+				return update(entity);
+			} else {
+				String message =
+						String.format(Locale.ENGLISH, "expected is %s, but actual is %s", condition, actualCondition);
+				throw new OptimisticLockingFailureException(message);
+			}
+		} catch (SQLRuntimeException e) {
+			throw dataAccessException("update", e);
+		}
+	}
+	
+	// ConditionalDeletableRepository
+	
+	@Override
+	public void deleteById(ID id, C condition) {
+		if (id == null) {
+			return;
+		}
+		try {
+			E found = findById(id, true)
+				.orElseThrow(() -> new IncorrectResultSizeDataAccessException(1, 0));
+			C actualCondition = getCondition(found);
+			if (condition == null || condition.equals(actualCondition)) {
+				deleteById(id);
+			} else {
+				String message =
+						String.format(Locale.ENGLISH, "expected is %s, but actual is %s", condition, actualCondition);
+				throw new OptimisticLockingFailureException(message);
+			}
+		} catch (SQLRuntimeException e) {
+			throw dataAccessException("update", e);
+		}
+	}
+	
+	@Override
+	public void delete(E entity, C condition) {
+		if (entity == null) {
+			return;
+		}
+		deleteById(getId(entity), condition);
+	}
+	
+	// delegate methods to sqlManager
+	
 	/**
 	 * @see SqlManager#call(Class, String)
 	 */
-	@SuppressWarnings("javadoc")
-	protected E call(Class<E> resultClass, String functionName) {
+	@SuppressWarnings({
+		"javadoc",
+		"unused"
+	})
+	protected E call(String task, Class<E> resultClass, String functionName) {
 		try {
 			return sqlManager.call(resultClass, functionName);
 		} catch (SQLRuntimeException e) {
-			throw dataAccessException("call", e);
+			throw dataAccessException("call-" + task, e);
 		}
 	}
 	
 	/**
 	 * @see SqlManager#call(Class, String, Object)
 	 */
-	@SuppressWarnings("javadoc")
-	protected E call(Class<E> resultClass, String functionName, Object param) {
+	@SuppressWarnings({
+		"javadoc",
+		"unused"
+	})
+	protected E call(String task, Class<E> resultClass, String functionName, Object param) {
 		try {
 			return sqlManager.call(resultClass, functionName, param);
 		} catch (SQLRuntimeException e) {
-			throw dataAccessException("call", e);
+			throw dataAccessException("call-" + task, e);
 		}
 	}
 	
 	/**
 	 * @see SqlManager#call(String)
 	 */
-	@SuppressWarnings("javadoc")
-	protected void call(String procedureName) {
+	@SuppressWarnings({
+		"javadoc",
+		"unused"
+	})
+	protected void call(String task, String procedureName) {
 		try {
 			sqlManager.call(procedureName);
 		} catch (SQLRuntimeException e) {
-			throw dataAccessException("call", e);
+			throw dataAccessException("call-" + task, e);
 		}
 	}
 	
 	/**
 	 * @see SqlManager#call(String, Object)
 	 */
-	@SuppressWarnings("javadoc")
-	protected void call(String procedureName, Object parameter) {
+	@SuppressWarnings({
+		"javadoc",
+		"unused"
+	})
+	protected void call(String task, String procedureName, Object parameter) {
 		try {
 			sqlManager.call(procedureName, parameter);
 		} catch (SQLRuntimeException e) {
-			throw dataAccessException("call", e);
+			throw dataAccessException("call-" + task, e);
 		}
 	}
 	
 	/**
 	 * @see SqlManager#callForList(Class, String)
 	 */
-	@SuppressWarnings("javadoc")
-	protected List<E> callForList(Class<E> resultClass, String functionName) {
+	@SuppressWarnings({
+		"javadoc",
+		"unused"
+	})
+	protected List<E> callForList(String task, Class<E> resultClass, String functionName) {
 		try {
 			return sqlManager.callForList(resultClass, functionName);
 		} catch (SQLRuntimeException e) {
-			throw dataAccessException("callForList", e);
+			throw dataAccessException("callForList-" + task, e);
 		}
 	}
 	
 	/**
 	 * @see SqlManager#callForList(Class, String, Object)
 	 */
-	@SuppressWarnings("javadoc")
-	protected List<E> callForList(Class<E> resultClass, String functionName, Object param) {
+	@SuppressWarnings({
+		"javadoc",
+		"unused"
+	})
+	protected List<E> callForList(String task, Class<E> resultClass, String functionName, Object param) {
 		try {
 			return sqlManager.callForList(resultClass, functionName, param);
 		} catch (SQLRuntimeException e) {
-			throw dataAccessException("callForList", e);
+			throw dataAccessException("callForList-" + task, e);
 		}
-	}
-	
-	protected Map<String, Object> createParams() {
-		Map<String, Object> params = new HashMap<>();
-		params.put("table", MirageUtil.getTableName(entityClass, nameConverter));
-		params.put("id", null); // 何故これが要るのだろう。無いとコケる
-		params.put("id_column_name", findIdColumnName());
-		
-		return params;
-	}
-	
-	/**
-	 * TODO for daisuke
-	 *
-	 * @param chunkable
-	 * @return
-	 * @since 0.1
-	 */
-	protected Map<String, Object> createParams(Chunkable chunkable) {
-		Map<String, Object> params = createParams();
-		addChunkParam(params, chunkable);
-		return params;
-	}
-	
-	/**
-	 * TODO for daisuke
-	 *
-	 * @param id
-	 * @param forUpdate
-	 * @return
-	 * @since 0.1
-	 */
-	protected Map<String, Object> createParams(ID id, boolean forUpdate) {
-		Map<String, Object> params = createParams();
-		addIdParam(params, id);
-		params.put("forUpdate", forUpdate);
-		return params;
-	}
-	
-	/**
-	 * TODO for daisuke
-	 *
-	 * @param pageable
-	 * @return
-	 * @since 0.1
-	 */
-	protected Map<String, Object> createParams(Pageable pageable) {
-		Map<String, Object> params = createParams();
-		addPageParam(params, pageable);
-		return params;
-	}
-	
-	/**
-	 * TODO for daisuke
-	 *
-	 * @param sort
-	 * @return
-	 * @since 0.1
-	 */
-	protected Map<String, Object> createParams(Sort sort) {
-		Map<String, Object> params = createParams();
-		addSortParam(params, sort);
-		return params;
 	}
 	
 	/**
@@ -590,25 +622,57 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements // N
 	 */
 	@SuppressWarnings({
 		"javadoc",
-		"unchecked"
+		"unchecked",
+		"unused"
 	})
-	protected int deleteBatch(E... entities) {
+	protected int deleteBatch(String task, E... entities) {
 		try {
 			return sqlManager.deleteBatch(entities);
 		} catch (SQLRuntimeException e) {
-			throw dataAccessException("deleteBatch", e);
+			throw dataAccessException("deleteBatch-" + task, e);
+		}
+	}
+	
+	/**
+	 * @see SqlManager#deleteBatch(String, Object...)
+	 */
+	@SuppressWarnings({
+		"javadoc",
+		"unchecked",
+		"unused"
+	})
+	protected int deleteBatch(String task, String entityName, E... entities) {
+		try {
+			return sqlManager.deleteBatch(entityName, entities);
+		} catch (SQLRuntimeException e) {
+			throw dataAccessException("deleteBatch-" + task, e);
 		}
 	}
 	
 	/**
 	 * @see SqlManager#deleteBatch(List)
 	 */
-	@SuppressWarnings("javadoc")
-	protected int deleteBatch(List<E> entities) {
+	@SuppressWarnings({
+		"javadoc",
+		"unused"
+	})
+	protected int deleteBatch(String task, List<? extends E> entities) {
 		try {
 			return sqlManager.deleteBatch(entities);
 		} catch (SQLRuntimeException e) {
-			throw dataAccessException("deleteBatch", e);
+			throw dataAccessException("deleteBatch-" + task, e);
+		}
+	}
+	
+	/**
+	 * @see SqlManager#deleteBatch(String, List)
+	 */
+	@SuppressWarnings("javadoc")
+	protected int deleteBatch(String task, String entityName, List<? extends E> entities) {
+		try {
+			return sqlManager.deleteBatch(entityName, entities);
+		} catch (SQLRuntimeException e) {
+			throw dataAccessException("deleteBatch-" + task, e);
 		}
 	}
 	
@@ -616,24 +680,27 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements // N
 	 * @see SqlManager#deleteEntity(Object)
 	 */
 	@SuppressWarnings("javadoc")
-	protected int deleteEntity(Object entity) {
+	protected int deleteEntity(String task, Object entity) {
 		try {
 			return sqlManager.deleteEntity(entity);
 		} catch (SQLRuntimeException e) {
-			throw dataAccessException("deleteEntity", e);
+			throw dataAccessException("deleteEntity-" + task, e);
 		}
 	}
 	
 	/**
 	 * @see SqlManager#executeUpdate(SqlResource)
 	 */
-	@SuppressWarnings("javadoc")
-	protected int executeUpdate(SqlResource resource) {
+	@SuppressWarnings({
+		"javadoc",
+		"unused"
+	})
+	protected int executeUpdate(String task, SqlResource resource) {
 		Assert.notNull(resource, "resource is required");
 		try {
 			return sqlManager.executeUpdate(resource);
 		} catch (SQLRuntimeException e) {
-			throw dataAccessException("executeUpdate", e);
+			throw dataAccessException("executeUpdate-" + task, e);
 		}
 	}
 	
@@ -641,35 +708,28 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements // N
 	 * @see SqlManager#executeUpdate(SqlResource, Object)
 	 */
 	@SuppressWarnings("javadoc")
-	protected int executeUpdate(SqlResource resource, Object param) {
+	protected int executeUpdate(String task, SqlResource resource, Object param) {
 		Assert.notNull(resource, "resource is required");
 		try {
 			return sqlManager.executeUpdate(resource, param);
 		} catch (SQLRuntimeException e) {
-			throw dataAccessException("executeUpdate", e);
+			throw dataAccessException("executeUpdate- " + task, e);
 		}
-	}
-	
-	/**
-	 * TODO for daisuke
-	 *
-	 * @return
-	 * @since 0.1
-	 */
-	protected SqlResource getBaseSelectSqlResource() {
-		return baseSelectSqlResource;
 	}
 	
 	/**
 	 * @see SqlManager#getCount(SqlResource)
 	 */
-	@SuppressWarnings("javadoc")
-	protected int getCount(SqlResource resource) {
+	@SuppressWarnings({
+		"javadoc",
+		"unused"
+	})
+	protected int getCount(String task, SqlResource resource) {
 		Assert.notNull(resource, "resource is required");
 		try {
 			return sqlManager.getCount(resource);
 		} catch (SQLRuntimeException e) {
-			throw dataAccessException("getCount", e);
+			throw dataAccessException("getCount-" + task, e);
 		}
 	}
 	
@@ -677,50 +737,28 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements // N
 	 * @see SqlManager#getCount(SqlResource, Object)
 	 */
 	@SuppressWarnings("javadoc")
-	protected int getCount(SqlResource resource, Object param) {
+	protected int getCount(String task, SqlResource resource, Object param) {
 		Assert.notNull(resource, "resource is required");
 		try {
 			return sqlManager.getCount(resource, param);
 		} catch (SQLRuntimeException e) {
-			throw dataAccessException("getCount", e);
+			throw dataAccessException("getCount-" + task, e);
 		}
-	}
-	
-	/**
-	 * TODO for daisuke
-	 *
-	 * @return
-	 */
-	protected synchronized SQLExceptionTranslator getExceptionTranslator() { // NOPMD
-		if (this.exceptionTranslator == null) {
-			if (dataSource != null) {
-				this.exceptionTranslator = new SQLErrorCodeSQLExceptionTranslator(dataSource);
-			} else {
-				this.exceptionTranslator = new SQLStateSQLExceptionTranslator();
-			}
-		}
-		return this.exceptionTranslator;
-	}
-	
-	/**
-	 * TODO for daisuke
-	 *
-	 * @return
-	 */
-	protected Long getFoundRows() {
-		return null;
 	}
 	
 	/**
 	 * @see SqlManager#getResultList(Class, SqlResource)
 	 */
-	@SuppressWarnings("javadoc")
-	protected List<E> getResultList(SqlResource resource) {
+	@SuppressWarnings({
+		"javadoc",
+		"unused"
+	})
+	protected List<E> getResultList(String task, SqlResource resource) {
 		Assert.notNull(resource, "resource is required");
 		try {
 			return sqlManager.getResultList(entityClass, resource);
 		} catch (SQLRuntimeException e) {
-			throw dataAccessException("getResultList", e);
+			throw dataAccessException("getResultList-" + task, e);
 		}
 	}
 	
@@ -729,25 +767,28 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements // N
 	 * @throws IllegalArgumentException 引数に{@code null}を与えた場合
 	 */
 	@SuppressWarnings("javadoc")
-	protected List<E> getResultList(SqlResource resource, Object param) {
+	protected List<E> getResultList(String task, SqlResource resource, Object param) {
 		Assert.notNull(resource, "resource is required");
 		try {
 			return sqlManager.getResultList(entityClass, resource, param);
 		} catch (SQLRuntimeException e) {
-			throw dataAccessException("getResultList", e);
+			throw dataAccessException("getResultList-" + task, e);
 		}
 	}
 	
 	/**
 	 * @see SqlManager#getSingleResult(Class, SqlResource)
 	 */
-	@SuppressWarnings("javadoc")
-	protected E getSingleResult(SqlResource resource) {
+	@SuppressWarnings({
+		"javadoc",
+		"unused"
+	})
+	protected E getSingleResult(String task, SqlResource resource) {
 		Assert.notNull(resource, "resource is required");
 		try {
 			return sqlManager.getSingleResult(entityClass, resource);
 		} catch (SQLRuntimeException e) {
-			throw dataAccessException("getSingleResult", e);
+			throw dataAccessException("getSingleResult-" + task, e);
 		}
 	}
 	
@@ -755,23 +796,26 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements // N
 	 * @see SqlManager#getSingleResult(Class, SqlResource, Object)
 	 */
 	@SuppressWarnings("javadoc")
-	protected E getSingleResult(SqlResource resource, Object param) {
+	protected E getSingleResult(String task, SqlResource resource, Object param) {
 		Assert.notNull(resource, "resource is required");
 		try {
 			return sqlManager.getSingleResult(entityClass, resource, param);
 		} catch (SQLRuntimeException e) {
-			throw dataAccessException("getSingleResult", e);
+			throw dataAccessException("getSingleResult-" + task, e);
 		}
 	}
 	
 	/**
-	 * TODO for daisuke
-	 *
-	 * @return
-	 * @since 0.1
+	 * @see SqlManager#insertBatch(List)
 	 */
-	protected SqlManager getSqlManager() {
-		return sqlManager;
+	@SuppressWarnings("javadoc")
+	protected int insertBatch(String task, List<? extends E> entities) {
+		try {
+			entities.forEach(e -> handlers.forEach(handler -> handler.beforeCreate(e)));
+			return sqlManager.insertBatch(entities);
+		} catch (SQLRuntimeException e) {
+			throw dataAccessException("insertBatch-" + task, e);
+		}
 	}
 	
 	/**
@@ -781,81 +825,57 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements // N
 		"javadoc",
 		"unchecked"
 	})
-	protected int insertBatch(E... entities) {
+	protected int insertBatch(String task, E... entities) {
 		try {
 			Arrays.stream(entities).forEach(e -> handlers.forEach(handler -> handler.beforeCreate(e)));
 			return sqlManager.insertBatch(entities);
 		} catch (SQLRuntimeException e) {
-			throw dataAccessException("insertBatch", e);
+			throw dataAccessException("insertBatch-" + task, e);
 		}
-	}
-	
-	/**
-	 * @see SqlManager#insertBatch(List)
-	 */
-	@SuppressWarnings("javadoc")
-	protected int insertBatch(List<E> entities) {
-		try {
-			entities.forEach(e -> handlers.forEach(handler -> handler.beforeCreate(e)));
-			return sqlManager.insertBatch(entities);
-		} catch (SQLRuntimeException e) {
-			throw dataAccessException("insertBatch", e);
-		}
-	}
-	
-	@Override
-	public <S extends E> Iterable<S> createAll(Iterable<S> entities) {
-		try {
-			List<S> list = newArrayList(entities);
-			list.forEach(e -> handlers.forEach(handler -> handler.beforeCreate(e)));
-			sqlManager.insertBatch(list);
-			return list;
-		} catch (SQLRuntimeException e) {
-			throw dataAccessException("insertBatch", e);
-		}
-	}
-	
-	@Override
-	public Iterable<E> deleteAllById(Iterable<ID> ids) {
-		return null;
 	}
 	
 	/**
 	 * @see SqlManager#insertEntity(Object)
 	 */
 	@SuppressWarnings("javadoc")
-	protected int insertEntity(Object entity) {
+	protected int insertEntity(String task, Object entity) {
 		try {
-			// handlers.forEach(handler -> handler.processBeforeInsert(entity));
+			handlers.forEach(handler -> handler.beforeCreate(entity));
 			return sqlManager.insertEntity(entity);
 		} catch (SQLRuntimeException e) {
-			throw dataAccessException("insertEntity", e);
+			throw dataAccessException("insertEntity-" + task, e);
 		}
 	}
 	
 	/**
 	 * @see SqlManager#iterate(Class, IterationCallback, SqlResource)
 	 */
-	@SuppressWarnings("javadoc")
-	protected <R> R iterate(IterationCallback<E, R> callback, SqlResource resource) {
+	@SuppressWarnings({
+		"javadoc",
+		"unused"
+	})
+	protected <R> R iterate(String task, IterationCallback<E, R> callback, SqlResource resource) {
 		Assert.notNull(resource, "resource is required");
 		try {
 			return sqlManager.iterate(entityClass, callback, resource);
 		} catch (SQLRuntimeException e) {
-			throw dataAccessException("iterate", e);
+			throw dataAccessException("iterate-" + task, e);
 		}
 	}
 	
 	/**
 	 * @see SqlManager#iterate(Class, IterationCallback, SqlResource, Object)
 	 */
-	@SuppressWarnings("javadoc")
-	protected <R> R iterate(IterationCallback<E, R> callback, SqlResource resource, Object param) {
+	@SuppressWarnings({
+		"javadoc",
+		"unused"
+	})
+	protected <R> R iterate(String task, IterationCallback<E, R> callback, SqlResource resource, Object param) {
 		Assert.notNull(resource, "resource is required");
 		try {
 			return sqlManager.iterate(entityClass, callback, resource, param);
 		} catch (SQLRuntimeException e) {
-			throw dataAccessException("iterate", e);
+			throw dataAccessException("iterate-" + task, e);
 		}
 	}
 	
@@ -864,14 +884,15 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements // N
 	 */
 	@SuppressWarnings({
 		"javadoc",
-		"unchecked"
+		"unchecked",
+		"unused"
 	})
-	protected int updateBatch(E... entities) {
+	protected int updateBatch(String task, E... entities) {
 		try {
 			Arrays.stream(entities).forEach(e -> handlers.forEach(handler -> handler.beforeUpdate(e)));
 			return sqlManager.updateBatch(entities);
 		} catch (SQLRuntimeException e) {
-			throw dataAccessException("updateBatch", e);
+			throw dataAccessException("updateBatch-" + task, e);
 		}
 	}
 	
@@ -879,12 +900,12 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements // N
 	 * @see SqlManager#updateBatch(List)
 	 */
 	@SuppressWarnings("javadoc")
-	protected int updateBatch(List<E> entities) {
+	protected int updateBatch(String task, List<? extends E> entities) {
 		try {
 			entities.forEach(e -> handlers.forEach(handler -> handler.beforeUpdate(e)));
 			return sqlManager.updateBatch(entities);
 		} catch (SQLRuntimeException e) {
-			throw dataAccessException("updateBatch", e);
+			throw dataAccessException("updateBatch-" + task, e);
 		}
 	}
 	
@@ -892,13 +913,49 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements // N
 	 * @see SqlManager#updateEntity(Object)
 	 */
 	@SuppressWarnings("javadoc")
-	protected int updateEntity(E entity) {
+	protected int updateEntity(String task, E entity) {
 		try {
 			handlers.forEach(handler -> handler.beforeUpdate(entity));
 			return sqlManager.updateEntity(entity);
 		} catch (SQLRuntimeException e) {
-			throw dataAccessException("updateEntity", e);
+			throw dataAccessException("updateEntity-" + task, e);
 		}
+	}
+	
+	// parameters
+	
+	private Map<String, Object> createParams() {
+		Map<String, Object> params = new HashMap<>();
+		params.put("table", MirageUtil.getTableName(entityClass, nameConverter));
+		params.put("id", null); // 何故これが要るのだろう。無いとコケる
+		params.put("id_column_name", findIdColumnName());
+		
+		return params;
+	}
+	
+	private Map<String, Object> createParams(Chunkable chunkable) {
+		Map<String, Object> params = createParams();
+		addChunkParam(params, chunkable);
+		return params;
+	}
+	
+	private Map<String, Object> createParams(ID id, boolean forUpdate) {
+		Map<String, Object> params = createParams();
+		addIdParam(params, id);
+		params.put("forUpdate", forUpdate);
+		return params;
+	}
+	
+	private Map<String, Object> createParams(Pageable pageable) {
+		Map<String, Object> params = createParams();
+		addPageParam(params, pageable);
+		return params;
+	}
+	
+	private Map<String, Object> createParams(Sort sort) {
+		Map<String, Object> params = createParams();
+		addSortParam(params, sort);
+		return params;
 	}
 	
 	private void addChunkParam(Map<String, Object> params, Chunkable chunkable) {
@@ -966,6 +1023,12 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements // N
 		}
 	}
 	
+	// others
+	
+	private Long getFoundRows() {
+		return null; // TODO
+	}
+	
 	private String findIdColumnName() {
 		Class<?> c = entityClass;
 		while (c != null && c != Object.class) {
@@ -992,6 +1055,17 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements // N
 		return Optional.ofNullable(chunkable.getPaginationRelation())
 			.map(PaginationRelation.NEXT::equals)
 			.orElse(true);
+	}
+	
+	private synchronized SQLExceptionTranslator getExceptionTranslator() { // NOPMD
+		if (this.exceptionTranslator == null) {
+			if (dataSource != null) {
+				this.exceptionTranslator = new SQLErrorCodeSQLExceptionTranslator(dataSource);
+			} else {
+				this.exceptionTranslator = new SQLStateSQLExceptionTranslator();
+			}
+		}
+		return this.exceptionTranslator;
 	}
 	
 	private DataAccessException dataAccessException(String task, SQLRuntimeException e) {

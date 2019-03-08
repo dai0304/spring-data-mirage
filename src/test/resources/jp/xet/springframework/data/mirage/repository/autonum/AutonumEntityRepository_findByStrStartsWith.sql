@@ -1,7 +1,7 @@
--- IdGeneratedEntityRepository_findByStr.sql
+-- AutonumEntityRepository_findByStr.sql
 
 SELECT *
-FROM id_generated_entities
+FROM autonum_string
 
 WHERE str LIKE concat(/*str*/'abc', '%')
 

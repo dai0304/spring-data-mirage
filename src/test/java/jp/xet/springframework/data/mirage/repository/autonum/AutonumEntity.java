@@ -13,13 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package jp.xet.springframework.data.mirage.repository.chunk;
+package jp.xet.springframework.data.mirage.repository.autonum;
 
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
+import lombok.experimental.Accessors;
 
 import org.springframework.data.annotation.Id;
 
@@ -30,26 +32,34 @@ import com.miragesql.miragesql.annotation.Table;
 
 /**
  * Sample entity class.
+ *
+ * @author daisuke
  */
-@Table(name = "string_num")
+@Table(name = "autonum_string")
 @Data
-@AllArgsConstructor
+@Accessors(chain = true)
+@EqualsAndHashCode(of = "id")
+@ToString(of = "str")
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
 @SuppressWarnings("serial")
-public class ChunkEntity implements Comparable<ChunkEntity> {
+public class AutonumEntity {
 	
 	@Id
 	@Column(name = "id")
-	@PrimaryKey(generationType = GenerationType.APPLICATION)
+	@PrimaryKey(generationType = GenerationType.IDENTITY)
 	@Setter(AccessLevel.PACKAGE)
-	private String id;
+	private long id;
 	
-	@Column(name = "num")
-	private long num;
+	@Column(name = "str")
+	private String str;
 	
 	
-	@Override
-	public int compareTo(ChunkEntity o) {
-		return this.id.compareTo(o.id);
+	/**
+	 * インスタンスを生成する。
+	 *
+	 * @param str string
+	 */
+	public AutonumEntity(String str) {
+		this.str = str;
 	}
 }

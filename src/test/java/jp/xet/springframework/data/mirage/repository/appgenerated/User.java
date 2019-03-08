@@ -18,7 +18,6 @@ package jp.xet.springframework.data.mirage.repository.appgenerated;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
@@ -34,7 +33,6 @@ import com.miragesql.miragesql.annotation.Table;
  */
 @Table(name = "users")
 @Data
-@EqualsAndHashCode(of = "username")
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
 @AllArgsConstructor
 @SuppressWarnings("serial")

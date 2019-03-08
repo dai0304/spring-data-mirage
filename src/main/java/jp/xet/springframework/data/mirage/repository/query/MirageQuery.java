@@ -188,7 +188,7 @@ public class MirageQuery implements RepositoryQuery { // NOPMD God class
 		}
 		boolean ascending = isAscending(chunkable);
 		boolean forward = isForward(chunkable);
-		log.debug("Chunk param for {} {}", ascending ? "ascending" : "descending", forward ? "forward" : "backword");
+		log.debug("Chunk param for {} {}", ascending ? "ascending" : "descending", forward ? "forward" : "backward");
 		
 		if (chunkable.getPaginationToken() != null) {
 			String key;
