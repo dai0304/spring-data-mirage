@@ -425,19 +425,15 @@ public class DefaultMirageRepository<E, ID extends Serializable & Comparable<ID>
 		if (entity == null) {
 			return null;
 		}
-		try {
-			E found = findById(entityInformation.getId(entity), true)
-				.orElseThrow(() -> new IncorrectResultSizeDataAccessException(1, 0));
-			C actualCondition = entityInformation.getCondition(found);
-			if (condition == null || condition.equals(actualCondition)) {
-				return update(entity);
-			} else {
-				String message =
-						String.format(Locale.ENGLISH, "expected is %s, but actual is %s", condition, actualCondition);
-				throw new OptimisticLockingFailureException(message);
-			}
-		} catch (SQLRuntimeException e) {
-			throw dataAccessException("update", e);
+		E found = findById(entityInformation.getId(entity), true)
+			.orElseThrow(() -> new IncorrectResultSizeDataAccessException(1, 0));
+		C actualCondition = entityInformation.getCondition(found);
+		if (condition == null || condition.equals(actualCondition)) {
+			return update(entity);
+		} else {
+			String message =
+					String.format(Locale.ENGLISH, "expected is %s, but actual is %s", condition, actualCondition);
+			throw new OptimisticLockingFailureException(message);
 		}
 	}
 	
@@ -448,19 +444,15 @@ public class DefaultMirageRepository<E, ID extends Serializable & Comparable<ID>
 		if (id == null) {
 			return;
 		}
-		try {
-			E found = findById(id, true)
-				.orElseThrow(() -> new IncorrectResultSizeDataAccessException(1, 0));
-			C actualCondition = entityInformation.getCondition(found);
-			if (condition == null || condition.equals(actualCondition)) {
-				deleteById(id);
-			} else {
-				String message =
-						String.format(Locale.ENGLISH, "expected is %s, but actual is %s", condition, actualCondition);
-				throw new OptimisticLockingFailureException(message);
-			}
-		} catch (SQLRuntimeException e) {
-			throw dataAccessException("update", e);
+		E found = findById(id, true)
+			.orElseThrow(() -> new IncorrectResultSizeDataAccessException(1, 0));
+		C actualCondition = entityInformation.getCondition(found);
+		if (condition == null || condition.equals(actualCondition)) {
+			deleteById(id);
+		} else {
+			String message =
+					String.format(Locale.ENGLISH, "expected is %s, but actual is %s", condition, actualCondition);
+			throw new OptimisticLockingFailureException(message);
 		}
 	}
 	
