@@ -31,6 +31,7 @@ import com.miragesql.miragesql.bean.BeanDescFactory;
 import com.miragesql.miragesql.bean.FieldPropertyExtractor;
 import com.miragesql.miragesql.dialect.MySQLDialect;
 import com.miragesql.miragesql.integration.spring.SpringConnectionProvider;
+import com.miragesql.miragesql.naming.NameConverter;
 import com.miragesql.miragesql.naming.RailsLikeNameConverter;
 import com.miragesql.miragesql.provider.ConnectionProvider;
 
@@ -42,16 +43,16 @@ import jp.xet.springframework.data.mirage.repository.support.MiragePersistenceEx
  */
 @Configuration
 @EnableTransactionManagement
-@EnableMirageRepositories
+@EnableMirageRepositories(sqlManagerRef = "sqlManagerX")
 public class MirageConfiguration {
 	
 	@Bean
-	public SqlManager sqlManager() {
+	public SqlManager sqlManagerX() {
 		SqlManagerImpl sqlManagerImpl = new SqlManagerImpl();
 		sqlManagerImpl.setConnectionProvider(connectionProvider());
 		sqlManagerImpl.setDialect(new MySQLDialect());
 		sqlManagerImpl.setBeanDescFactory(beanDescFactory());
-		sqlManagerImpl.setNameConverter(new RailsLikeNameConverter());
+		sqlManagerImpl.setNameConverter(nameConverter());
 		return sqlManagerImpl;
 	}
 	
@@ -67,6 +68,11 @@ public class MirageConfiguration {
 		BeanDescFactory beanDescFactory = new BeanDescFactory();
 		beanDescFactory.setPropertyExtractor(new FieldPropertyExtractor());
 		return beanDescFactory;
+	}
+	
+	@Bean
+	public NameConverter nameConverter() {
+		return new RailsLikeNameConverter();
 	}
 	
 	@Bean

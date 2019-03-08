@@ -22,10 +22,10 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.repository.core.EntityInformation;
 import org.springframework.data.repository.core.support.AbstractEntityInformation;
-import org.springframework.util.StringUtils;
 
 import com.miragesql.miragesql.SqlManager;
-import com.miragesql.miragesql.annotation.Table;
+import com.miragesql.miragesql.naming.NameConverter;
+import com.miragesql.miragesql.util.MirageUtil;
 
 /**
  * TODO for daisuke
@@ -40,27 +40,35 @@ public class MirageEntityInformationSupport<T, ID extends Serializable, C>
 	 * Creates a {@link MirageEntityInformation} for the given domain class and {@link SqlManager}.
 	 *
 	 * @param domainClass class of entity
-	 * @param sqlManager {@link SqlManager}
+	 * @param nameConverter {@link NameConverter}
 	 * @return created {@link MirageEntityInformation}
 	 */
-	public static <T> EntityInformation<T, ?> getMetadata(Class<T> domainClass, SqlManager sqlManager) {
-		return new MirageEntityInformationSupport<>(domainClass);
+	public static <T> EntityInformation<T, ?> getMetadata(Class<T> domainClass, NameConverter nameConverter) {
+		return new MirageEntityInformationSupport<>(domainClass, nameConverter);
 	}
+	
+	
+	private final NameConverter nameConverter;
+	
 	
 	/**
 	 * Creates a new {@link MirageEntityInformationSupport} with the given domain class.
 	 *
 	 * @param domainClass
 	 */
-	public MirageEntityInformationSupport(Class<T> domainClass) {
+	public MirageEntityInformationSupport(Class<T> domainClass, NameConverter nameConverter) {
 		super(domainClass);
+		this.nameConverter = nameConverter;
 	}
 	
 	@Override
 	public String getEntityName() {
-		Class<?> domainClass = getJavaType();
-		Table entity = domainClass.getAnnotation(Table.class);
-		return entity != null && StringUtils.hasText(entity.name()) ? entity.name() : domainClass.getSimpleName();
+		try {
+			return MirageUtil.getTableName(getJavaType(), nameConverter);
+		} catch (NullPointerException e) { // NOPMD
+			throw new IllegalStateException("If nameConverter bean is not registered, "
+					+ "entity class must have @Table annotation", e);
+		}
 	}
 	
 	@Override

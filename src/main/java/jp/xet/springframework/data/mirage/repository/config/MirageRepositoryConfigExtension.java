@@ -62,23 +62,19 @@ public class MirageRepositoryConfigExtension extends RepositoryConfigurationExte
 	@Override
 	public void postProcess(BeanDefinitionBuilder builder, XmlRepositoryConfigurationSource config) {
 		Element element = config.getElement();
-		postProcess(builder, element.getAttribute("sql-manager-ref"), element.getAttribute("transaction-manager-ref"),
+		String sqlManagerRef = element.getAttribute("sql-manager-ref");
+		String transactionManagerRef = element.getAttribute("transaction-manager-ref");
+		postProcess(builder,
+				StringUtils.hasText(sqlManagerRef) ? sqlManagerRef : DEFAULT_SQL_MANAGER_BEAN_NAME,
+				StringUtils.hasText(transactionManagerRef) ? transactionManagerRef
+						: DEFAULT_TRANSACTION_MANAGER_BEAN_NAME,
 				config.getSource());
 	}
 	
-	private void postProcess(BeanDefinitionBuilder builder, String sqlManagerRef, String transactionManagerRef,
+	private void postProcess(BeanDefinitionBuilder builder, String sqlManager, String transactionManager,
 			Object source) { // NOPMD
-		if (StringUtils.hasText(sqlManagerRef)) {
-			builder.addPropertyReference("sqlManager", sqlManagerRef);
-		} else {
-			builder.addPropertyReference("sqlManager", DEFAULT_SQL_MANAGER_BEAN_NAME);
-		}
-		
-		if (StringUtils.hasText(transactionManagerRef)) {
-			builder.addPropertyValue("transactionManager", transactionManagerRef);
-		} else {
-			builder.addPropertyValue("transactionManager", DEFAULT_TRANSACTION_MANAGER_BEAN_NAME);
-		}
+		builder.addPropertyReference("sqlManager", sqlManager);
+		builder.addPropertyValue("transactionManager", transactionManager);
 	}
 	
 	@Override

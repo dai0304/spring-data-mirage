@@ -15,10 +15,13 @@
  */
 package jp.xet.springframework.data.mirage.repository.support;
 
+import lombok.Getter;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
+import org.springframework.jdbc.support.SQLExceptionTranslator;
 
 import com.miragesql.miragesql.exception.SQLRuntimeException;
 
@@ -27,16 +30,12 @@ import com.miragesql.miragesql.exception.SQLRuntimeException;
  */
 public class MiragePersistenceExceptionTranslator implements PersistenceExceptionTranslator {
 	
-	private SQLErrorCodeSQLExceptionTranslator sqlExceptionTranslator = new SQLErrorCodeSQLExceptionTranslator();
+	@Getter
+	private SQLExceptionTranslator sqlExceptionTranslator = new SQLErrorCodeSQLExceptionTranslator();
 	
 	
 	@Autowired(required = false)
-	public SQLErrorCodeSQLExceptionTranslator getSqlExceptionTranslator() {
-		return sqlExceptionTranslator;
-	}
-	
-	public void setSqlExceptionTranslator(
-			SQLErrorCodeSQLExceptionTranslator sqlExceptionTranslator) {
+	public void setSqlExceptionTranslator(SQLExceptionTranslator sqlExceptionTranslator) {
 		this.sqlExceptionTranslator = sqlExceptionTranslator;
 	}
 	
@@ -57,7 +56,7 @@ public class MiragePersistenceExceptionTranslator implements PersistenceExceptio
 	@SuppressWarnings("serial")
 	private static final class MirageDataAccessException extends DataAccessException {
 		
-		private MirageDataAccessException(Throwable cause) {
+		private MirageDataAccessException(RuntimeException cause) {
 			super("unknown", cause);
 		}
 	}

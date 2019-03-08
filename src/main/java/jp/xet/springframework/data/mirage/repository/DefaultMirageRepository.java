@@ -55,7 +55,6 @@ import org.ws2ten1.chunks.ChunkImpl;
 import org.ws2ten1.chunks.Chunkable;
 import org.ws2ten1.chunks.Chunkable.PaginationRelation;
 import org.ws2ten1.chunks.PaginationTokenEncoder;
-import org.ws2ten1.chunks.SimplePaginationTokenEncoder;
 import org.ws2ten1.repositories.BatchCreatableRepository;
 import org.ws2ten1.repositories.BatchDeletableRepository;
 import org.ws2ten1.repositories.BatchReadableRepository;
@@ -69,15 +68,12 @@ import org.ws2ten1.repositories.PageableRepository;
 import org.ws2ten1.repositories.ScannableRepository;
 import org.ws2ten1.repositories.TruncatableRepository;
 
-import com.google.common.collect.Lists;
 import com.miragesql.miragesql.IterationCallback;
 import com.miragesql.miragesql.SqlManager;
 import com.miragesql.miragesql.SqlResource;
 import com.miragesql.miragesql.StringSqlResource;
 import com.miragesql.miragesql.annotation.Column;
 import com.miragesql.miragesql.exception.SQLRuntimeException;
-import com.miragesql.miragesql.naming.NameConverter;
-import com.miragesql.miragesql.util.MirageUtil;
 import com.miragesql.miragesql.util.Validate;
 
 import jp.xet.springframework.data.mirage.repository.handler.RepositoryActionListener;
@@ -137,25 +133,23 @@ public class DefaultMirageRepository<E, ID extends Serializable & Comparable<ID>
 	}
 	
 	
+	@Getter(AccessLevel.PROTECTED)
 	private final MirageEntityInformation<E, ID, C> entityInformation;
-	
-	private final Class<E> entityClass;
 	
 	@Getter(AccessLevel.PROTECTED)
 	private final SqlManager sqlManager;
 	
-	private final NameConverter nameConverter; // nullable
-	
-	private final DataSource dataSource; // nullable
-	
+	@Getter(AccessLevel.PROTECTED)
 	private final List<RepositoryActionListener> handlers;
 	
 	@Getter(AccessLevel.PROTECTED)
+	private final PaginationTokenEncoder encoder;
+	
+	@Getter(AccessLevel.PROTECTED)
+	private final SQLExceptionTranslator exceptionTranslator;
+	
+	@Getter(AccessLevel.PROTECTED)
 	private SqlResource baseSelectSqlResource = BASE_SELECT_SQL;
-	
-	private transient SQLExceptionTranslator exceptionTranslator;
-	
-	private PaginationTokenEncoder encoder = new SimplePaginationTokenEncoder();
 	
 	
 	/**
@@ -164,17 +158,19 @@ public class DefaultMirageRepository<E, ID extends Serializable & Comparable<ID>
 	 * @param entityInformation {@link EntityInformation}
 	 * @param sqlManager {@link SqlManager}
 	 */
-	@SuppressWarnings("unchecked")
-	public DefaultMirageRepository(EntityInformation<E, ? extends Serializable> entityInformation,
-			SqlManager sqlManager, NameConverter nameConverter,
-			DataSource dataSource, List<RepositoryActionListener> handlers) {
+	public DefaultMirageRepository(MirageEntityInformation<E, ID, C> entityInformation, SqlManager sqlManager,
+			List<RepositoryActionListener> handlers, PaginationTokenEncoder encoder, DataSource dataSource) {
 		Assert.notNull(entityInformation, "entityInformation is required");
-		this.entityInformation = (MirageEntityInformation<E, ID, C>) entityInformation;
-		this.entityClass = entityInformation.getJavaType();
+		this.entityInformation = entityInformation;
 		this.sqlManager = sqlManager;
 		this.handlers = handlers;
-		this.nameConverter = nameConverter;
-		this.dataSource = dataSource;
+		this.encoder = encoder;
+		
+		if (dataSource != null) {
+			this.exceptionTranslator = new SQLErrorCodeSQLExceptionTranslator(dataSource);
+		} else {
+			this.exceptionTranslator = new SQLStateSQLExceptionTranslator();
+		}
 	}
 	
 	public void setBaseSelectSqlResource(SqlResource baseSelectSqlResource) {
@@ -255,9 +251,8 @@ public class DefaultMirageRepository<E, ID extends Serializable & Comparable<ID>
 			}
 		}
 		
-		String tableName = MirageUtil.getTableName(entityClass, nameConverter);
-		List<? extends E> entityList = Lists.newArrayList(entities);
-		deleteBatch("deleteAll", tableName, entityList);
+		List<? extends E> entityList = newArrayList(entities);
+		deleteBatch("deleteAll", getTableName(), entityList);
 	}
 	
 	// TruncatableRepository
@@ -695,7 +690,7 @@ public class DefaultMirageRepository<E, ID extends Serializable & Comparable<ID>
 	protected List<E> getResultList(String task, SqlResource resource) {
 		Assert.notNull(resource, "resource is required");
 		try {
-			return sqlManager.getResultList(entityClass, resource);
+			return sqlManager.getResultList(getEntityClass(), resource);
 		} catch (SQLRuntimeException e) {
 			throw dataAccessException("getResultList-" + task, e);
 		}
@@ -709,7 +704,7 @@ public class DefaultMirageRepository<E, ID extends Serializable & Comparable<ID>
 	protected List<E> getResultList(String task, SqlResource resource, Object param) {
 		Assert.notNull(resource, "resource is required");
 		try {
-			return sqlManager.getResultList(entityClass, resource, param);
+			return sqlManager.getResultList(getEntityClass(), resource, param);
 		} catch (SQLRuntimeException e) {
 			throw dataAccessException("getResultList-" + task, e);
 		}
@@ -725,7 +720,7 @@ public class DefaultMirageRepository<E, ID extends Serializable & Comparable<ID>
 	protected E getSingleResult(String task, SqlResource resource) {
 		Assert.notNull(resource, "resource is required");
 		try {
-			return sqlManager.getSingleResult(entityClass, resource);
+			return sqlManager.getSingleResult(getEntityClass(), resource);
 		} catch (SQLRuntimeException e) {
 			throw dataAccessException("getSingleResult-" + task, e);
 		}
@@ -738,7 +733,7 @@ public class DefaultMirageRepository<E, ID extends Serializable & Comparable<ID>
 	protected E getSingleResult(String task, SqlResource resource, Object param) {
 		Assert.notNull(resource, "resource is required");
 		try {
-			return sqlManager.getSingleResult(entityClass, resource, param);
+			return sqlManager.getSingleResult(getEntityClass(), resource, param);
 		} catch (SQLRuntimeException e) {
 			throw dataAccessException("getSingleResult-" + task, e);
 		}
@@ -796,7 +791,7 @@ public class DefaultMirageRepository<E, ID extends Serializable & Comparable<ID>
 	protected <R> R iterate(String task, IterationCallback<E, R> callback, SqlResource resource) {
 		Assert.notNull(resource, "resource is required");
 		try {
-			return sqlManager.iterate(entityClass, callback, resource);
+			return sqlManager.iterate(getEntityClass(), callback, resource);
 		} catch (SQLRuntimeException e) {
 			throw dataAccessException("iterate-" + task, e);
 		}
@@ -812,7 +807,7 @@ public class DefaultMirageRepository<E, ID extends Serializable & Comparable<ID>
 	protected <R> R iterate(String task, IterationCallback<E, R> callback, SqlResource resource, Object param) {
 		Assert.notNull(resource, "resource is required");
 		try {
-			return sqlManager.iterate(entityClass, callback, resource, param);
+			return sqlManager.iterate(getEntityClass(), callback, resource, param);
 		} catch (SQLRuntimeException e) {
 			throw dataAccessException("iterate-" + task, e);
 		}
@@ -865,7 +860,7 @@ public class DefaultMirageRepository<E, ID extends Serializable & Comparable<ID>
 	
 	private Map<String, Object> createParams() {
 		Map<String, Object> params = new HashMap<>();
-		params.put("table", MirageUtil.getTableName(entityClass, nameConverter));
+		params.put("table", getTableName());
 		params.put("id", null); // 何故これが要るのだろう。無いとコケる
 		params.put("id_column_name", findIdColumnName());
 		
@@ -969,7 +964,7 @@ public class DefaultMirageRepository<E, ID extends Serializable & Comparable<ID>
 	}
 	
 	private String findIdColumnName() {
-		Class<?> c = entityClass;
+		Class<?> c = getEntityClass();
 		while (c != null && c != Object.class) {
 			Field[] declaredFields = c.getDeclaredFields();
 			for (Field field : declaredFields) {
@@ -996,18 +991,15 @@ public class DefaultMirageRepository<E, ID extends Serializable & Comparable<ID>
 			.orElse(true);
 	}
 	
-	private synchronized SQLExceptionTranslator getExceptionTranslator() { // NOPMD
-		if (this.exceptionTranslator == null) {
-			if (dataSource != null) {
-				this.exceptionTranslator = new SQLErrorCodeSQLExceptionTranslator(dataSource);
-			} else {
-				this.exceptionTranslator = new SQLStateSQLExceptionTranslator();
-			}
-		}
-		return this.exceptionTranslator;
+	private Class<E> getEntityClass() {
+		return entityInformation.getJavaType();
+	}
+	
+	private String getTableName() {
+		return entityInformation.getEntityName();
 	}
 	
 	private DataAccessException dataAccessException(String task, SQLRuntimeException e) {
-		return getExceptionTranslator().translate(task, null, e.getCause());
+		return exceptionTranslator.translate(task, null, e.getCause());
 	}
 }

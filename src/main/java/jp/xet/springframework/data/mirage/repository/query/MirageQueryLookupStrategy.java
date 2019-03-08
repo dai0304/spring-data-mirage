@@ -48,7 +48,6 @@ public abstract class MirageQueryLookupStrategy implements QueryLookupStrategy {
 	 * @param sqlManager {@link SqlManager}
 	 * @param key
 	 * @return
-	 * @since 0.1
 	 */
 	public static QueryLookupStrategy create(SqlManager sqlManager, Key key) {
 		if (key == null) {

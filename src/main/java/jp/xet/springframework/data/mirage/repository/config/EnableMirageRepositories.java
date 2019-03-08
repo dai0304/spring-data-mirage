@@ -45,6 +45,12 @@ import jp.xet.springframework.data.mirage.repository.support.MirageRepositoryFac
 public @interface EnableMirageRepositories {
 	
 	/**
+	 * Alias for the {@link #basePackages()} attribute. Allows for more concise annotation declarations e.g.:
+	 * {@code @EnableMirageRepositories("org.my.pkg")} instead of {@code @EnableMirageRepositories(basePackages="org.my.pkg")}.
+	 */
+	String[] value() default {};
+	
+	/**
 	 * Type-safe alternative to {@link #basePackages()} for specifying the packages to scan for annotated components. The
 	 * package of each class specified will be scanned. Consider creating a special no-op marker class or interface in
 	 * each package that serves no purpose other than being referenced by this attribute.
@@ -69,8 +75,15 @@ public @interface EnableMirageRepositories {
 	Filter[] includeFilters() default {};
 	
 	/**
+	 * Returns the postfix to be used when looking up custom repository implementations. Defaults to {@literal Impl}. So
+	 * for a repository named {@code PersonRepository} the corresponding implementation class will be looked up scanning
+	 * for {@code PersonRepositoryImpl}.
+	 */
+	String repositoryImplementationPostfix() default "Impl";
+	
+	/**
 	 * Configures the location of where to find the Spring Data named queries properties file. Will default to
-	 * {@code META-INFO/mirage-named-queries.properties}.
+	 * {@code META-INF/mirage-named-queries.properties}.
 	 */
 	String namedQueriesLocation() default "";
 	
@@ -86,12 +99,7 @@ public @interface EnableMirageRepositories {
 	 */
 	Class<?> repositoryFactoryBeanClass() default MirageRepositoryFactoryBean.class;
 	
-	/**
-	 * Returns the postfix to be used when looking up custom repository implementations. Defaults to {@literal Impl}. So
-	 * for a repository named {@code PersonRepository} the corresponding implementation class will be looked up scanning
-	 * for {@code PersonRepositoryImpl}.
-	 */
-	String repositoryImplementationPostfix() default "Impl";
+	// Mirage specific configuration
 	
 	/**
 	 * Configures the name of the {@link SqlManager} bean definition to be used to create repositories
@@ -104,10 +112,4 @@ public @interface EnableMirageRepositories {
 	 * discovered through this annotation. Defaults to {@code transactionManager}.
 	 */
 	String transactionManagerRef() default "transactionManager";
-	
-	/**
-	 * Alias for the {@link #basePackages()} attribute. Allows for more concise annotation declarations e.g.:
-	 * {@code @EnableMirageRepositories("org.my.pkg")} instead of {@code @EnableMirageRepositories(basePackages="org.my.pkg")}.
-	 */
-	String[] value() default {};
 }

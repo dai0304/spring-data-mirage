@@ -15,7 +15,6 @@
  */
 package jp.xet.springframework.data.mirage.repository.support;
 
-import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -34,7 +33,11 @@ import org.springframework.data.repository.query.QueryLookupStrategy;
 import org.springframework.data.repository.query.QueryLookupStrategy.Key;
 import org.springframework.data.repository.query.QueryMethodEvaluationContextProvider;
 
+import org.ws2ten1.chunks.PaginationTokenEncoder;
+import org.ws2ten1.chunks.SimplePaginationTokenEncoder;
+
 import com.miragesql.miragesql.SqlManager;
+import com.miragesql.miragesql.naming.DefaultNameConverter;
 import com.miragesql.miragesql.naming.NameConverter;
 
 import jp.xet.springframework.data.mirage.repository.DefaultMirageRepository;
@@ -56,17 +59,18 @@ public class MirageRepositoryFactory extends RepositoryFactorySupport {
 	
 	private final DataSource dataSource;
 	
+	@NonNull
 	private final List<RepositoryActionListener> handlers;
 	
 	
 	public MirageRepositoryFactory(SqlManager sqlManager) {
-		this(sqlManager, null, null, Collections.emptyList());
+		this(sqlManager, new DefaultNameConverter(), null, Collections.emptyList());
 	}
 	
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T, ID> EntityInformation<T, ID> getEntityInformation(Class<T> domainClass) {
-		return (EntityInformation<T, ID>) MirageEntityInformationSupport.getMetadata(domainClass, sqlManager);
+		return (EntityInformation<T, ID>) MirageEntityInformationSupport.getMetadata(domainClass, nameConverter);
 	}
 	
 	@Override
@@ -87,10 +91,10 @@ public class MirageRepositoryFactory extends RepositoryFactorySupport {
 	})
 	protected Object getTargetRepository(RepositoryInformation metadata) {
 		Class<?> repositoryInterface = metadata.getRepositoryInterface();
-		EntityInformation<?, Serializable> entityInformation = getEntityInformation(metadata.getDomainType());
+		MirageEntityInformation mei = (MirageEntityInformation) getEntityInformation(metadata.getDomainType());
 		
-		DefaultMirageRepository repo = new DefaultMirageRepository(entityInformation, sqlManager,
-				nameConverter, dataSource, handlers);
+		PaginationTokenEncoder encoder = new SimplePaginationTokenEncoder();
+		DefaultMirageRepository repo = new DefaultMirageRepository(mei, sqlManager, handlers, encoder, dataSource);
 		try {
 			String name = repositoryInterface.getSimpleName() + ".sql";
 			repo.setBaseSelectSqlResource(DefaultMirageRepository.newSqlResource(repositoryInterface, name));
