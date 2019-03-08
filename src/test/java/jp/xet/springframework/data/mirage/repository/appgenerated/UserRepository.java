@@ -20,18 +20,21 @@ import org.ws2ten1.repositories.BatchDeletableRepository;
 import org.ws2ten1.repositories.BatchReadableRepository;
 import org.ws2ten1.repositories.BatchUpsertableRepository;
 import org.ws2ten1.repositories.ChunkableRepository;
+import org.ws2ten1.repositories.CreatableRepository;
 import org.ws2ten1.repositories.DeletableRepository;
-import org.ws2ten1.repositories.LockableCrudRepository;
+import org.ws2ten1.repositories.LockableReadableRepository;
 import org.ws2ten1.repositories.PageableRepository;
 import org.ws2ten1.repositories.ScannableRepository;
 import org.ws2ten1.repositories.TruncatableRepository;
+import org.ws2ten1.repositories.UpdatableRepository;
 import org.ws2ten1.repositories.UpsertableRepository;
 
 /**
  * Repository interface for {@link User}.
  */
 public interface UserRepository extends ScannableRepository<User, String>,
-		LockableCrudRepository<User, String>, UpsertableRepository<User, String>,
+		CreatableRepository<User, String>, UpsertableRepository<User, String>,
+		LockableReadableRepository<User, String>, UpdatableRepository<User, String>,
 		DeletableRepository<User, String>, TruncatableRepository<User, String>,
 		ChunkableRepository<User, String>, PageableRepository<User, String>,
 		BatchReadableRepository<User, String>, BatchCreatableRepository<User, String>,

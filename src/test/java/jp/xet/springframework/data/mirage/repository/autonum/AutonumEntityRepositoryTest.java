@@ -64,29 +64,6 @@ public class AutonumEntityRepositoryTest {
 	AutonumEntityRepository repo;
 	
 	
-	// BaseRepository
-	
-	@Test
-	public void testGetId() {
-		// setup
-		AutonumEntity foo = new AutonumEntity("foo");
-		// exercise
-		Long actual = repo.getId(foo);
-		// verify
-		assertThat(actual).isEqualTo(0L);
-	}
-	
-	@Test
-	@Rollback
-	public void testGetId_Saved() {
-		// setup
-		AutonumEntity foo = repo.create(new AutonumEntity("foo"));
-		// exercise
-		Long actual = repo.getId(foo);
-		// verify
-		assertThat(actual).isNotEqualTo(0L);
-	}
-	
 	// ReadableRepository
 	
 	@Test

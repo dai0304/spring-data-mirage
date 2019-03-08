@@ -19,6 +19,8 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Version;
+import org.springframework.data.repository.core.EntityInformation;
 import org.springframework.data.repository.core.support.AbstractEntityInformation;
 import org.springframework.util.StringUtils;
 
@@ -31,8 +33,8 @@ import com.miragesql.miragesql.annotation.Table;
  * @param <T> type of entity (domainClass)
  * @param <ID>
  */
-public class MirageEntityInformationSupport<T, ID extends Serializable>
-		extends AbstractEntityInformation<T, ID> implements MirageEntityInformation<T, ID> {
+public class MirageEntityInformationSupport<T, ID extends Serializable, C>
+		extends AbstractEntityInformation<T, ID> implements MirageEntityInformation<T, ID, C> {
 	
 	/**
 	 * Creates a {@link MirageEntityInformation} for the given domain class and {@link SqlManager}.
@@ -41,7 +43,7 @@ public class MirageEntityInformationSupport<T, ID extends Serializable>
 	 * @param sqlManager {@link SqlManager}
 	 * @return created {@link MirageEntityInformation}
 	 */
-	public static <T> MirageEntityInformation<T, ?> getMetadata(Class<T> domainClass, SqlManager sqlManager) {
+	public static <T> EntityInformation<T, ?> getMetadata(Class<T> domainClass, SqlManager sqlManager) {
 		return new MirageEntityInformationSupport<>(domainClass);
 	}
 	
@@ -100,5 +102,27 @@ public class MirageEntityInformationSupport<T, ID extends Serializable>
 			c = c.getSuperclass();
 		}
 		throw new IllegalStateException("Id annotation not found in: " + getJavaType());
+	}
+	
+	@Override
+	@SuppressWarnings("unchecked")
+	public C getCondition(T entity) {
+		Class<?> c = getJavaType();
+		while (c != null && c != Object.class) {
+			Field[] declaredFields = c.getDeclaredFields();
+			for (Field field : declaredFields) {
+				Version versionAnnotation = field.getAnnotation(Version.class);
+				if (versionAnnotation != null) {
+					field.setAccessible(true);
+					try {
+						return (C) field.get(entity);
+					} catch (Exception e) { // NOPMD
+						// NOPMD ignore
+					}
+				}
+			}
+			c = c.getSuperclass();
+		}
+		return null;
 	}
 }

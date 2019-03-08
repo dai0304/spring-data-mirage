@@ -63,16 +63,6 @@ public class UserRepositoryTest {
 	UserRepository repo;
 	
 	
-	// BaseRepository
-	
-	@Test
-	public void testGetId() {
-		// exercise
-		String actual = repo.getId(FOO);
-		// verify
-		assertThat(actual).isEqualTo("foo");
-	}
-	
 	// ReadableRepository
 	
 	@Test

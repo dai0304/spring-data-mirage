@@ -38,7 +38,6 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.Version;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -65,7 +64,7 @@ import org.ws2ten1.repositories.ChunkableRepository;
 import org.ws2ten1.repositories.ConditionalDeletableRepository;
 import org.ws2ten1.repositories.ConditionalUpdatableRepository;
 import org.ws2ten1.repositories.CrudRepository;
-import org.ws2ten1.repositories.LockableCrudRepository;
+import org.ws2ten1.repositories.LockableReadableRepository;
 import org.ws2ten1.repositories.PageableRepository;
 import org.ws2ten1.repositories.ScannableRepository;
 import org.ws2ten1.repositories.TruncatableRepository;
@@ -82,6 +81,7 @@ import com.miragesql.miragesql.util.MirageUtil;
 import com.miragesql.miragesql.util.Validate;
 
 import jp.xet.springframework.data.mirage.repository.handler.RepositoryActionListener;
+import jp.xet.springframework.data.mirage.repository.support.MirageEntityInformation;
 
 /**
  * Default {@link org.springframework.data.repository.Repository} implementation using Mirage SQL.
@@ -90,8 +90,8 @@ import jp.xet.springframework.data.mirage.repository.handler.RepositoryActionLis
  * @param <ID> the type of the id of the entity the repository manages
  */
 @Slf4j // -@cs[MethodCount|ClassFanOutComplexity]
-public class DefaultMirageRepository<E, ID extends Serializable, C> implements // NOPMD God class
-		ScannableRepository<E, ID>, CrudRepository<E, ID>, LockableCrudRepository<E, ID>,
+public class DefaultMirageRepository<E, ID extends Serializable & Comparable<ID>, C> implements // NOPMD God class
+		ScannableRepository<E, ID>, CrudRepository<E, ID>, LockableReadableRepository<E, ID>,
 		BatchCreatableRepository<E, ID>, BatchReadableRepository<E, ID>,
 		BatchDeletableRepository<E, ID>, BatchUpsertableRepository<E, ID>,
 		TruncatableRepository<E, ID>, ChunkableRepository<E, ID>, PageableRepository<E, ID>,
@@ -137,6 +137,10 @@ public class DefaultMirageRepository<E, ID extends Serializable, C> implements /
 	}
 	
 	
+	private final MirageEntityInformation<E, ID, C> entityInformation;
+	
+	private final Class<E> entityClass;
+	
 	@Getter(AccessLevel.PROTECTED)
 	private final SqlManager sqlManager;
 	
@@ -151,8 +155,6 @@ public class DefaultMirageRepository<E, ID extends Serializable, C> implements /
 	
 	private transient SQLExceptionTranslator exceptionTranslator;
 	
-	private final Class<E> entityClass;
-	
 	private PaginationTokenEncoder encoder = new SimplePaginationTokenEncoder();
 	
 	
@@ -162,10 +164,12 @@ public class DefaultMirageRepository<E, ID extends Serializable, C> implements /
 	 * @param entityInformation {@link EntityInformation}
 	 * @param sqlManager {@link SqlManager}
 	 */
+	@SuppressWarnings("unchecked")
 	public DefaultMirageRepository(EntityInformation<E, ? extends Serializable> entityInformation,
 			SqlManager sqlManager, NameConverter nameConverter,
 			DataSource dataSource, List<RepositoryActionListener> handlers) {
 		Assert.notNull(entityInformation, "entityInformation is required");
+		this.entityInformation = (MirageEntityInformation<E, ID, C>) entityInformation;
 		this.entityClass = entityInformation.getJavaType();
 		this.sqlManager = sqlManager;
 		this.handlers = handlers;
@@ -179,31 +183,6 @@ public class DefaultMirageRepository<E, ID extends Serializable, C> implements /
 		} else {
 			this.baseSelectSqlResource = baseSelectSqlResource;
 		}
-	}
-	
-	// BaseRepository
-	
-	@Override
-	@SuppressWarnings("unchecked")
-	public ID getId(E entity) {
-		Class<?> c = entityClass;
-		while (c != null && c != Object.class) {
-			Field[] declaredFields = c.getDeclaredFields();
-			for (Field field : declaredFields) {
-				Id idAnnotation = field.getAnnotation(Id.class);
-				if (idAnnotation != null) {
-					field.setAccessible(true);
-					try {
-						return (ID) field.get(entity);
-					} catch (Exception e) { // NOPMD
-						// ignore
-						log.debug("failed", e);
-					}
-				}
-			}
-			c = c.getSuperclass();
-		}
-		return null;
 	}
 	
 	// ScannableRepository
@@ -297,7 +276,7 @@ public class DefaultMirageRepository<E, ID extends Serializable, C> implements /
 	
 	@Override
 	public boolean existsById(ID id) {
-		return exists(id, false);
+		return existsById(id, false);
 	}
 	
 	// LockableCrudRepository
@@ -310,7 +289,7 @@ public class DefaultMirageRepository<E, ID extends Serializable, C> implements /
 	}
 	
 	@Override
-	public boolean exists(ID id, boolean forUpdate) {
+	public boolean existsById(ID id, boolean forUpdate) {
 		Assert.notNull(id, "id must not be null");
 		return getCount("exists", getBaseSelectSqlResource(), createParams(id, forUpdate)) > 0;
 	}
@@ -336,11 +315,11 @@ public class DefaultMirageRepository<E, ID extends Serializable, C> implements /
 		} else {
 			String firstKey = null;
 			if (chunkable.getPaginationToken() != null && resultList.isEmpty() == false) {
-				firstKey = Objects.toString(getId(resultList.get(0)));
+				firstKey = Objects.toString(entityInformation.getId(resultList.get(0)));
 			}
 			String lastKey = null;
 			if (resultList.isEmpty() == false) {
-				lastKey = Objects.toString(getId(resultList.get(resultList.size() - 1)));
+				lastKey = Objects.toString(entityInformation.getId(resultList.get(resultList.size() - 1)));
 			}
 			pt = encoder.encode(firstKey, lastKey);
 		}
@@ -385,7 +364,7 @@ public class DefaultMirageRepository<E, ID extends Serializable, C> implements /
 		List<E> toInsert = new ArrayList<>();
 		for (S entity : entities) {
 			if (entity != null) {
-				if (exists(getId(entity), true)) {
+				if (existsById(entityInformation.getId(entity), true)) {
 					toUpdate.add(entity);
 				} else {
 					toInsert.add(entity);
@@ -405,16 +384,12 @@ public class DefaultMirageRepository<E, ID extends Serializable, C> implements /
 		if (entity == null) {
 			return null;
 		}
-		try {
-			if (exists(getId(entity), true)) {
-				updateEntity("save", entity);
-				log.debug("entity updated: {}", entity);
-			} else {
-				insertEntity("save", entity);
-				log.debug("entity inserted: {}", entity);
-			}
-		} catch (SQLRuntimeException e) {
-			throw dataAccessException("save", e);
+		if (existsById(entityInformation.getId(entity), true)) {
+			updateEntity("save", entity);
+			log.debug("entity updated: {}", entity);
+		} else {
+			insertEntity("save", entity);
+			log.debug("entity inserted: {}", entity);
 		}
 		return entity;
 	}
@@ -439,38 +414,10 @@ public class DefaultMirageRepository<E, ID extends Serializable, C> implements /
 	
 	@Override
 	public <S extends E> Iterable<S> createAll(Iterable<S> entities) {
-		try {
-			insertBatch("createAll", newArrayList(entities));
-			return entities;
-		} catch (SQLRuntimeException e) {
-			throw dataAccessException("insertBatch", e);
-		}
+		insertBatch("createAll", newArrayList(entities));
+		return entities;
 	}
 	
-	// ConditionalRepository
-	
-	@Override
-	@SuppressWarnings("unchecked")
-	public C getCondition(E entity) {
-		Class<?> c = entityClass;
-		while (c != null && c != Object.class) {
-			Field[] declaredFields = c.getDeclaredFields();
-			for (Field field : declaredFields) {
-				Version versionAnnotation = field.getAnnotation(Version.class);
-				if (versionAnnotation != null) {
-					field.setAccessible(true);
-					try {
-						return (C) field.get(entity);
-					} catch (Exception e) { // NOPMD
-						// ignore
-						log.debug("failed", e);
-					}
-				}
-			}
-			c = c.getSuperclass();
-		}
-		return null;
-	}
 	// ConditionalUpdatableRepository
 	
 	@Override
@@ -479,9 +426,9 @@ public class DefaultMirageRepository<E, ID extends Serializable, C> implements /
 			return null;
 		}
 		try {
-			E found = findById(getId(entity), true)
+			E found = findById(entityInformation.getId(entity), true)
 				.orElseThrow(() -> new IncorrectResultSizeDataAccessException(1, 0));
-			C actualCondition = getCondition(found);
+			C actualCondition = entityInformation.getCondition(found);
 			if (condition == null || condition.equals(actualCondition)) {
 				return update(entity);
 			} else {
@@ -504,7 +451,7 @@ public class DefaultMirageRepository<E, ID extends Serializable, C> implements /
 		try {
 			E found = findById(id, true)
 				.orElseThrow(() -> new IncorrectResultSizeDataAccessException(1, 0));
-			C actualCondition = getCondition(found);
+			C actualCondition = entityInformation.getCondition(found);
 			if (condition == null || condition.equals(actualCondition)) {
 				deleteById(id);
 			} else {
@@ -522,7 +469,7 @@ public class DefaultMirageRepository<E, ID extends Serializable, C> implements /
 		if (entity == null) {
 			return;
 		}
-		deleteById(getId(entity), condition);
+		deleteById(entityInformation.getId(entity), condition);
 	}
 	
 	// delegate methods to sqlManager

@@ -81,8 +81,8 @@ repositories {
 dependencies {
 	api "com.miragesql:miragesql:$mirageVersion"
 	api "com.miragesql:miragesql-integration:$mirageVersion"
-	api "org.ws2ten1:ws2ten1-repositories:1.0.0-rc7"
-	api "org.ws2ten1:ws2ten1-chunks:1.0.0-rc6"
+	api "org.ws2ten1:ws2ten1-repositories:1.0.0-rc9"
+	api "org.ws2ten1:ws2ten1-chunks:1.0.0-rc7"
 	implementation "org.slf4j:slf4j-api"
 	implementation "com.google.guava:guava:$guavaVersion"
 	implementation "org.springframework:spring-context"
