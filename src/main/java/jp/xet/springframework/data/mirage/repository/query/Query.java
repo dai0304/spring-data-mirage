@@ -30,16 +30,12 @@ import java.lang.annotation.Target;
 public @interface Query {
 	
 	/**
-	 *
-	 * @return
-	 * @since 0.1
+	 * TODO
 	 */
 	String countQuery() default "";
 	
 	/**
-	 *
-	 * @return
-	 * @since 0.1
+	 * SQL file name in the classpath.
 	 */
 	String value() default "";
 	

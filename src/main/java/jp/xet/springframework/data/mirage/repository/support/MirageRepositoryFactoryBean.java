@@ -29,6 +29,9 @@ import org.springframework.data.repository.core.support.RepositoryFactorySupport
 import org.springframework.data.repository.core.support.TransactionalRepositoryFactoryBeanSupport;
 import org.springframework.util.Assert;
 
+import org.ws2ten1.chunks.PaginationTokenEncoder;
+import org.ws2ten1.chunks.SimplePaginationTokenEncoder;
+
 import com.miragesql.miragesql.SqlManager;
 import com.miragesql.miragesql.naming.NameConverter;
 
@@ -56,6 +59,9 @@ public class MirageRepositoryFactoryBean<T extends Repository<S, ID>, S, ID exte
 	@Autowired(required = false)
 	List<RepositoryActionListener> handlers = Collections.emptyList();
 	
+	@Autowired(required = false)
+	PaginationTokenEncoder encoder = new SimplePaginationTokenEncoder();
+	
 	
 	protected MirageRepositoryFactoryBean(Class<? extends T> repositoryInterface) {
 		super(repositoryInterface);
@@ -69,6 +75,6 @@ public class MirageRepositoryFactoryBean<T extends Repository<S, ID>, S, ID exte
 	
 	@Override
 	protected RepositoryFactorySupport doCreateRepositoryFactory() {
-		return new MirageRepositoryFactory(sqlManager, nameConverter, dataSource, handlers);
+		return new MirageRepositoryFactory(sqlManager, nameConverter, dataSource, handlers, encoder);
 	}
 }

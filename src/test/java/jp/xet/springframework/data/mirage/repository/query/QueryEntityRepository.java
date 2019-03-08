@@ -13,30 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package jp.xet.springframework.data.mirage.repository;
+package jp.xet.springframework.data.mirage.repository.query;
 
-import java.util.Arrays;
+import java.util.Optional;
+
+import org.springframework.data.repository.query.Param;
+
+import org.ws2ten1.repositories.UpsertableRepository;
+
+import jp.xet.springframework.data.mirage.repository.chunk.ChunkEntity;
 
 /**
- * TODO for daisuke
+ * Repository interface for {@link ChunkEntity}.
  */
-@SuppressWarnings("serial")
-public class NoSuchSqlResourceException extends IllegalStateException {
+public interface QueryEntityRepository extends UpsertableRepository<QueryEntity, String> {
 	
-	private final SqlResourceCandidate[] candidates;
-	
-	
-	/**
-	 * インスタンスを生成する。
-	 *
-	 * @param candidates array of SQL resource candidate
-	 */
-	public NoSuchSqlResourceException(SqlResourceCandidate... candidates) {
-		super(Arrays.toString(candidates));
-		this.candidates = candidates.clone();
-	}
-	
-	public SqlResourceCandidate[] getCandidates() {
-		return candidates.clone();
-	}
+	@Query("find.sql")
+	Optional<QueryEntity> foo(@Param("hoge") String s);
 }

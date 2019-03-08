@@ -62,9 +62,12 @@ public class MirageRepositoryFactory extends RepositoryFactorySupport {
 	@NonNull
 	private final List<RepositoryActionListener> handlers;
 	
+	private final PaginationTokenEncoder encoder;
+	
 	
 	public MirageRepositoryFactory(SqlManager sqlManager) {
-		this(sqlManager, new DefaultNameConverter(), null, Collections.emptyList());
+		this(sqlManager, new DefaultNameConverter(), null, Collections.emptyList(),
+				new SimplePaginationTokenEncoder());
 	}
 	
 	@Override
@@ -76,7 +79,7 @@ public class MirageRepositoryFactory extends RepositoryFactorySupport {
 	@Override
 	protected Optional<QueryLookupStrategy> getQueryLookupStrategy(Key key,
 			QueryMethodEvaluationContextProvider evaluationContextProvider) {
-		return Optional.of(MirageQueryLookupStrategy.create(sqlManager, key));
+		return Optional.of(MirageQueryLookupStrategy.create(sqlManager, key, encoder));
 	}
 	
 	@Override
@@ -93,7 +96,6 @@ public class MirageRepositoryFactory extends RepositoryFactorySupport {
 		Class<?> repositoryInterface = metadata.getRepositoryInterface();
 		MirageEntityInformation mei = (MirageEntityInformation) getEntityInformation(metadata.getDomainType());
 		
-		PaginationTokenEncoder encoder = new SimplePaginationTokenEncoder();
 		DefaultMirageRepository repo = new DefaultMirageRepository(mei, sqlManager, handlers, encoder, dataSource);
 		try {
 			String name = repositoryInterface.getSimpleName() + ".sql";

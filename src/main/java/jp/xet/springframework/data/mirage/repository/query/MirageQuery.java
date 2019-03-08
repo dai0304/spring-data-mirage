@@ -48,7 +48,6 @@ import org.ws2ten1.chunks.ChunkImpl;
 import org.ws2ten1.chunks.Chunkable;
 import org.ws2ten1.chunks.Chunkable.PaginationRelation;
 import org.ws2ten1.chunks.PaginationTokenEncoder;
-import org.ws2ten1.chunks.SimplePaginationTokenEncoder;
 
 import com.miragesql.miragesql.SqlManager;
 import com.miragesql.miragesql.SqlResource;
@@ -135,7 +134,7 @@ public class MirageQuery implements RepositoryQuery { // NOPMD God class
 	
 	private final SqlManager sqlManager;
 	
-	private PaginationTokenEncoder encoder = new SimplePaginationTokenEncoder();
+	private final PaginationTokenEncoder encoder;
 	
 	
 	/**
@@ -145,11 +144,12 @@ public class MirageQuery implements RepositoryQuery { // NOPMD God class
 	 * @param sqlManager {@link SqlManager}
 	 * @throws IllegalArgumentException if the argument is {@code null}
 	 */
-	public MirageQuery(MirageQueryMethod mirageQueryMethod, SqlManager sqlManager) {
+	public MirageQuery(MirageQueryMethod mirageQueryMethod, SqlManager sqlManager, PaginationTokenEncoder encoder) {
 		Assert.notNull(mirageQueryMethod, "MirageQueryMethod must not to be null");
 		Assert.notNull(sqlManager, "SqlManager must not to be null");
 		this.mirageQueryMethod = mirageQueryMethod;
 		this.sqlManager = sqlManager;
+		this.encoder = encoder;
 		sqlResource = createSqlResource();
 	}
 	
