@@ -79,7 +79,7 @@ public class MirageRepositoryFactory extends RepositoryFactorySupport {
 	@Override
 	protected Optional<QueryLookupStrategy> getQueryLookupStrategy(Key key,
 			QueryMethodEvaluationContextProvider evaluationContextProvider) {
-		return Optional.of(MirageQueryLookupStrategy.create(sqlManager, key, encoder));
+		return Optional.of(MirageQueryLookupStrategy.create(key, sqlManager, encoder));
 	}
 	
 	@Override

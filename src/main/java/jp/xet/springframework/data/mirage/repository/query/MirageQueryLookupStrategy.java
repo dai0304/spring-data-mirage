@@ -35,135 +35,37 @@ import com.miragesql.miragesql.SqlManager;
  * Query lookup strategy to execute finders.
  *
  * <p>Base class for {@link QueryLookupStrategy} implementations that need access to an {@link SqlManager}.</p>
- *
- * @since 0.1
- * @version $Id$
- * @author daisuke
  */
-@RequiredArgsConstructor(access = AccessLevel.PACKAGE) // -@cs[AbstractClassName]
-public abstract class MirageQueryLookupStrategy implements QueryLookupStrategy {
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
+public class MirageQueryLookupStrategy implements QueryLookupStrategy {
 	
 	/**
 	 * Creates a {@link QueryLookupStrategy} for the given {@link SqlManager} and
 	 * {@link org.springframework.data.repository.query.QueryLookupStrategy.Key}.
 	 *
+	 * @param key {@link org.springframework.data.repository.query.QueryLookupStrategy.Key}
 	 * @param sqlManager {@link SqlManager}
-	 * @param key
-	 * @return
+	 * @return QueryLookupStrategy
 	 */
-	public static QueryLookupStrategy create(SqlManager sqlManager, Key key, PaginationTokenEncoder encoder) {
-		if (key == null) {
-			return new CreateIfNotFoundQueryLookupStrategy(sqlManager, encoder);
+	public static QueryLookupStrategy create(Key key, SqlManager sqlManager, PaginationTokenEncoder encoder) {
+		if (key == null || key == Key.USE_DECLARED_QUERY) {
+			return new MirageQueryLookupStrategy(sqlManager, encoder);
 		}
-		
-		switch (key) {
-			case CREATE:
-				return new CreateQueryLookupStrategy(sqlManager);
-			case USE_DECLARED_QUERY:
-				return new DeclaredQueryLookupStrategy(sqlManager, encoder);
-			case CREATE_IF_NOT_FOUND:
-				return new CreateIfNotFoundQueryLookupStrategy(sqlManager, encoder);
-			default:
-				throw new IllegalArgumentException(
-						String.format(Locale.ENGLISH, "Unsupported query lookup strategy %s!", key));
-		}
+		String message = String.format(Locale.ENGLISH, "Unsupported query lookup strategy %s!", key);
+		throw new IllegalArgumentException(message);
 	}
 	
 	
 	private final SqlManager sqlManager;
 	
+	private final PaginationTokenEncoder encoder;
+	
 	
 	@Override
 	public RepositoryQuery resolveQuery(Method method, RepositoryMetadata metadata, ProjectionFactory factory,
 			NamedQueries namedQueries) {
-		return resolveQuery(new MirageQueryMethod(method, metadata, factory), sqlManager, namedQueries);
-	}
-	
-	/**
-	 * TODO for daisuke
-	 *
-	 * @param method
-	 * @param sqlManager {@link SqlManager}
-	 * @param namedQueries
-	 * @return
-	 * @since 0.1
-	 */
-	protected abstract RepositoryQuery resolveQuery(MirageQueryMethod method, SqlManager sqlManager,
-			NamedQueries namedQueries);
-	
-	
-	/**
-	 * {@link QueryLookupStrategy} to try to detect a declared query first ( {@link Query}, Mirage named query). In case none
-	 * is found we fall back on query creation.
-	 */
-	private static class CreateIfNotFoundQueryLookupStrategy extends MirageQueryLookupStrategy {
-		
-		private final DeclaredQueryLookupStrategy strategy;
-		
-		private final CreateQueryLookupStrategy createStrategy;
-		
-		
-		CreateIfNotFoundQueryLookupStrategy(SqlManager sqlManager, PaginationTokenEncoder encoder) {
-			super(sqlManager);
-			strategy = new DeclaredQueryLookupStrategy(sqlManager, encoder);
-			createStrategy = new CreateQueryLookupStrategy(sqlManager);
-		}
-		
-		@Override
-		public RepositoryQuery resolveQuery(Method method, RepositoryMetadata metadata, ProjectionFactory factory,
-				NamedQueries namedQueries) {
-			try {
-				return strategy.resolveQuery(method, metadata, factory, namedQueries);
-			} catch (IllegalStateException e) {
-				return createStrategy.resolveQuery(method, metadata, factory, namedQueries);
-			}
-		}
-		
-		@Override
-		protected RepositoryQuery resolveQuery(MirageQueryMethod method, SqlManager sqlManager,
-				NamedQueries namedQueries) {
-			try {
-				return strategy.resolveQuery(method, sqlManager, namedQueries);
-			} catch (IllegalStateException e) {
-				return createStrategy.resolveQuery(method, sqlManager, namedQueries);
-			}
-		}
-	}
-	
-	/**
-	 * {@link QueryLookupStrategy} to create a query from the method name.
-	 */
-	private static class CreateQueryLookupStrategy extends MirageQueryLookupStrategy {
-		
-		CreateQueryLookupStrategy(SqlManager sqlManager) {
-			super(sqlManager);
-		}
-		
-		@Override
-		protected RepositoryQuery resolveQuery(MirageQueryMethod method, SqlManager sqlManager,
-				NamedQueries namedQueries) {
-			return null; // new PartTreeJpaQuery(method, sqlManager); // TODO
-		}
-	}
-	
-	/**
-	 * {@link QueryLookupStrategy} that tries to detect a declared query declared via {@link Query} annotation followed by
-	 * a Mirage named query lookup.
-	 */
-	private static class DeclaredQueryLookupStrategy extends MirageQueryLookupStrategy {
-		
-		private final PaginationTokenEncoder encoder;
-		
-		
-		DeclaredQueryLookupStrategy(SqlManager sqlManager, PaginationTokenEncoder encoder) {
-			super(sqlManager);
-			this.encoder = encoder;
-		}
-		
-		@Override
-		protected RepositoryQuery resolveQuery(MirageQueryMethod method, SqlManager sqlManager,
-				NamedQueries namedQueries) {
-			return new MirageQuery(method, sqlManager, encoder);
-		}
+		// TODO utilize namedQueries
+		MirageQueryMethod mirageQueryMethod = new MirageQueryMethod(method, metadata, factory);
+		return new MirageQuery(mirageQueryMethod, sqlManager, encoder);
 	}
 }

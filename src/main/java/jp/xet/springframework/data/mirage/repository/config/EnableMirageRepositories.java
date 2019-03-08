@@ -82,16 +82,16 @@ public @interface EnableMirageRepositories {
 	String repositoryImplementationPostfix() default "Impl";
 	
 	/**
-	 * Configures the location of where to find the Spring Data named queries properties file. Will default to
-	 * {@code META-INF/mirage-named-queries.properties}.
+	 * Configures the location of where to find the Spring Data named queries properties file.
+	 * Will default to {@code META-INF/mirage-named-queries.properties}.
 	 */
 	String namedQueriesLocation() default "";
 	
 	/**
-	 * Returns the key of the {@link QueryLookupStrategy} to be used for lookup queries for query methods. Defaults to
-	 * {@link Key#CREATE_IF_NOT_FOUND}.
+	 * Returns the key of the {@link QueryLookupStrategy} to be used for lookup queries for query methods.
+	 * Defaults to {@link Key#USE_DECLARED_QUERY}.
 	 */
-	Key queryLookupStrategy() default Key.CREATE_IF_NOT_FOUND;
+	Key queryLookupStrategy() default Key.USE_DECLARED_QUERY;
 	
 	/**
 	 * Returns the {@link FactoryBean} class to be used for each repository instance. Defaults to
