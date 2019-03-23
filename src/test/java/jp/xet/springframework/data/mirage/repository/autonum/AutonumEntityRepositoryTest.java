@@ -188,11 +188,14 @@ public class AutonumEntityRepositoryTest {
 	@Test
 	public void testCreate() {
 		AutonumEntity foo = new AutonumEntity("foo");
+		long idBeforeCreate = foo.getId();
 		// exercise
 		AutonumEntity actual = repo.create(foo);
 		// verify
-		assertThat(actual).isEqualTo(foo);
-		assertThat(repo.findById(foo.getId())).hasValue(foo);
+		assertThat(foo.getId()).isEqualTo(idBeforeCreate); // not changed
+		assertThat(actual.getId()).isNotEqualTo(foo.getId()); // auto numbered
+		assertThat(actual.getStr()).isEqualTo(foo.getStr());
+		assertThat(repo.findById(actual.getId())).hasValue(actual);
 	}
 	
 	@Test
@@ -211,14 +214,16 @@ public class AutonumEntityRepositoryTest {
 	
 	@Test
 	public void testSave() {
-		long id = ThreadLocalRandom.current().nextLong();
+		long id = Math.abs(ThreadLocalRandom.current().nextLong());
 		AutonumEntity foo = new AutonumEntity("foo")
 			.setId(id);
 		// exercise
 		AutonumEntity actual = repo.save(foo);
 		// verify
-		assertThat(actual).isEqualTo(foo);
-		assertThat(repo.findById(foo.getId())).hasValue(foo);
+		assertThat(foo.getId()).isEqualTo(id); // not changed
+		assertThat(actual.getId()).isNotEqualTo(foo.getId()); // auto numbered
+		assertThat(actual.getStr()).isEqualTo(foo.getStr());
+		assertThat(repo.findById(actual.getId())).hasValue(actual);
 	}
 	
 	@Test

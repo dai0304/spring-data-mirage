@@ -15,6 +15,8 @@
  */
 package jp.xet.springframework.data.mirage.repository.chunk;
 
+import java.io.Serializable;
+
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -36,7 +38,7 @@ import com.miragesql.miragesql.annotation.Table;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
 @SuppressWarnings("serial")
-public class ChunkEntity implements Comparable<ChunkEntity> {
+public class ChunkEntity implements Comparable<ChunkEntity>, Serializable {
 	
 	@Id
 	@Column(name = "id")

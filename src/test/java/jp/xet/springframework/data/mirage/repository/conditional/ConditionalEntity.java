@@ -15,6 +15,8 @@
  */
 package jp.xet.springframework.data.mirage.repository.conditional;
 
+import java.io.Serializable;
+
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -38,7 +40,7 @@ import jp.xet.springframework.data.mirage.repository.handler.BeforeUpdate;
 @Data
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
 @SuppressWarnings("serial")
-public class ConditionalEntity implements Comparable<ConditionalEntity> {
+public class ConditionalEntity implements Comparable<ConditionalEntity>, Serializable {
 	
 	@Id
 	@Column(name = "id")

@@ -15,12 +15,13 @@
  */
 package jp.xet.springframework.data.mirage.repository.autonum;
 
+import java.io.Serializable;
+
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 import lombok.experimental.Accessors;
 
 import org.springframework.data.annotation.Id;
@@ -39,10 +40,9 @@ import com.miragesql.miragesql.annotation.Table;
 @Data
 @Accessors(chain = true)
 @EqualsAndHashCode(of = "id")
-@ToString(of = "str")
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
 @SuppressWarnings("serial")
-public class AutonumEntity {
+public class AutonumEntity implements Serializable {
 	
 	@Id
 	@Column(name = "id")

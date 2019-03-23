@@ -15,6 +15,7 @@
  */
 package jp.xet.springframework.data.mirage.repository.preprocess;
 
+import java.io.Serializable;
 import java.time.Instant;
 
 import lombok.AccessLevel;
@@ -41,7 +42,7 @@ import jp.xet.springframework.data.mirage.repository.handler.BeforeUpdate;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
 @SuppressWarnings("serial")
-public class PreProcessEntity {
+public class PreProcessEntity implements Serializable {
 	
 	@Id
 	@Column(name = "id")

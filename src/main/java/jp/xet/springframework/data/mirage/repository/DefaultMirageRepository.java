@@ -27,6 +27,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import javax.sql.DataSource;
 
@@ -153,7 +155,7 @@ public class DefaultMirageRepository<E, ID extends Serializable & Comparable<ID>
 	
 	
 	/**
-	 * インスタンスを生成する。
+	 * Create new instance.
 	 *
 	 * @param entityInformation {@link EntityInformation}
 	 * @param sqlManager {@link SqlManager}
@@ -205,8 +207,9 @@ public class DefaultMirageRepository<E, ID extends Serializable & Comparable<ID>
 		if (entity == null) {
 			return null;
 		}
-		insertEntity("create", entity);
-		return entity;
+		S clone = CloneUtil.cloneIfPossible(entity);
+		insertEntity("create", clone);
+		return clone;
 	}
 	
 	// DeletableRepository
@@ -247,7 +250,7 @@ public class DefaultMirageRepository<E, ID extends Serializable & Comparable<ID>
 		}
 		for (E entity : entities) {
 			if (entity == null) {
-				throw new NullPointerException("entity is null"); // NOPMD
+				throw new NullPointerException("entities contains null"); // NOPMD
 			}
 		}
 		
@@ -357,19 +360,22 @@ public class DefaultMirageRepository<E, ID extends Serializable & Comparable<ID>
 		}
 		List<E> toUpdate = new ArrayList<>();
 		List<E> toInsert = new ArrayList<>();
+		List<S> result = new ArrayList<>();
 		for (S entity : entities) {
 			if (entity != null) {
+				S clone = CloneUtil.cloneIfPossible(entity);
+				result.add(clone);
 				if (existsById(entityInformation.getId(entity), true)) {
-					toUpdate.add(entity);
+					toUpdate.add(clone);
 				} else {
-					toInsert.add(entity);
+					toInsert.add(clone);
 				}
 			}
 		}
 		
 		updateBatch("saveAll", toUpdate);
 		insertBatch("saveAll", toInsert);
-		return newArrayList(entities);
+		return result;
 	}
 	
 	// UpsertableRepository
@@ -379,14 +385,15 @@ public class DefaultMirageRepository<E, ID extends Serializable & Comparable<ID>
 		if (entity == null) {
 			return null;
 		}
-		if (existsById(entityInformation.getId(entity), true)) {
-			updateEntity("save", entity);
-			log.debug("entity updated: {}", entity);
+		S clone = CloneUtil.cloneIfPossible(entity);
+		if (existsById(entityInformation.getId(clone), true)) {
+			updateEntity("save", clone);
+			log.debug("entity updated: {}", clone);
 		} else {
-			insertEntity("save", entity);
-			log.debug("entity inserted: {}", entity);
+			insertEntity("save", clone);
+			log.debug("entity inserted: {}", clone);
 		}
-		return entity;
+		return clone;
 	}
 	
 	// UpdatableRepository
@@ -396,21 +403,25 @@ public class DefaultMirageRepository<E, ID extends Serializable & Comparable<ID>
 		if (entity == null) {
 			return null;
 		}
-		int rowCount = updateEntity("update", entity);
+		S clone = CloneUtil.cloneIfPossible(entity);
+		int rowCount = updateEntity("update", clone);
 		if (rowCount == 1) {
-			log.debug("entity updated: {}", entity);
+			log.debug("entity updated: {}", clone);
 		} else {
 			throw new IncorrectResultSizeDataAccessException(1, rowCount);
 		}
-		return entity;
+		return clone;
 	}
 	
 	// BatchCreatableRepository
 	
 	@Override
 	public <S extends E> Iterable<S> createAll(Iterable<S> entities) {
-		insertBatch("createAll", newArrayList(entities));
-		return entities;
+		List<S> clones = StreamSupport.stream(entities.spliterator(), false)
+			.map(CloneUtil::cloneIfPossible)
+			.collect(Collectors.toList());
+		insertBatch("createAll", clones);
+		return clones;
 	}
 	
 	// ConditionalUpdatableRepository
@@ -420,11 +431,12 @@ public class DefaultMirageRepository<E, ID extends Serializable & Comparable<ID>
 		if (entity == null) {
 			return null;
 		}
-		E found = findById(entityInformation.getId(entity), true)
+		S clone = CloneUtil.cloneIfPossible(entity);
+		E found = findById(entityInformation.getId(clone), true)
 			.orElseThrow(() -> new IncorrectResultSizeDataAccessException(1, 0));
 		C actualCondition = entityInformation.getCondition(found);
 		if (condition == null || condition.equals(actualCondition)) {
-			return update(entity);
+			return update(clone);
 		} else {
 			String message =
 					String.format(Locale.ENGLISH, "expected is %s, but actual is %s", condition, actualCondition);
@@ -757,7 +769,8 @@ public class DefaultMirageRepository<E, ID extends Serializable & Comparable<ID>
 	 */
 	@SuppressWarnings({
 		"javadoc",
-		"unchecked"
+		"unchecked",
+		"unused"
 	})
 	protected int insertBatch(String task, E... entities) {
 		try {
@@ -771,7 +784,10 @@ public class DefaultMirageRepository<E, ID extends Serializable & Comparable<ID>
 	/**
 	 * @see SqlManager#insertEntity(Object)
 	 */
-	@SuppressWarnings("javadoc")
+	@SuppressWarnings({
+		"javadoc",
+		"unused"
+	})
 	protected int insertEntity(String task, Object entity) {
 		try {
 			handlers.forEach(handler -> handler.beforeCreate(entity));
@@ -833,7 +849,10 @@ public class DefaultMirageRepository<E, ID extends Serializable & Comparable<ID>
 	/**
 	 * @see SqlManager#updateBatch(List)
 	 */
-	@SuppressWarnings("javadoc")
+	@SuppressWarnings({
+		"javadoc",
+		"unused"
+	})
 	protected int updateBatch(String task, List<? extends E> entities) {
 		try {
 			entities.forEach(e -> handlers.forEach(handler -> handler.beforeUpdate(e)));

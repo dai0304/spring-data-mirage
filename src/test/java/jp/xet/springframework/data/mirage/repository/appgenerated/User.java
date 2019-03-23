@@ -15,6 +15,8 @@
  */
 package jp.xet.springframework.data.mirage.repository.appgenerated;
 
+import java.io.Serializable;
+
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -36,7 +38,7 @@ import com.miragesql.miragesql.annotation.Table;
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
 @AllArgsConstructor
 @SuppressWarnings("serial")
-public class User {
+public class User implements Serializable {
 	
 	@Id
 	@PrimaryKey(generationType = GenerationType.APPLICATION)
