@@ -70,8 +70,9 @@ public class MirageRepositoryFactory extends RepositoryFactorySupport {
 		return (EntityInformation<T, ID>) MirageEntityInformationSupport.getMetadata(domainClass, sqlManager);
 	}
 	
-	@Override protected Optional<QueryLookupStrategy> getQueryLookupStrategy(Key key,
-		QueryMethodEvaluationContextProvider evaluationContextProvider) {
+	@Override
+	protected Optional<QueryLookupStrategy> getQueryLookupStrategy(Key key,
+			QueryMethodEvaluationContextProvider evaluationContextProvider) {
 		return Optional.of(MirageQueryLookupStrategy.create(sqlManager, key));
 	}
 	
