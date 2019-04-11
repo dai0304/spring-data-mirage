@@ -7,14 +7,14 @@ buildscript {
 		maven { url "https://plugins.gradle.org/m2/" }
 	}
 	dependencies {
-		classpath "com.diffplug.spotless:spotless-plugin-gradle:3.10.0"
-		classpath "de.thetaphi:forbiddenapis:2.2"
-		classpath "de.aaschmid:gradle-cpd-plugin:1.0"
+		classpath "com.diffplug.spotless:spotless-plugin-gradle:3.18.0"
+		classpath "de.thetaphi:forbiddenapis:2.6"
+		classpath "de.aaschmid:gradle-cpd-plugin:1.2"
 	}
 }
 
 plugins {
-	id 'java'
+	id 'java-library'
 	id 'maven'
 	id 'maven-publish'
 	id "com.jfrog.bintray" version "1.7.3"
@@ -48,6 +48,11 @@ group = "jp.xet.springframework.data.mirage"
 ext.artifactId = "spring-data-mirage"
 
 defaultTasks "clean", "build"
+
+wrapper {
+	gradleVersion = '5.2.1'
+	distributionType = Wrapper.DistributionType.ALL
+}
 
 // compiler
 sourceCompatibility = 1.8
@@ -106,9 +111,4 @@ configurations.all {
 			details.useTarget "org.slf4j:log4j-over-slf4j:$slf4jVersion"
 		}
 	}
-}
-
-// ======== wrapper ========
-task wrapper(type: Wrapper) {
-	gradleVersion = "4.6"
 }
