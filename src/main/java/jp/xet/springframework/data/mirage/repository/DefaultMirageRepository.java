@@ -309,7 +309,7 @@ public class DefaultMirageRepository<E, ID extends Serializable & Comparable<ID>
 		
 		String pt;
 		if (resultList.isEmpty()) {
-			pt = encoder.encode(null, null);
+			pt = null; // encoder.encode(null, null);
 		} else {
 			String firstKey = null;
 			if (chunkable.getPaginationToken() != null && resultList.isEmpty() == false) {

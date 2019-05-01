@@ -28,6 +28,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.ws2ten1.chunks.Chunk;
+import org.ws2ten1.chunks.ChunkRequest;
+import org.ws2ten1.chunks.Chunkable;
 
 import com.miragesql.miragesql.SqlManager;
 
@@ -82,5 +85,60 @@ public class DefaultMirageRepositoryTest {
 		assertThat(actual).contains(new User("foo", "foopass"));
 		assertThat(actual).doesNotContain(new User("bar", "barpass"));
 		assertThat(actual).contains(new User("baz", "bazpass"));
+	}
+	
+	@Test
+	public void findAll_Iterable_Empty() {
+		// setup
+		UserRepository repos = factory.getRepository(UserRepository.class);
+		// exercise
+		Iterable<User> actual = repos.findAll(Arrays.asList("foo", "baz"));
+		// verify
+		assertThat(actual).isEmpty();
+	}
+	
+	@Test
+	public void findAll_Chunkable() {
+		// setup
+		UserRepository repos = factory.getRepository(UserRepository.class);
+		repos.save(new User("foo", "foopass"));
+		repos.save(new User("bar", "barpass"));
+		repos.save(new User("baz", "bazpass"));
+		// exercise
+		Chunk<User> actual = repos.findAll(new ChunkRequest(2));
+		// verify
+		assertThat(actual).hasSize(2);
+		assertThat(actual).doesNotContain(new User("foo", "foopass"));
+		assertThat(actual).contains(new User("bar", "barpass"));
+		assertThat(actual).contains(new User("baz", "bazpass"));
+		assertThat(actual.getPaginationToken()).isNotNull();
+	}
+	
+	@Test
+	public void findAll_ChunkableAll() {
+		// setup
+		UserRepository repos = factory.getRepository(UserRepository.class);
+		repos.save(new User("foo", "foopass"));
+		repos.save(new User("bar", "barpass"));
+		repos.save(new User("baz", "bazpass"));
+		// exercise
+		Chunk<User> actual = repos.findAll(new ChunkRequest(5));
+		// verify
+		assertThat(actual).hasSize(3);
+		assertThat(actual).contains(new User("foo", "foopass"));
+		assertThat(actual).contains(new User("bar", "barpass"));
+		assertThat(actual).contains(new User("baz", "bazpass"));
+		assertThat(actual.getPaginationToken()).isNotNull();
+	}
+	
+	@Test
+	public void findAll_ChunkableEmpty_NullPaginationToken() {
+		// setup
+		UserRepository repos = factory.getRepository(UserRepository.class);
+		// exercise
+		Chunk<User> actual = repos.findAll(new ChunkRequest(2));
+		// verify
+		assertThat(actual).isEmpty();
+		assertThat(actual.getPaginationToken()).isNull();
 	}
 }
