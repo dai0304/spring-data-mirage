@@ -30,7 +30,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ws2ten1.chunks.Chunk;
 import org.ws2ten1.chunks.ChunkRequest;
-import org.ws2ten1.chunks.Chunkable;
 
 import com.miragesql.miragesql.SqlManager;
 

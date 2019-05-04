@@ -307,10 +307,8 @@ public class DefaultMirageRepository<E, ID extends Serializable & Comparable<ID>
 			Collections.reverse(resultList);
 		}
 		
-		String pt;
-		if (resultList.isEmpty()) {
-			pt = null; // encoder.encode(null, null);
-		} else {
+		String pt = null; // encoder.encode(null, null);
+		if (resultList.isEmpty() == false) {
 			String firstKey = null;
 			if (chunkable.getPaginationToken() != null && resultList.isEmpty() == false) {
 				firstKey = Objects.toString(entityInformation.getId(resultList.get(0)));
