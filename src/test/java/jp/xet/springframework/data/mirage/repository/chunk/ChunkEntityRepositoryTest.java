@@ -170,12 +170,12 @@ public class ChunkEntityRepositoryTest {
 		
 		Chunk<ChunkEntity> chunk1again2 = repo.findAll(chunk0.nextChunkable());
 		assertThat(chunk1again2.hasContent()).isTrue();
-		assertThat(chunk1again2.isFirst()).isFalse();
+		assertThat(chunk1again2.isFirst()).isTrue();
 		assertThat(chunk1again2.isLast()).isFalse();
 		assertThat(chunk1again2.hasNext()).isTrue();
 		assertThat(chunk1again2.nextChunkable()).isNotNull();
-		assertThat(chunk1again2.hasPrevious()).isTrue();
-		assertThat(chunk1again2.previousChunkable()).isNotNull();
+		assertThat(chunk1again2.hasPrevious()).isFalse();
+		assertThat(chunk1again2.previousChunkable()).isNull();
 		assertThat(chunk1again2.getDirection()).isEqualTo(Direction.ASC);
 		assertThat(chunk1again2.getContent()).hasSize(8);
 		assertThat(Ordering.natural().isStrictlyOrdered(chunk1again2.getContent())).isTrue();
@@ -218,7 +218,7 @@ public class ChunkEntityRepositoryTest {
 		
 		Chunk<ChunkEntity> chunk1again = repo.findAll(chunk2.previousChunkable());
 		assertThat(chunk1again.hasContent()).isTrue();
-		assertThat(chunk1again.isFirst()).isFalse();
+		assertThat(chunk1again.isFirst()).isTrue();
 		assertThat(chunk1again.isLast()).isFalse();
 		assertThat(chunk1again.hasNext()).isTrue();
 		assertThat(chunk1again.nextChunkable()).isNotNull();
@@ -369,12 +369,12 @@ public class ChunkEntityRepositoryTest {
 		
 		Chunk<ChunkEntity> chunk1again2 = repo.findAll(chunk0.nextChunkable());
 		assertThat(chunk1again2.hasContent()).isTrue();
-		assertThat(chunk1again2.isFirst()).isFalse();
+		assertThat(chunk1again2.isFirst()).isTrue();
 		assertThat(chunk1again2.isLast()).isFalse();
 		assertThat(chunk1again2.hasNext()).isTrue();
 		assertThat(chunk1again2.nextChunkable()).isNotNull();
-		assertThat(chunk1again2.hasPrevious()).isTrue();
-		assertThat(chunk1again2.previousChunkable()).isNotNull();
+		assertThat(chunk1again2.hasPrevious()).isFalse();
+		assertThat(chunk1again2.previousChunkable()).isNull();
 		assertThat(chunk1again2.getDirection()).isEqualTo(Direction.DESC);
 		assertThat(chunk1again2.getContent()).hasSize(8);
 		assertThat(Ordering.natural().reverse().isStrictlyOrdered(chunk1again2.getContent())).isTrue();
@@ -417,7 +417,7 @@ public class ChunkEntityRepositoryTest {
 		
 		Chunk<ChunkEntity> chunk1again = repo.findAll(chunk2.previousChunkable());
 		assertThat(chunk1again.hasContent()).isTrue();
-		assertThat(chunk1again.isFirst()).isFalse();
+		assertThat(chunk1again.isFirst()).isTrue();
 		assertThat(chunk1again.isLast()).isFalse();
 		assertThat(chunk1again.hasNext()).isTrue();
 		assertThat(chunk1again.nextChunkable()).isNotNull();
