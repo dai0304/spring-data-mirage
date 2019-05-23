@@ -23,7 +23,6 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -34,6 +33,7 @@ import org.junit.runner.RunWith;
 import org.ws2ten1.chunks.Chunk;
 import org.ws2ten1.chunks.ChunkRequest;
 import org.ws2ten1.chunks.Chunkable;
+import org.ws2ten1.chunks.Direction;
 
 import com.google.common.collect.Ordering;
 

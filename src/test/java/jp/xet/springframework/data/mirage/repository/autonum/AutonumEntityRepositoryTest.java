@@ -33,7 +33,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -45,6 +44,7 @@ import org.junit.runner.RunWith;
 import org.ws2ten1.chunks.Chunk;
 import org.ws2ten1.chunks.ChunkRequest;
 import org.ws2ten1.chunks.Chunkable;
+import org.ws2ten1.chunks.Direction;
 
 import jp.xet.springframework.data.mirage.repository.MirageConfiguration;
 
@@ -167,7 +167,7 @@ public class AutonumEntityRepositoryTest {
 		repo.save(new AutonumEntity("foo"));
 		repo.save(new AutonumEntity("bar"));
 		// exercise
-		List<AutonumEntity> actual = repo.findAll(Sort.by(Direction.ASC, "id"));
+		List<AutonumEntity> actual = repo.findAll(Sort.by(Sort.Direction.ASC, "id"));
 		// verify
 		assertThat(actual).hasSize(2).extracting("str").containsExactly("foo", "bar");
 	}
@@ -178,7 +178,7 @@ public class AutonumEntityRepositoryTest {
 		repo.save(new AutonumEntity("foo"));
 		repo.save(new AutonumEntity("bar"));
 		// exercise
-		List<AutonumEntity> actual = repo.findAll(Sort.by(Direction.DESC, "id"));
+		List<AutonumEntity> actual = repo.findAll(Sort.by(Sort.Direction.DESC, "id"));
 		// verify
 		assertThat(actual).hasSize(2).extracting("str").containsExactly("bar", "foo");
 	}

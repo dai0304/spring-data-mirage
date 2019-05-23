@@ -37,7 +37,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.repository.query.Parameter;
 import org.springframework.data.repository.query.QueryMethod;
@@ -47,6 +46,7 @@ import org.springframework.util.Assert;
 import org.ws2ten1.chunks.ChunkImpl;
 import org.ws2ten1.chunks.Chunkable;
 import org.ws2ten1.chunks.Chunkable.PaginationRelation;
+import org.ws2ten1.chunks.Direction;
 import org.ws2ten1.chunks.PaginationTokenEncoder;
 
 import com.miragesql.miragesql.SqlManager;
