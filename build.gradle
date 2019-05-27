@@ -96,7 +96,7 @@ dependencies {
 	testCompile "ch.qos.logback:logback-classic:$logbackVersion"
 
 	pmd 'net.sourceforge.pmd:pmd-java:5.8.1'
-	pmd 'org.ow2.asm:asm:6.1'
+	pmd 'org.ow2.asm:asm:7.1'
 }
 
 
