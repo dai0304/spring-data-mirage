@@ -26,8 +26,8 @@ public interface MirageRepository<E, ID extends Serializable> extends PagingAndS
 ## Requirements
 
 * Java 8+
-* Spring Data Commons 2.0.x
-* Mirage 2.0.x
+* Spring Data Commons 2.1.x
+* Mirage 2.1.x
 
 
 ## Quick Start
@@ -52,7 +52,7 @@ Add the jar to your maven project :
 <dependency>
   <groupId>org.springframework.data</groupId>
   <artifactId>spring-data-mirage</artifactId>
-  <version>0.12.0.RELEASE</version>
+  <version>x.x.x.RELEASE</version>
 </dependency>
 ```
 
