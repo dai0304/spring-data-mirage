@@ -6,18 +6,17 @@ buildscript {
 		maven { url "https://plugins.gradle.org/m2/" }
 	}
 	dependencies {
-		classpath 'org.ajoberstar:grgit:1.7.2'
+		classpath 'org.ajoberstar.grgit:grgit-gradle:3.1.1'
 	}
 }
 
 ext {
-	git = org.ajoberstar.grgit.Grgit.open(file(rootProject.projectDir))
+	git = org.ajoberstar.grgit.Grgit.open(dir: file(rootProject.projectDir))
 	describedCommit = git.describe().toString().trim()
 }
 
 version = describedCommit +
-	(describedCommit.matches(".*-[0-9]+-g[0-9a-f]{7}") ? ".BUILD-SNAPSHOT" : "") +
-	(git.status().isClean() ? "" : "+dirty")
+	(describedCommit.matches(".*-[0-9]+-g[0-9a-f]{7}") ? ".BUILD-SNAPSHOT" : "")
 
 task showVersion {
 	doLast {
