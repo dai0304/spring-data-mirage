@@ -22,7 +22,7 @@ import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 
-import jp.sf.amateras.mirage.exception.SQLRuntimeException;
+import com.miragesql.miragesql.exception.SQLRuntimeException;
 
 /**
  * TODO for daisuke
@@ -52,7 +52,7 @@ public class MiragePersistenceExceptionTranslator implements PersistenceExceptio
 			return sqlExceptionTranslator.translate("", "unknown", sqlException);
 		}
 		
-		if (ex.getClass().getPackage().getName().startsWith("jp.sf.amateras.mirage.exception")) {
+		if (ex.getClass().getPackage().getName().startsWith("com.miragesql.miragesql.exception")) {
 			return new MirageDataAccessException(ex);
 		}
 		return null;

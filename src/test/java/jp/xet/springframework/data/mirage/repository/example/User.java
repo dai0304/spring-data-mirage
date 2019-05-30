@@ -18,11 +18,11 @@ package jp.xet.springframework.data.mirage.repository.example;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.domain.Persistable;
 
-import jp.sf.amateras.mirage.annotation.Column;
-import jp.sf.amateras.mirage.annotation.PrimaryKey;
-import jp.sf.amateras.mirage.annotation.PrimaryKey.GenerationType;
-import jp.sf.amateras.mirage.annotation.Table;
-import jp.sf.amateras.mirage.annotation.Transient;
+import com.miragesql.miragesql.annotation.Column;
+import com.miragesql.miragesql.annotation.PrimaryKey;
+import com.miragesql.miragesql.annotation.PrimaryKey.GenerationType;
+import com.miragesql.miragesql.annotation.Table;
+import com.miragesql.miragesql.annotation.Transient;
 
 /**
  * User entity.

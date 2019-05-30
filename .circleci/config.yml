@@ -33,9 +33,19 @@ jobs:
           path: build/test-results
       - deploy:
           name: Deploy to JFrog Bintray
-          command: ./gradlew bintrayUpload
+          command: ./gradlew build bintrayUpload
       - save_cache:
           key: v0-{{ .Branch }}-{{ checksum ".circleci/config.yml" }}-{{ checksum "build.gradle" }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
           paths:
             - "~/.gradle"
             - "~/.m2"
+
+workflows:
+  version: 2
+  all:
+    jobs:
+      - build:
+          context: bintray
+          filters:
+            tags:
+              only: /.*/

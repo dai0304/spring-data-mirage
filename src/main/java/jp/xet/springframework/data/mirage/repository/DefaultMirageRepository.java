@@ -48,14 +48,14 @@ import org.springframework.util.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jp.sf.amateras.mirage.IterationCallback;
-import jp.sf.amateras.mirage.SqlManager;
-import jp.sf.amateras.mirage.SqlResource;
-import jp.sf.amateras.mirage.annotation.Column;
-import jp.sf.amateras.mirage.exception.SQLRuntimeException;
-import jp.sf.amateras.mirage.naming.NameConverter;
-import jp.sf.amateras.mirage.util.MirageUtil;
-import jp.sf.amateras.mirage.util.Validate;
+import com.miragesql.miragesql.IterationCallback;
+import com.miragesql.miragesql.SqlManager;
+import com.miragesql.miragesql.SqlResource;
+import com.miragesql.miragesql.annotation.Column;
+import com.miragesql.miragesql.exception.SQLRuntimeException;
+import com.miragesql.miragesql.naming.NameConverter;
+import com.miragesql.miragesql.util.MirageUtil;
+import com.miragesql.miragesql.util.Validate;
 
 import jp.xet.sparwings.spring.data.chunk.Chunk;
 import jp.xet.sparwings.spring.data.chunk.ChunkImpl;
@@ -619,7 +619,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	}
 	
 	/**
-	 * @see SqlManager#executeUpdate(String)
+	 * @see SqlManager#executeUpdate(SqlResource, Object) 
 	 */
 	@SuppressWarnings("javadoc")
 	protected int executeUpdate(SqlResource resource) {
@@ -632,7 +632,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	}
 	
 	/**
-	 * @see SqlManager#executeUpdate(String, Object)
+	 * @see SqlManager#executeUpdate(SqlResource, Object) 
 	 */
 	@SuppressWarnings("javadoc")
 	protected int executeUpdate(SqlResource resource, Object param) {
@@ -655,7 +655,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	}
 	
 	/**
-	 * @see SqlManager#getCount(String)
+	 * @see SqlManager#getCount(SqlResource) 
 	 */
 	@SuppressWarnings("javadoc")
 	protected int getCount(SqlResource resource) {
@@ -668,7 +668,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	}
 	
 	/**
-	 * @see SqlManager#getCount(String, Object)
+	 * @see SqlManager#getCount(SqlResource, Object) 
 	 */
 	@SuppressWarnings("javadoc")
 	protected int getCount(SqlResource resource, Object param) {
@@ -708,7 +708,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	}
 	
 	/**
-	 * @see SqlManager#getResultList(Class, String)
+	 * @see SqlManager#getResultList(Class, SqlResource) 
 	 */
 	@SuppressWarnings("javadoc")
 	protected List<E> getResultList(SqlResource resource) {
@@ -721,7 +721,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	}
 	
 	/**
-	 * @see SqlManager#getResultList(Class, String, Object)
+	 * @see SqlManager#getResultList(Class, SqlResource, Object) 
 	 * @throws IllegalArgumentException 引数に{@code null}を与えた場合
 	 */
 	@SuppressWarnings("javadoc")
@@ -735,7 +735,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	}
 	
 	/**
-	 * @see SqlManager#getSingleResult(Class, String)
+	 * @see SqlManager#getSingleResult(Class, SqlResource) 
 	 */
 	@SuppressWarnings("javadoc")
 	protected E getSingleResult(SqlResource resource) {
@@ -748,7 +748,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	}
 	
 	/**
-	 * @see SqlManager#getSingleResult(Class, String, Object)
+	 * @see SqlManager#getSingleResult(Class, SqlResource, Object) 
 	 */
 	@SuppressWarnings("javadoc")
 	protected E getSingleResult(SqlResource resource, Object param) {
@@ -810,7 +810,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	}
 	
 	/**
-	 * @see SqlManager#iterate(Class, IterationCallback, String)
+	 * @see SqlManager#iterate(Class, IterationCallback, SqlResource) 
 	 */
 	@SuppressWarnings("javadoc")
 	protected <R> R iterate(IterationCallback<E, R> callback, SqlResource resource) {
@@ -823,7 +823,7 @@ public class DefaultMirageRepository<E, ID extends Serializable> implements Scan
 	}
 	
 	/**
-	 * @see SqlManager#iterate(Class, IterationCallback, String, Object)
+	 * @see SqlManager#iterate(Class, IterationCallback, SqlResource, Object) 
 	 */
 	@SuppressWarnings("javadoc")
 	protected <R> R iterate(IterationCallback<E, R> callback, SqlResource resource, Object param) {

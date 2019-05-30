@@ -46,9 +46,9 @@ import org.springframework.util.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jp.sf.amateras.mirage.SqlManager;
-import jp.sf.amateras.mirage.SqlResource;
-import jp.sf.amateras.mirage.StringSqlResource;
+import com.miragesql.miragesql.SqlManager;
+import com.miragesql.miragesql.SqlResource;
+import com.miragesql.miragesql.StringSqlResource;
 
 import jp.xet.sparwings.spring.data.chunk.ChunkImpl;
 import jp.xet.sparwings.spring.data.chunk.Chunkable;
@@ -71,6 +71,8 @@ public class MirageQuery implements RepositoryQuery {
 	private static Logger log = LoggerFactory.getLogger(MirageQuery.class);
 	
 	private static final int BUFFER_SIZE = 1024 * 4;
+	
+	private final SqlResource sqlResource;
 	
 	
 	static String getArgsPartOfSignature(Method method) {
@@ -171,11 +173,11 @@ public class MirageQuery implements RepositoryQuery {
 		Assert.notNull(sqlManager, "SqlManager must not to be null");
 		this.mirageQueryMethod = mirageQueryMethod;
 		this.sqlManager = sqlManager;
+		sqlResource = createSqlResource();
 	}
 	
 	@Override
 	public Object execute(Object[] parameters) {
-		SqlResource sqlResource = createSqlResource();
 		Map<String, Object> parameterMap = createParameterMap(parameters);
 		
 		Class<?> returnedDomainType = mirageQueryMethod.getReturnedObjectType();

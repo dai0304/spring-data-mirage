@@ -27,13 +27,15 @@ import org.springframework.transaction.annotation.Transactional;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import jp.xet.springframework.data.mirage.repository.TestConfiguration;
+
 /**
  * Test for {@link UserRepository}.
  * 
  * @author daisuke
  */
 @RunWith(SpringRunner.class)
-@ContextConfiguration("classpath:/test-context.xml")
+@ContextConfiguration(classes = TestConfiguration.class)
 @Transactional
 @SuppressWarnings("javadoc")
 public class UserRepositoryTest {

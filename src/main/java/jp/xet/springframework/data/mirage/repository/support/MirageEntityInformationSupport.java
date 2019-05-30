@@ -20,8 +20,8 @@ import java.io.Serializable;
 import org.springframework.data.repository.core.support.AbstractEntityInformation;
 import org.springframework.util.StringUtils;
 
-import jp.sf.amateras.mirage.SqlManager;
-import jp.sf.amateras.mirage.annotation.Table;
+import com.miragesql.miragesql.SqlManager;
+import com.miragesql.miragesql.annotation.Table;
 
 /**
  * TODO for daisuke

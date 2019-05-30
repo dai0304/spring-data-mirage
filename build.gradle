@@ -7,17 +7,17 @@ buildscript {
 		maven { url "https://plugins.gradle.org/m2/" }
 	}
 	dependencies {
-		classpath "com.diffplug.spotless:spotless-plugin-gradle:3.10.0"
-		classpath "de.thetaphi:forbiddenapis:2.2"
-		classpath "de.aaschmid:gradle-cpd-plugin:1.0"
+		classpath "com.diffplug.spotless:spotless-plugin-gradle:3.18.0"
+		classpath "de.thetaphi:forbiddenapis:2.6"
+		classpath "de.aaschmid:gradle-cpd-plugin:2.0"
 	}
 }
 
 plugins {
-	id 'java'
+	id 'java-library'
 	id 'maven'
 	id 'maven-publish'
-	id "com.jfrog.bintray" version "1.7.3"
+	id "com.jfrog.bintray" version "1.8.4"
 }
 
 // ======== code quality ========
@@ -49,6 +49,11 @@ ext.artifactId = "spring-data-mirage"
 
 defaultTasks "clean", "build"
 
+wrapper {
+	gradleVersion = '5.2.1'
+	distributionType = Wrapper.DistributionType.ALL
+}
+
 // compiler
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -75,10 +80,10 @@ configurations {
 
 dependencies {
 	compile "org.slf4j:slf4j-api:$slf4jVersion"
-	compile "org.slf4j:jul-to-slf4j:$slf4jVersion"
 	compile "com.google.guava:guava:$guavaVersion"
 	compile "org.springframework.data:spring-data-commons:$springDataCommonsVersion"
-	compile "jp.sf.amateras:mirage:$mirageVersion"
+	compile "com.miragesql:miragesql:$mirageVersion"
+	compile "com.miragesql:miragesql-integration:$mirageVersion"
 	compileOnly "org.springframework:spring-context:$springVersion"
 	compileOnly "org.springframework:spring-jdbc:$springVersion"
 	compileOnly "jp.xet.spar-wings:spar-wings-spring-data-chunk:$sparWingsVersion"
@@ -89,13 +94,10 @@ dependencies {
 	testCompile "org.mockito:mockito-core:$mockitoVersion"
 	testCompile "org.springframework:spring-test:$springVersion"
 	testCompile "com.h2database:h2:$h2DatabaseVersion"
-	testCompile("org.lazyluke:log4jdbc-remix:$log4jdbcVersion") {
-		exclude group:"slf4j-log4j12"
-	}
 	testCompile "ch.qos.logback:logback-classic:$logbackVersion"
 
-	pmd 'net.sourceforge.pmd:pmd-java:5.8.1'
-	pmd 'org.ow2.asm:asm:6.1'
+	pmd 'net.sourceforge.pmd:pmd-java:6.15.0'
+	pmd 'org.ow2.asm:asm:7.1'
 }
 
 
@@ -110,9 +112,4 @@ configurations.all {
 			details.useTarget "org.slf4j:log4j-over-slf4j:$slf4jVersion"
 		}
 	}
-}
-
-// ======== wrapper ========
-task wrapper(type: Wrapper) {
-	gradleVersion = "4.6"
 }

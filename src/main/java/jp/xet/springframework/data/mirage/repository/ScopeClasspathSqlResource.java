@@ -25,7 +25,7 @@ import org.springframework.util.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jp.sf.amateras.mirage.ClasspathSqlResource;
+import com.miragesql.miragesql.ClasspathSqlResource;
 
 /**
  * TODO daisuke
