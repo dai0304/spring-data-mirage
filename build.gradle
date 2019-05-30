@@ -83,6 +83,7 @@ dependencies {
 	compile "com.google.guava:guava:$guavaVersion"
 	compile "org.springframework.data:spring-data-commons:$springDataCommonsVersion"
 	compile "com.miragesql:miragesql:$mirageVersion"
+	compile "com.miragesql:miragesql-integration:$mirageVersion"
 	compileOnly "org.springframework:spring-context:$springVersion"
 	compileOnly "org.springframework:spring-jdbc:$springVersion"
 	compileOnly "jp.xet.spar-wings:spar-wings-spring-data-chunk:$sparWingsVersion"
