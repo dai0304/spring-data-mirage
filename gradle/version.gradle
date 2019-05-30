@@ -11,12 +11,13 @@ buildscript {
 }
 
 ext {
-	git = org.ajoberstar.grgit.Grgit.open(dir: file(rootProject.projectDir))
-	describedCommit = git.describe().toString().trim()
+	git = org.ajoberstar.grgit.Grgit.open(dir: file('.'))
+	describedCommit = git.describe(tags: true).toString().trim()
 }
 
 version = describedCommit +
-	(describedCommit.matches(".*-[0-9]+-g[0-9a-f]{7}") ? ".BUILD-SNAPSHOT" : "")
+	(describedCommit.matches(".*-[0-9]+-g[0-9a-f]{7}") ? "-SNAPSHOT" : "") +
+	(git.status().isClean() ? "" : "+dirty")
 
 task showVersion {
 	doLast {
