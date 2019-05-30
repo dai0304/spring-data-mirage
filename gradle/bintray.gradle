@@ -31,7 +31,7 @@ bintray {
 	user = System.env.BINTRAY_USER
 	key = System.env.BINTRAY_KEY
 	publications = ["mavenJava"]
-	dryRun = System.env.CIRCLE_BRANCH != "master"
+	dryRun = System.env.CIRCLE_TAG == null
 	publish = true
 	pkg {
 		repo = "maven"
