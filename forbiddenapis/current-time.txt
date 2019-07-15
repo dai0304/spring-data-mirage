@@ -1,0 +1,4 @@
+@defaultMessage System clock must be accessed via unified testable interface
+#java.lang.System#currentTimeMillis()
+#java.lang.System#nanoTime()
+#java.util.Date#<init>()

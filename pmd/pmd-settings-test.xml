@@ -1,0 +1,135 @@
+<?xml version="1.0"?>
+<ruleset name="ws2ten1 PMD rule-set"
+         xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 http://pmd.sourceforge.net/ruleset_2_0_0.xsd">
+
+  <description>ws2ten1 PMD rule-set</description>
+
+  <rule ref="category/java/bestpractices.xml" >
+    <!-- lombok -->
+    <exclude name="UnusedPrivateField"/>
+
+    <!-- actual expected rule -->
+    <exclude name="PositionLiteralsFirstInComparisons"/>
+    <exclude name="PositionLiteralsFirstInCaseInsensitiveComparisons"/>
+
+    <!-- abstractクラスはabstractメソッドを持たなければならない理由はない。 -->
+    <exclude name="AbstractClassWithoutAbstractMethod"/>
+
+    <exclude name="AccessorMethodGeneration"/>
+
+    <!-- unused rule -->
+    <exclude name="GuardLogStatement"/>
+
+    <!-- TODO ひとまず無効にしておく -->
+    <exclude name="JUnitTestsShouldIncludeAssert"/>
+
+    <!-- TODO ひとまず無効にしておく -->
+    <exclude name="JUnitAssertionsShouldIncludeMessage"/>
+
+    <!-- TODO これは無効にしておく -->
+    <exclude name="JUnitTestContainsTooManyAsserts"/>
+  </rule>
+
+  <rule ref="category/java/codestyle.xml/UnnecessaryModifier"/>
+  <rule ref="category/java/codestyle.xml/UnnecessaryReturn"/>
+  <rule ref="category/java/codestyle.xml/UselessQualifiedThis"/>
+
+  <rule ref="category/java/design.xml" >
+    <!-- forbidden-apis で対応できるので Exclude -->
+    <exclude name="LoosePackageCoupling"/>
+
+    <exclude name="TooManyFields"/>
+    <exclude name="TooManyMethods"/>
+
+    <!-- accord only in test -->
+    <exclude name="SignatureDeclareThrowsException"/>
+
+    <!-- 必要なこともある。少なければいいというものではない。 -->
+    <exclude name="ExcessiveParameterList"/>
+
+    <!-- accord only in test -->
+    <exclude name="ExcessiveClassLength"/>
+    <exclude name="ExcessivePublicCount"/>
+    <exclude name="ExcessiveMethodLength"/>
+    <exclude name="ExcessiveClassLength"/>
+
+    <!-- むやみにcombineすればいいものではない。 -->
+    <exclude name="CollapsibleIfStatements"/>
+
+    <!-- for lombok -->
+    <exclude name="SingularField"/>
+
+    <!-- for lombok -->
+    <exclude name="ImmutableField"/>
+
+    <!-- avoid not operator rule -->
+    <exclude name="SimplifyBooleanExpressions"/>
+
+    <exclude name="UseUtilityClass"/><!-- TODO exclude only main class -->
+
+    <!-- unused rule -->
+    <exclude name="ExcessiveImports"/>
+
+    <!-- unused rule -->
+    <exclude name="UseObjectForClearerAPI"/>
+
+    <!-- ignore new rule -->
+    <exclude name="LawOfDemeter"/>
+
+    <!-- unused rule -->
+    <exclude name="NcssCount"/>
+
+    <!-- unused rule -->
+    <exclude name="CyclomaticComplexity"/>
+  </rule>
+
+  <rule ref="category/java/documentation.xml" >
+    <exclude name="CommentRequired"/>
+    <exclude name="CommentSize"/>
+  </rule>
+
+  <rule ref="category/java/errorprone.xml" >
+
+    <!-- local rule -->
+    <exclude name="AvoidDuplicateLiterals"/>
+
+    <!-- unused rule -->
+    <exclude name="BeanMembersShouldSerialize" />
+
+    <!-- unused rule -->
+    <exclude name="AvoidLiteralsInIfCondition"/>
+
+    <!-- unused rule -->
+    <exclude name="AvoidFieldNameMatchingMethodName"/>
+
+    <!-- unused rule -->
+    <exclude name="AvoidFieldNameMatchingTypeName"/>
+
+    <!-- unused rule -->
+    <exclude name="DataflowAnomalyAnalysis"/>
+
+    <!-- accord only in test -->
+    <exclude name="MoreThanOneLogger"/>
+  </rule>
+
+  <rule ref="category/java/multithreading.xml" >
+    <!-- unused rule -->
+    <exclude name="UseConcurrentHashMap"/>
+  </rule>
+
+  <rule ref="category/java/performance.xml" >
+    <!-- unused rule -->
+    <exclude name="AvoidInstantiatingObjectsInLoops"/>
+    <!-- accord only in test -->
+    <exclude name="AppendCharacterWithChar"/>
+    <!-- TODO ひとまず無効にする -->
+    <exclude name="AddEmptyString"/>
+    <!-- TODO ひとまず無効にする -->
+    <exclude name="UseStringBufferForStringAppends"/>
+  </rule>
+
+  <rule ref="category/java/security.xml" />
+
+</ruleset>
