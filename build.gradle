@@ -15,12 +15,15 @@ buildscript {
 
 plugins {
 	id 'java-library'
-	id 'maven'
+	id 'org.springframework.boot' version '2.1.5.RELEASE'
 	id 'maven-publish'
 	id "com.jfrog.bintray" version "1.8.4"
 }
 
-// ======== code quality ========
+// basic plugins
+apply plugin: 'io.spring.dependency-management'
+
+// code quality plugins
 apply plugin: "checkstyle"
 apply plugin: "findbugs"
 apply plugin: "pmd"
@@ -38,21 +41,16 @@ apply from: "${rootProject.projectDir}/gradle/quality/jacoco.gradle"
 apply from: "${rootProject.projectDir}/gradle/quality/forbiddenapis.gradle"
 apply from: "${rootProject.projectDir}/gradle/quality/spotless.gradle"
 
+// custom configuration
 apply from: "${rootProject.projectDir}/gradle/version.gradle"
 apply from: "${rootProject.projectDir}/gradle/resolveDependencies.gradle"
 apply from: "${rootProject.projectDir}/gradle/sourceArtifact.gradle"
 apply from: "${rootProject.projectDir}/gradle/bintray.gradle"
 
-
 group = "jp.xet.springframework.data.mirage"
 ext.artifactId = "spring-data-mirage"
 
 defaultTasks "clean", "build"
-
-wrapper {
-	gradleVersion = '5.2.1'
-	distributionType = Wrapper.DistributionType.ALL
-}
 
 // compiler
 sourceCompatibility = 1.8
@@ -67,7 +65,6 @@ javadoc {
 	failOnError = false
 }
 
-// ======== libraries ========
 repositories {
 	jcenter()
 	mavenCentral()
@@ -78,38 +75,32 @@ configurations {
 	testCompile.extendsFrom compileOnly
 }
 
+dependencyManagement {
+	imports {
+		mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
+	}
+}
+
 dependencies {
-	compile "org.slf4j:slf4j-api:$slf4jVersion"
-	compile "com.google.guava:guava:$guavaVersion"
-	compile "org.springframework.data:spring-data-commons:$springDataCommonsVersion"
-	compile "com.miragesql:miragesql:$mirageVersion"
-	compile "com.miragesql:miragesql-integration:$mirageVersion"
-	compileOnly "org.springframework:spring-context:$springVersion"
-	compileOnly "org.springframework:spring-jdbc:$springVersion"
+	implementation "org.slf4j:slf4j-api"
+	implementation "com.google.guava:guava:$guavaVersion"
+	implementation "org.springframework.data:spring-data-commons"
+	implementation "com.miragesql:miragesql:$mirageVersion"
+	implementation "com.miragesql:miragesql-integration:$mirageVersion"
+	compileOnly "org.springframework:spring-context"
+	compileOnly "org.springframework:spring-jdbc"
 	compileOnly "jp.xet.spar-wings:spar-wings-spring-data-chunk:$sparWingsVersion"
 
 	// tests
-	testCompile "junit:junit:$junitVersion"
-	testCompile "org.hamcrest:hamcrest-library:$hamcrestVersion"
-	testCompile "org.mockito:mockito-core:$mockitoVersion"
-	testCompile "org.springframework:spring-test:$springVersion"
-	testCompile "com.h2database:h2:$h2DatabaseVersion"
-	testCompile "ch.qos.logback:logback-classic:$logbackVersion"
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation "com.h2database:h2"
+	testImplementation "ch.qos.logback:logback-classic"
 
 	pmd 'net.sourceforge.pmd:pmd-java:6.16.0'
 	pmd 'org.ow2.asm:asm:7.1'
 }
 
-
-configurations.all {
-	resolutionStrategy.eachDependency { DependencyResolveDetails details ->
-		if (details.requested.name == "commons-logging") {
-			// prefer "jcl-over-slf4j" over "commons-logging":
-			details.useTarget "org.slf4j:jcl-over-slf4j:$slf4jVersion"
-		}
-		if (details.requested.name == "log4j") {
-			// prefer "log4j-over-slf4j" over "log4j":
-			details.useTarget "org.slf4j:log4j-over-slf4j:$slf4jVersion"
-		}
-	}
+wrapper {
+	gradleVersion = '5.2.1'
+	distributionType = Wrapper.DistributionType.ALL
 }
