@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+	<Match>
+		<Bug pattern="CRLF_INJECTION_LOGS,EI_EXPOSE_REP,EI_EXPOSE_REP2,OS_OPEN_STREAM,PREDICTABLE_RANDOM,SPRING_CSRF_PROTECTION_DISABLED" />
+	</Match>
+</FindBugsFilter>

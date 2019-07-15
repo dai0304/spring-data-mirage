@@ -1,0 +1,2 @@
+ org.assertj.core.api.Java6Assertions @ Use org.assertj.core.api.Assertions. This class is compatible with Android.
+
