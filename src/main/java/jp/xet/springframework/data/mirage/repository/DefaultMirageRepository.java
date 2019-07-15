@@ -25,8 +25,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -52,8 +52,8 @@ import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 import org.springframework.util.Assert;
 
-import org.ws2ten1.chunks.Chunk;
-import org.ws2ten1.chunks.ChunkImpl;
+import org.ws2ten1.chunks.ChunkFactory;
+import org.ws2ten1.chunks.ChunkFactoryImpl;
 import org.ws2ten1.chunks.Chunkable;
 import org.ws2ten1.chunks.Chunkable.PaginationRelation;
 import org.ws2ten1.chunks.PaginationTokenEncoder;
@@ -295,9 +295,9 @@ public class DefaultMirageRepository<E, ID extends Serializable & Comparable<ID>
 	// ChunkableRepository
 	
 	@Override
-	public Chunk<E> findAll(Chunkable chunkable) {
+	public List<E> findAll(Chunkable chunkable) {
 		if (chunkable == null) {
-			return new ChunkImpl<>(newArrayList(findAll()), null, null);
+			return newArrayList(findAll());
 		}
 		
 		Map<String, Object> param = createParams(chunkable);
@@ -306,20 +306,16 @@ public class DefaultMirageRepository<E, ID extends Serializable & Comparable<ID>
 				&& param.get("before") != null) {
 			Collections.reverse(resultList);
 		}
-		
-		String pt = null; // encoder.encode(null, null);
-		if (resultList.isEmpty() == false) {
-			String firstKey = null;
-			if (chunkable.getPaginationToken() != null && resultList.isEmpty() == false) {
-				firstKey = Objects.toString(entityInformation.getId(resultList.get(0)));
-			}
-			String lastKey = null;
-			if (resultList.isEmpty() == false) {
-				lastKey = Objects.toString(entityInformation.getId(resultList.get(resultList.size() - 1)));
-			}
-			pt = encoder.encode(firstKey, lastKey);
-		}
-		return new ChunkImpl<>(resultList, pt, chunkable);
+		return resultList;
+	}
+	
+	@Override
+	public ChunkFactory<E, ID> getChunkFactory() {
+		return new ChunkFactoryImpl<>(entityInformation::getId, encoder);
+	}
+	
+	public Function<E, ID> getIdExtractor() {
+		return entityInformation::getId;
 	}
 	
 	// BatchReadableRepository

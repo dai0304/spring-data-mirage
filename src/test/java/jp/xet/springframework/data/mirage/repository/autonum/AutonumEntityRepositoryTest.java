@@ -324,15 +324,16 @@ public class AutonumEntityRepositoryTest {
 		
 		Chunkable chunkable = new ChunkRequest(2);
 		// exercise
-		Chunk<AutonumEntity> chunk = repo.findAll(chunkable);
+		List<AutonumEntity> list = repo.findAll(chunkable);
 		// verify
-		assertThat(chunk.getContent()).hasSize(2)
+		assertThat(list).hasSize(2)
 			.extracting("str").containsExactly("foo", "bar");
+		Chunk<AutonumEntity> chunk = repo.getChunkFactory().createChunk(list, chunkable);
 		
 		// exercise
-		chunk = repo.findAll(chunk.nextChunkable());
+		list = repo.findAll(chunk.nextChunkable());
 		// verify
-		assertThat(chunk.getContent()).hasSize(2)
+		assertThat(list).hasSize(2)
 			.extracting("str").containsExactly("baz", "qux");
 	}
 	
@@ -352,14 +353,15 @@ public class AutonumEntityRepositoryTest {
 		
 		Chunkable chunkable = new ChunkRequest(2, Direction.DESC);
 		// exercise
-		Chunk<AutonumEntity> chunk = repo.findAll(chunkable);
+		List<AutonumEntity> list = repo.findAll(chunkable);
 		// verify
-		assertThat(chunk.getContent()).hasSize(2)
+		assertThat(list).hasSize(2)
 			.extracting("str").containsExactly("garply", "grault");
+		Chunk<AutonumEntity> chunk = repo.getChunkFactory().createChunk(list, chunkable);
 		
 		// exercise
-		chunk = repo.findAll(chunk.nextChunkable());
-		assertThat(chunk.getContent()).hasSize(2)
+		list = repo.findAll(chunk.nextChunkable());
+		assertThat(list).hasSize(2)
 			.extracting("str").containsExactly("courge", "quux");
 	}
 	
@@ -416,20 +418,6 @@ public class AutonumEntityRepositoryTest {
 	}
 	
 	// Custom
-	
-	@Test
-	@Rollback
-	public void test_create_and_findChunk() {
-		assertThat(repo.count()).isEqualTo(0L);
-		AutonumEntity foo = repo.create(new AutonumEntity("foo"));
-		assertThat(repo.count()).isEqualTo(1L);
-		Chunk<AutonumEntity> chunk = repo.findChunk();
-		assertThat(chunk).hasSize(1);
-		
-		AutonumEntity found = chunk.iterator().next();
-		assertThat(found.getId()).isEqualTo(foo.getId());
-		assertThat(found.getStr()).isEqualTo("foo");
-	}
 	
 	@Test
 	@Rollback

@@ -19,7 +19,6 @@ import java.util.List;
 
 import org.springframework.data.repository.query.Param;
 
-import org.ws2ten1.chunks.Chunk;
 import org.ws2ten1.repositories.BatchReadableRepository;
 import org.ws2ten1.repositories.ChunkableRepository;
 import org.ws2ten1.repositories.CrudRepository;
@@ -61,12 +60,4 @@ public interface AutonumEntityRepository extends ScannableRepository<AutonumEnti
 	@StaticParam(key = "str", value = "hoge")
 	@StaticParam(key = "str2", value = "hoge2")
 	List<AutonumEntity> findXxx();
-	
-	/**
-	 * TODO for wreulicke
-	 *
-	 * @return the entities found
-	 */
-	Chunk<AutonumEntity> findChunk();
-	
 }

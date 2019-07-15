@@ -18,6 +18,7 @@ package jp.xet.springframework.data.mirage.repository;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.core.support.RepositoryFactorySupport;
@@ -103,14 +104,17 @@ public class DefaultMirageRepositoryTest {
 		repos.save(new User("foo", "foopass"));
 		repos.save(new User("bar", "barpass"));
 		repos.save(new User("baz", "bazpass"));
+		ChunkRequest chunkable = new ChunkRequest(2);
 		// exercise
-		Chunk<User> actual = repos.findAll(new ChunkRequest(2));
+		List<User> actual = repos.findAll(chunkable);
 		// verify
 		assertThat(actual).hasSize(2);
 		assertThat(actual).doesNotContain(new User("foo", "foopass"));
 		assertThat(actual).contains(new User("bar", "barpass"));
 		assertThat(actual).contains(new User("baz", "bazpass"));
-		assertThat(actual.getPaginationToken()).isNotNull();
+		
+		Chunk<User> chunk = repos.getChunkFactory().createChunk(actual, chunkable);
+		assertThat(chunk.getPaginationToken()).isNotNull();
 	}
 	
 	@Test
@@ -120,14 +124,17 @@ public class DefaultMirageRepositoryTest {
 		repos.save(new User("foo", "foopass"));
 		repos.save(new User("bar", "barpass"));
 		repos.save(new User("baz", "bazpass"));
+		ChunkRequest chunkable = new ChunkRequest(5);
 		// exercise
-		Chunk<User> actual = repos.findAll(new ChunkRequest(5));
+		List<User> actual = repos.findAll(chunkable);
 		// verify
 		assertThat(actual).hasSize(3);
 		assertThat(actual).contains(new User("foo", "foopass"));
 		assertThat(actual).contains(new User("bar", "barpass"));
 		assertThat(actual).contains(new User("baz", "bazpass"));
-		assertThat(actual.getPaginationToken()).isNotNull();
+		
+		Chunk<User> chunk = repos.getChunkFactory().createChunk(actual, chunkable);
+		assertThat(chunk.getPaginationToken()).isNotNull();
 	}
 	
 	@Test
@@ -135,9 +142,11 @@ public class DefaultMirageRepositoryTest {
 		// setup
 		UserRepository repos = factory.getRepository(UserRepository.class);
 		// exercise
-		Chunk<User> actual = repos.findAll(new ChunkRequest(2));
+		ChunkRequest chunkable = new ChunkRequest(2);
+		List<User> actual = repos.findAll(chunkable);
 		// verify
 		assertThat(actual).isEmpty();
-		assertThat(actual.getPaginationToken()).isNull();
+		Chunk<User> chunk = repos.getChunkFactory().createChunk(actual, chunkable);
+		assertThat(chunk.getPaginationToken()).isNull();
 	}
 }
