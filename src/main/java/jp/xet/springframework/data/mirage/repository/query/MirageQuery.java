@@ -18,7 +18,6 @@ package jp.xet.springframework.data.mirage.repository.query;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -27,12 +26,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.data.annotation.Id;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.SliceImpl;
@@ -43,11 +40,10 @@ import org.springframework.data.repository.query.QueryMethod;
 import org.springframework.data.repository.query.RepositoryQuery;
 import org.springframework.util.Assert;
 
-import org.ws2ten1.chunks.ChunkImpl;
-import org.ws2ten1.chunks.Chunkable;
-import org.ws2ten1.chunks.Chunkable.PaginationRelation;
-import org.ws2ten1.chunks.Direction;
-import org.ws2ten1.chunks.PaginationTokenEncoder;
+import org.ws2ten1.chunkrequests.Chunkable;
+import org.ws2ten1.chunkrequests.Chunkable.PaginationRelation;
+import org.ws2ten1.chunkrequests.Direction;
+import org.ws2ten1.chunkrequests.PaginationTokenEncoder;
 
 import com.miragesql.miragesql.SqlManager;
 import com.miragesql.miragesql.SqlResource;
@@ -257,29 +253,6 @@ public class MirageQuery implements RepositoryQuery { // NOPMD God class
 		return new ScopeClasspathSqlResource(candidates);
 	}
 	
-	private Object getId(Object entity) {
-		if (entity == null) {
-			return null;
-		}
-		Class<?> c = entity.getClass();
-		while (c != null && c != Object.class) {
-			Field[] declaredFields = c.getDeclaredFields();
-			for (Field field : declaredFields) {
-				Id idAnnotation = field.getAnnotation(Id.class);
-				if (idAnnotation != null) {
-					field.setAccessible(true);
-					try {
-						return field.get(entity);
-					} catch (Exception e) { // NOPMD
-						// ignore
-					}
-				}
-			}
-			c = c.getSuperclass();
-		}
-		return null;
-	}
-	
 	private int getTotalCount(SqlResource sqlResource) {
 		try (Reader reader = new InputStreamReader(sqlResource.getInputStream(), StandardCharsets.UTF_8)) {
 			String query = toString(reader);
@@ -309,18 +282,7 @@ public class MirageQuery implements RepositoryQuery { // NOPMD God class
 			addChunkParam(parameterMap, chunkable);
 		}
 		
-		List<?> resultList = sqlManager.getResultList(returnedDomainType, sqlResource, parameterMap);
-		
-		if (List.class.isAssignableFrom(mirageQueryMethod.getReturnType())) {
-			return resultList;
-		}
-		
-		String firstKey = Objects
-			.toString(getId((chunkable == null || chunkable.getPaginationToken() == null || resultList.isEmpty()) ? null
-					: resultList.get(0)));
-		String lastKey = Objects.toString(getId(resultList.isEmpty() ? null : resultList.get(resultList.size() - 1)));
-		String pt = encoder.encode(firstKey, lastKey);
-		return new ChunkImpl<>(resultList, pt, chunkable);
+		return sqlManager.getResultList(returnedDomainType, sqlResource, parameterMap);
 	}
 	
 	private Object processPageQuery(SqlResource sqlResource, Map<String, Object> parameterMap,

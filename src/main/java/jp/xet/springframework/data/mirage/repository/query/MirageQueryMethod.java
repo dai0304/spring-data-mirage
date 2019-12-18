@@ -17,6 +17,7 @@ package jp.xet.springframework.data.mirage.repository.query;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -32,7 +33,7 @@ import org.springframework.data.util.TypeInformation;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import org.ws2ten1.chunks.Chunk;
+import org.ws2ten1.chunkrequests.Chunkable;
 
 /**
  * TODO for daisuke
@@ -109,12 +110,15 @@ public class MirageQueryMethod extends QueryMethod {
 		return result;
 	}
 	
+	boolean isChunkingMethod() {
+		return Arrays.asList(method.getParameterTypes()).contains(Chunkable.class);
+	}
+	
 	/**
 	 * TODO for daisuke
 	 */
 	public boolean isChunkQuery() {
-		return isPageQuery() == false
-				&& org.springframework.util.ClassUtils.isAssignable(Chunk.class, unwrappedReturnType);
+		return isPageQuery() == false && isChunkingMethod();
 	}
 	
 	/**

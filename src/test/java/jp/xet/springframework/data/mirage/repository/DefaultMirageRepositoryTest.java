@@ -29,8 +29,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.ws2ten1.chunkrequests.ChunkRequest;
 import org.ws2ten1.chunks.Chunk;
-import org.ws2ten1.chunks.ChunkRequest;
+import org.ws2ten1.chunks.ChunkFactory;
 
 import com.miragesql.miragesql.SqlManager;
 
@@ -58,12 +59,12 @@ public class DefaultMirageRepositoryTest {
 	@Test
 	public void findAll() {
 		// setup
-		UserRepository repos = factory.getRepository(UserRepository.class);
-		repos.save(new User("foo", "foopass"));
-		repos.save(new User("bar", "barpass"));
-		repos.save(new User("baz", "bazpass"));
+		UserRepository repo = factory.getRepository(UserRepository.class);
+		repo.save(new User("foo", "foopass"));
+		repo.save(new User("bar", "barpass"));
+		repo.save(new User("baz", "bazpass"));
 		// exercise
-		Iterable<User> actual = repos.findAll();
+		Iterable<User> actual = repo.findAll();
 		// verify
 		assertThat(actual).hasSize(3);
 		assertThat(actual).contains(new User("foo", "foopass"));
@@ -74,12 +75,12 @@ public class DefaultMirageRepositoryTest {
 	@Test
 	public void findAll_Iterable() {
 		// setup
-		UserRepository repos = factory.getRepository(UserRepository.class);
-		repos.save(new User("foo", "foopass"));
-		repos.save(new User("bar", "barpass"));
-		repos.save(new User("baz", "bazpass"));
+		UserRepository repo = factory.getRepository(UserRepository.class);
+		repo.save(new User("foo", "foopass"));
+		repo.save(new User("bar", "barpass"));
+		repo.save(new User("baz", "bazpass"));
 		// exercise
-		Iterable<User> actual = repos.findAll(Arrays.asList("foo", "baz"));
+		Iterable<User> actual = repo.findAll(Arrays.asList("foo", "baz"));
 		// verify
 		assertThat(actual).hasSize(2);
 		assertThat(actual).contains(new User("foo", "foopass"));
@@ -90,9 +91,9 @@ public class DefaultMirageRepositoryTest {
 	@Test
 	public void findAll_Iterable_Empty() {
 		// setup
-		UserRepository repos = factory.getRepository(UserRepository.class);
+		UserRepository repo = factory.getRepository(UserRepository.class);
 		// exercise
-		Iterable<User> actual = repos.findAll(Arrays.asList("foo", "baz"));
+		Iterable<User> actual = repo.findAll(Arrays.asList("foo", "baz"));
 		// verify
 		assertThat(actual).isEmpty();
 	}
@@ -100,53 +101,53 @@ public class DefaultMirageRepositoryTest {
 	@Test
 	public void findAll_Chunkable() {
 		// setup
-		UserRepository repos = factory.getRepository(UserRepository.class);
-		repos.save(new User("foo", "foopass"));
-		repos.save(new User("bar", "barpass"));
-		repos.save(new User("baz", "bazpass"));
+		UserRepository repo = factory.getRepository(UserRepository.class);
+		repo.save(new User("foo", "foopass"));
+		repo.save(new User("bar", "barpass"));
+		repo.save(new User("baz", "bazpass"));
 		ChunkRequest chunkable = new ChunkRequest(2);
 		// exercise
-		List<User> actual = repos.findAll(chunkable);
+		List<User> actual = repo.findAll(chunkable);
 		// verify
 		assertThat(actual).hasSize(2);
 		assertThat(actual).doesNotContain(new User("foo", "foopass"));
 		assertThat(actual).contains(new User("bar", "barpass"));
 		assertThat(actual).contains(new User("baz", "bazpass"));
 		
-		Chunk<User> chunk = repos.getChunkFactory().createChunk(actual, chunkable);
+		Chunk<User> chunk = ChunkFactory.from(repo).createChunk(actual, chunkable);
 		assertThat(chunk.getPaginationToken()).isNotNull();
 	}
 	
 	@Test
 	public void findAll_ChunkableAll() {
 		// setup
-		UserRepository repos = factory.getRepository(UserRepository.class);
-		repos.save(new User("foo", "foopass"));
-		repos.save(new User("bar", "barpass"));
-		repos.save(new User("baz", "bazpass"));
+		UserRepository repo = factory.getRepository(UserRepository.class);
+		repo.save(new User("foo", "foopass"));
+		repo.save(new User("bar", "barpass"));
+		repo.save(new User("baz", "bazpass"));
 		ChunkRequest chunkable = new ChunkRequest(5);
 		// exercise
-		List<User> actual = repos.findAll(chunkable);
+		List<User> actual = repo.findAll(chunkable);
 		// verify
 		assertThat(actual).hasSize(3);
 		assertThat(actual).contains(new User("foo", "foopass"));
 		assertThat(actual).contains(new User("bar", "barpass"));
 		assertThat(actual).contains(new User("baz", "bazpass"));
 		
-		Chunk<User> chunk = repos.getChunkFactory().createChunk(actual, chunkable);
+		Chunk<User> chunk = ChunkFactory.from(repo).createChunk(actual, chunkable);
 		assertThat(chunk.getPaginationToken()).isNotNull();
 	}
 	
 	@Test
 	public void findAll_ChunkableEmpty_NullPaginationToken() {
 		// setup
-		UserRepository repos = factory.getRepository(UserRepository.class);
+		UserRepository repo = factory.getRepository(UserRepository.class);
 		// exercise
 		ChunkRequest chunkable = new ChunkRequest(2);
-		List<User> actual = repos.findAll(chunkable);
+		List<User> actual = repo.findAll(chunkable);
 		// verify
 		assertThat(actual).isEmpty();
-		Chunk<User> chunk = repos.getChunkFactory().createChunk(actual, chunkable);
+		Chunk<User> chunk = ChunkFactory.from(repo).createChunk(actual, chunkable);
 		assertThat(chunk.getPaginationToken()).isNull();
 	}
 }

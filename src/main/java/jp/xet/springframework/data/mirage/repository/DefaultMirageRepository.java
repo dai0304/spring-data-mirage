@@ -52,11 +52,9 @@ import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 import org.springframework.util.Assert;
 
-import org.ws2ten1.chunks.ChunkFactory;
-import org.ws2ten1.chunks.ChunkFactoryImpl;
-import org.ws2ten1.chunks.Chunkable;
-import org.ws2ten1.chunks.Chunkable.PaginationRelation;
-import org.ws2ten1.chunks.PaginationTokenEncoder;
+import org.ws2ten1.chunkrequests.Chunkable;
+import org.ws2ten1.chunkrequests.Chunkable.PaginationRelation;
+import org.ws2ten1.chunkrequests.PaginationTokenEncoder;
 import org.ws2ten1.repositories.BatchCreatableRepository;
 import org.ws2ten1.repositories.BatchDeletableRepository;
 import org.ws2ten1.repositories.BatchReadableRepository;
@@ -144,8 +142,8 @@ public class DefaultMirageRepository<E, ID extends Serializable & Comparable<ID>
 	@Getter(AccessLevel.PROTECTED)
 	private final List<RepositoryActionListener> handlers;
 	
-	@Getter(AccessLevel.PROTECTED)
-	private final PaginationTokenEncoder encoder;
+	@Getter
+	private final PaginationTokenEncoder paginationTokenEncoder;
 	
 	@Getter(AccessLevel.PROTECTED)
 	private final SQLExceptionTranslator exceptionTranslator;
@@ -161,12 +159,13 @@ public class DefaultMirageRepository<E, ID extends Serializable & Comparable<ID>
 	 * @param sqlManager {@link SqlManager}
 	 */
 	public DefaultMirageRepository(MirageEntityInformation<E, ID, C> entityInformation, SqlManager sqlManager,
-			List<RepositoryActionListener> handlers, PaginationTokenEncoder encoder, DataSource dataSource) {
+			List<RepositoryActionListener> handlers, PaginationTokenEncoder paginationTokenEncoder,
+			DataSource dataSource) {
 		Assert.notNull(entityInformation, "entityInformation is required");
 		this.entityInformation = entityInformation;
 		this.sqlManager = sqlManager;
 		this.handlers = handlers;
-		this.encoder = encoder;
+		this.paginationTokenEncoder = paginationTokenEncoder;
 		
 		if (dataSource != null) {
 			this.exceptionTranslator = new SQLErrorCodeSQLExceptionTranslator(dataSource);
@@ -310,10 +309,6 @@ public class DefaultMirageRepository<E, ID extends Serializable & Comparable<ID>
 	}
 	
 	@Override
-	public ChunkFactory<E, ID> getChunkFactory() {
-		return new ChunkFactoryImpl<>(entityInformation::getId, encoder);
-	}
-	
 	public Function<E, ID> getIdExtractor() {
 		return entityInformation::getId;
 	}
@@ -917,11 +912,11 @@ public class DefaultMirageRepository<E, ID extends Serializable & Comparable<ID>
 			String key;
 			
 			if (forward) {
-				key = encoder.extractLastKey(chunkable.getPaginationToken()).orElse(null);
+				key = paginationTokenEncoder.extractLastKey(chunkable.getPaginationToken()).orElse(null);
 				params.put("after", key);
 				log.debug("Using last key as after: {}", key);
 			} else {
-				key = encoder.extractFirstKey(chunkable.getPaginationToken()).orElse(null);
+				key = paginationTokenEncoder.extractFirstKey(chunkable.getPaginationToken()).orElse(null);
 				params.put("before", key);
 				log.debug("Using first key as before: {}", key);
 			}

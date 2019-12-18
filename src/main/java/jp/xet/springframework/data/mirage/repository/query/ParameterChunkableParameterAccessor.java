@@ -18,7 +18,7 @@ package jp.xet.springframework.data.mirage.repository.query;
 import org.springframework.data.repository.query.Parameters;
 import org.springframework.data.repository.query.ParametersParameterAccessor;
 
-import org.ws2ten1.chunks.Chunkable;
+import org.ws2ten1.chunkrequests.Chunkable;
 
 /**
  * TODO for daisuke

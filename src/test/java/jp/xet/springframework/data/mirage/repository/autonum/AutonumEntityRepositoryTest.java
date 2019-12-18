@@ -41,10 +41,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.ws2ten1.chunkrequests.ChunkRequest;
+import org.ws2ten1.chunkrequests.Chunkable;
+import org.ws2ten1.chunkrequests.Direction;
 import org.ws2ten1.chunks.Chunk;
-import org.ws2ten1.chunks.ChunkRequest;
-import org.ws2ten1.chunks.Chunkable;
-import org.ws2ten1.chunks.Direction;
+import org.ws2ten1.chunks.ChunkFactory;
 
 import jp.xet.springframework.data.mirage.repository.MirageConfiguration;
 
@@ -328,7 +329,7 @@ public class AutonumEntityRepositoryTest {
 		// verify
 		assertThat(list).hasSize(2)
 			.extracting("str").containsExactly("foo", "bar");
-		Chunk<AutonumEntity> chunk = repo.getChunkFactory().createChunk(list, chunkable);
+		Chunk<AutonumEntity> chunk = ChunkFactory.from(repo).createChunk(list, chunkable);
 		
 		// exercise
 		list = repo.findAll(chunk.nextChunkable());
@@ -357,7 +358,7 @@ public class AutonumEntityRepositoryTest {
 		// verify
 		assertThat(list).hasSize(2)
 			.extracting("str").containsExactly("garply", "grault");
-		Chunk<AutonumEntity> chunk = repo.getChunkFactory().createChunk(list, chunkable);
+		Chunk<AutonumEntity> chunk = ChunkFactory.from(repo).createChunk(list, chunkable);
 		
 		// exercise
 		list = repo.findAll(chunk.nextChunkable());

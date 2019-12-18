@@ -27,7 +27,7 @@ import org.springframework.data.repository.core.RepositoryMetadata;
 import org.springframework.data.repository.query.QueryLookupStrategy;
 import org.springframework.data.repository.query.RepositoryQuery;
 
-import org.ws2ten1.chunks.PaginationTokenEncoder;
+import org.ws2ten1.chunkrequests.PaginationTokenEncoder;
 
 import com.miragesql.miragesql.SqlManager;
 
