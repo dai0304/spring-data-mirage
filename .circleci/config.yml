@@ -1,10 +1,11 @@
 version: 2
+
 jobs:
   build:
     docker:
       - image: circleci/openjdk:8u181-jdk
     environment:
-      _JAVA_OPTIONS: -Xmx3G
+      JVM_OPTS: -Xmx3G
       GRADLE_OPTS: -Dorg.gradle.daemon=false
       TERM: dumb
     steps:
@@ -17,18 +18,22 @@ jobs:
             - v1-develop
             - v1-master
       - run:
-          name: Show version
+          name: Show gradle version
           command: ./gradlew -v
       - run:
-          name: Resolve dependencies
-          command: ./gradlew resolveDependencies
+          name: Download gradle dependencies
+          command: ./gradlew dependencies
+      - save_cache:
+          key: v1-{{ .Branch }}-{{ checksum ".circleci/config.yml" }}-{{ checksum "build.gradle" }}-{{ checksum "gradle.properties" }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
+          paths:
+            - ~/.gradle
+            - ~/.m2
       - run:
           name: Run tests
-          command: ./gradlew check jacocoTestReport
+          command: ./gradlew clean check
       - store_artifacts:
           name: Store artifacts
           path: build/reports
-          destination: artifacts
       - store_test_results:
           path: build/test-results
       - deploy:
@@ -37,11 +42,6 @@ jobs:
             if [ -n "${CIRCLE_TAG}" -a -n "${BINTRAY_USER}" ]; then
               ./gradlew build bintrayUpload
             fi
-      - save_cache:
-          key: v0-{{ .Branch }}-{{ checksum ".circleci/config.yml" }}-{{ checksum "build.gradle" }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
-          paths:
-            - "~/.gradle"
-            - "~/.m2"
 
 workflows:
   version: 2

@@ -1,58 +1,40 @@
-// -*- coding: utf-8; mode: groovy -*-
-
-buildscript {
-	repositories {
-		jcenter()
-		mavenCentral()
-		maven { url 'https://plugins.gradle.org/m2/' }
-	}
-	dependencies {
-		classpath 'de.thetaphi:forbiddenapis:2.6'
-		classpath 'de.aaschmid:gradle-cpd-plugin:2.0'
-		classpath "gradle.plugin.com.github.spotbugs:spotbugs-gradle-plugin:$spotbugsPluginVersion"
-	}
-}
+// ================
+// Gradle configuration
 
 plugins {
 	id 'java-library'
-	id 'org.springframework.boot' version '2.2.2.RELEASE'
 	id 'maven-publish'
+	id 'org.springframework.boot' version '2.2.2.RELEASE'
 	id 'com.jfrog.bintray' version '1.8.4'
+
+	// https://github.com/palantir/gradle-git-version
+	id 'com.palantir.git-version' version '0.12.2'
+
+	// code quality plugins
+	id 'checkstyle'
 	id 'pmd'
-	id 'com.diffplug.gradle.spotless' version '3.23.1'
+	id 'jacoco'
+	id 'com.github.spotbugs' version '3.0.0'
+	id 'de.thetaphi.forbiddenapis' version '2.7'
+	id 'com.diffplug.gradle.spotless' version '3.26.1'
 }
 
-// basic plugins
-apply plugin: 'io.spring.dependency-management'
+wrapper {
+	distributionType = Wrapper.DistributionType.ALL
+}
 
-// code quality plugins
-apply plugin: "checkstyle"
-apply plugin: "com.github.spotbugs"
-apply plugin: "cpd"
-apply plugin: "jacoco"
-apply plugin: "de.thetaphi.forbiddenapis"
+defaultTasks 'clean', 'build'
 
-// code quality configuration
-apply from: "${rootProject.projectDir}/config/checkstyle.gradle"
-apply from: "${rootProject.projectDir}/config/spotbugs.gradle"
-apply from: "${rootProject.projectDir}/config/pmd.gradle"
-apply from: "${rootProject.projectDir}/config/cpd.gradle"
-apply from: "${rootProject.projectDir}/config/jacoco.gradle"
-apply from: "${rootProject.projectDir}/config/forbiddenapis.gradle"
-apply from: "${rootProject.projectDir}/config/spotless.gradle"
-
-// custom configuration
-apply from: "${rootProject.projectDir}/gradle/version.gradle"
-apply from: "${rootProject.projectDir}/gradle/resolveDependencies.gradle"
-apply from: "${rootProject.projectDir}/gradle/sourceArtifact.gradle"
-apply from: "${rootProject.projectDir}/gradle/bintray.gradle"
+// ================
+// Project metadata configuration
 
 group = "jp.xet.springframework.data.mirage"
+version = gitVersion()
 ext.artifactId = "spring-data-mirage"
 
-defaultTasks "clean", "build"
+// ================
+// Build configuration
 
-// compiler
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
@@ -64,6 +46,8 @@ compileJava {
 javadoc {
 	failOnError = false
 }
+
+apply plugin: 'io.spring.dependency-management'
 
 repositories {
 	jcenter()
@@ -85,7 +69,8 @@ dependencies {
 	api "com.miragesql:miragesql:2.1.0"
 	api "com.miragesql:miragesql-integration:2.1.0"
 	api "org.ws2ten1:ws2ten1-repositories:1.0.0-rc12"
-	api "org.ws2ten1:ws2ten1-chunks:1.0.0-rc11"
+	api 'org.ws2ten1:ws2ten1-chunkrequests:1.0.0-rc1'
+
 	implementation "org.slf4j:slf4j-api"
 	implementation "com.google.guava:guava:24.1-jre"
 	implementation "org.springframework.data:spring-data-commons"
@@ -120,13 +105,27 @@ jar {
 	enabled = true
 }
 
+// ================
+// Lint / Test configuration
+
+apply from: "${rootProject.projectDir}/config/checkstyle.gradle"
+apply from: "${rootProject.projectDir}/config/spotbugs.gradle"
+apply from: "${rootProject.projectDir}/config/pmd.gradle"
+apply from: "${rootProject.projectDir}/config/jacoco.gradle"
+apply from: "${rootProject.projectDir}/config/forbiddenapis.gradle"
+apply from: "${rootProject.projectDir}/config/spotless.gradle"
+
+
 tasks.withType(com.github.spotbugs.SpotBugsTask) {
 	reports {
-		html {
-			enabled = true
-		}
-		xml {
-			enabled = false
-		}
+		html.enabled = true
+		xml.enabled = false
 	}
 }
+
+// ================
+// Deploy configuration
+
+apply from: "${rootProject.projectDir}/gradle/sourceArtifact.gradle"
+apply from: "${rootProject.projectDir}/gradle/bintray.gradle"
+
