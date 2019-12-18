@@ -128,4 +128,3 @@ tasks.withType(com.github.spotbugs.SpotBugsTask) {
 
 apply from: "${rootProject.projectDir}/gradle/sourceArtifact.gradle"
 apply from: "${rootProject.projectDir}/gradle/bintray.gradle"
-

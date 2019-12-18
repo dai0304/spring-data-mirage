@@ -53,8 +53,8 @@ public class ConditionalEntityRepositoryTest {
 	@Autowired
 	ConditionalEntityRepository repo;
 	
-	
 	// ConditionalUpdatableRepository
+	
 	
 	@Test
 	@Rollback

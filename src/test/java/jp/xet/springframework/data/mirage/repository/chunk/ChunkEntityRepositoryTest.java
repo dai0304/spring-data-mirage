@@ -52,8 +52,8 @@ public class ChunkEntityRepositoryTest {
 	@Autowired
 	ChunkEntityRepository repo;
 	
-	
 	// ChunkableRepository
+	
 	
 	@Test
 	@Rollback

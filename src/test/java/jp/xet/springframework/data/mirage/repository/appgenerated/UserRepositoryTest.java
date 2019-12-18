@@ -62,8 +62,8 @@ public class UserRepositoryTest {
 	@Autowired
 	UserRepository repo;
 	
-	
 	// ReadableRepository
+	
 	
 	@Test
 	@Rollback

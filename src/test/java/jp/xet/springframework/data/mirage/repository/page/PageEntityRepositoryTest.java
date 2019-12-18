@@ -52,8 +52,8 @@ public class PageEntityRepositoryTest {
 	@Autowired
 	PageEntityRepository repo;
 	
-	
 	// PageableRepository
+	
 	
 	@Test
 	@Rollback

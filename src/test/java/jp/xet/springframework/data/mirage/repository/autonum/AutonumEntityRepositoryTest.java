@@ -63,8 +63,8 @@ public class AutonumEntityRepositoryTest {
 	@Autowired
 	AutonumEntityRepository repo;
 	
-	
 	// ReadableRepository
+	
 	
 	@Test
 	@Rollback
