@@ -35,16 +35,16 @@ import java.lang.annotation.Target;
 public @interface StaticParam {
 	
 	/**
+	 * The key.
 	 *
-	 * @return
-	 * @since 0.1
+	 * @return key
 	 */
 	String key();
 	
 	/**
+	 * The value.
 	 *
-	 * @return
-	 * @since 0.1
+	 * @return value
 	 */
 	String value();
 }

@@ -89,8 +89,7 @@ public class MirageQueryMethod extends QueryMethod {
 	/**
 	 * TODO for daisuke
 	 *
-	 * @return
-	 * @since 0.1
+	 * @return {@link StaticParam}s
 	 */
 	public Iterable<StaticParam> getStaticParameters() {
 		StaticParams staticParams = method.getAnnotation(StaticParams.class);

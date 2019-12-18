@@ -3,25 +3,25 @@
 <module name="Checker">
   <property name="localeCountry" value="US"/>
   <property name="localeLanguage" value="en"/>
-  
+
   <!-- BeforeExecutionFileFilters is required for sources that are based on java9 -->
   <module name="BeforeExecutionExclusionFileFilter">
     <property name="fileNamePattern" value="module\-info\.java$" />
   </module>
-  
+
   <!-- Filters -->
   <module name="SeverityMatchFilter">
     <!-- report all violations except ignore -->
     <property name="severity" value="ignore"/>
     <property name="acceptOnMatch" value="false"/>
   </module>
-  
+
   <module name="SuppressionFilter">
     <property name="file" value="config/checkstyle/suppressions.xml"/>
     <property name="optional" value="true"/>
   </module>
   <module name="SuppressWarningsFilter"/>
-  
+
   <!-- Javadoc Comments -->
   <module name="JavadocPackage">
     <property name="severity" value="ignore"/><!-- confirmed -->
@@ -31,7 +31,7 @@
   <module name="NewlineAtEndOfFile"/>
   <module name="Translation"/>
   <module name="UniqueProperties"/>
-  
+
   <!-- Regexp -->
   <module name="RegexpMultiline"/>
   <module name="RegexpSingleline">
@@ -49,22 +49,22 @@
 
   <!-- Size Violations -->
   <module name="FileLength"/>
-  
+
   <!-- Whitespace -->
   <module name="FileTabCharacter">
     <property name="severity" value="ignore"/><!-- confirmed -->
   </module>
-  
+
   <module name="TreeWalker">
     <property name="tabWidth" value="4"/>
-    
+
     <module name="SuppressionCommentFilter"/>
     <module name="SuppressWithNearbyCommentFilter">
       <property name="commentFormat" value="-@cs\[(\w+(\|\w+)*)\]"/>
       <property name="checkFormat" value="$1"/>
       <property name="influenceFormat" value="5"/>
     </module>
-    
+
     <!-- Annotations -->
     <module name="AnnotationLocation">
       <property name="tokens" value="ANNOTATION_DEF,ANNOTATION_FIELD_DEF"/>
@@ -84,7 +84,7 @@
     <module name="PackageAnnotation"/>
     <module name="SuppressWarnings"/>
     <module name="SuppressWarningsHolder"/>
-    
+
     <!-- Block Checks -->
     <module name="AvoidNestedBlocks"/>
     <module name="EmptyBlock">
@@ -111,7 +111,7 @@
       <property name="tokens" value="LITERAL_DO"/>
       <property name="option" value="same"/>
     </module>
-    
+
     <!-- Class Design -->
     <module name="DesignForExtension">
       <property name="severity" value="ignore"/><!-- confirmed -->
@@ -132,7 +132,7 @@
     <module name="VisibilityModifier">
       <property name="packageAllowed" value="true"/>
     </module>
-    
+
     <!-- Coding -->
     <module name="ArrayTrailingComma"/>
     <module name="AvoidInlineConditionals">
@@ -218,8 +218,8 @@
     <module name="SuperClone"/>
     <module name="SuperFinalize"/>
     <module name="UnnecessaryParentheses"/>
-    <module name="VariableDeclarationUsageDistance"/>    
-    
+    <module name="VariableDeclarationUsageDistance"/>
+
     <!-- Imports -->
     <module name="AvoidStarImport"/>
     <module name="AvoidStaticImport">
@@ -239,7 +239,7 @@
     </module>
     <module name="RedundantImport"/>
     <module name="UnusedImports"/>
-    
+
     <!-- Javadoc Comments -->
     <module name="AtclauseOrder"/>
     <module name="JavadocMethod">
@@ -283,7 +283,7 @@
     <module name="WriteTag">
       <property name="severity" value="ignore"/><!-- confirmed -->
     </module>
-    
+
     <!-- Metrics -->
     <module name="BooleanExpressionComplexity">
       <property name="max" value="7"/>
@@ -306,7 +306,7 @@
         <property name="methodMaximum" value="70"/><!-- TODO default 50 -->
     </module>
     <module name="NPathComplexity"/>
-    
+
     <!-- Misc -->
     <module name="ArrayTypeStyle"/>
     <module name="AvoidEscapedUnicodeCharacters">
@@ -336,11 +336,11 @@
       <property name="excludedClasses" value=".*Application$"/>
     </module>
     <module name="UpperEll"/>
-    
+
     <!-- Modifiers -->
     <module name="ModifierOrder"/>
     <module name="RedundantModifier"/>
-    
+
     <!-- Naming Conventions -->
     <module name="AbbreviationAsWordInName">
       <property name="ignoreFinal" value="false"/>
@@ -350,19 +350,25 @@
     <module name="CatchParameterName">
       <property name="format" value="^(e|ex|[a-z][a-z][a-zA-Z]+)$"/>
     </module>
-    <module name="ClassTypeParameterName"/>
+    <module name="ClassTypeParameterName">
+      <property name="format" value="^[A-Z_]+$"/>
+    </module>
     <module name="ConstantName"/>
-    <module name="InterfaceTypeParameterName"/>
+    <module name="InterfaceTypeParameterName">
+      <property name="format" value="^[A-Z_]+$"/>
+    </module>
     <module name="LocalFinalVariableName"/>
     <module name="LocalVariableName"/>
     <module name="MemberName"/>
     <module name="MethodName"/>
-    <module name="MethodTypeParameterName"/>
+    <module name="MethodTypeParameterName">
+      <property name="format" value="^[A-Z_]+$"/>
+    </module>
     <module name="PackageName"/>
     <module name="ParameterName"/>
     <module name="StaticVariableName"/>
     <module name="TypeName"/>
-    
+
     <!-- Regexp -->
     <!--
     <module name="Regexp"/>
@@ -373,7 +379,7 @@
       <property name="format" value="[^\p{ASCII}]"/>
       <property name="ignoreComments" value="true"/>
     </module>
-    
+
     <!-- Size Violations -->
     <module name="AnonInnerLength"/>
     <module name="ExecutableStatementCount">
@@ -395,7 +401,7 @@
     <module name="ParameterNumber">
        <property name="max" value="20"/>
     </module>
-    
+
     <!-- Whitespace -->
     <module name="EmptyForInitializerPad"/>
     <module name="EmptyForIteratorPad"/>

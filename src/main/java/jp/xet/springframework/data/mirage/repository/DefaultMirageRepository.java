@@ -88,7 +88,7 @@ import jp.xet.springframework.data.mirage.repository.support.MirageEntityInforma
  * @param <ID> the type of the id of the entity the repository manages
  */
 @Slf4j // -@cs[MethodCount|ClassFanOutComplexity]
-public class DefaultMirageRepository<E, ID extends Serializable & Comparable<ID>, C> implements // NOPMD God class
+public class DefaultMirageRepository<E, ID extends Serializable & Comparable<ID>, C> implements // NOPMD God class1
 		ScannableRepository<E, ID>, CrudRepository<E, ID>, LockableReadableRepository<E, ID>,
 		BatchCreatableRepository<E, ID>, BatchReadableRepository<E, ID>,
 		BatchDeletableRepository<E, ID>, BatchUpsertableRepository<E, ID>,
