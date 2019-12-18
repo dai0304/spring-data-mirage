@@ -68,7 +68,7 @@ dependencyManagement {
 dependencies {
 	api "com.miragesql:miragesql:2.1.0"
 	api "com.miragesql:miragesql-integration:2.1.0"
-	api "org.ws2ten1:ws2ten1-repositories:1.0.0-rc12"
+	api "org.ws2ten1:ws2ten1-repositories:1.0.0-rc13"
 	api 'org.ws2ten1:ws2ten1-chunkrequests:1.0.0-rc1'
 
 	implementation "org.slf4j:slf4j-api"
