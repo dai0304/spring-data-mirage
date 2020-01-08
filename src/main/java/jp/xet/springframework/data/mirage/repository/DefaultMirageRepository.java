@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -142,7 +141,7 @@ public class DefaultMirageRepository<E, ID extends Serializable & Comparable<ID>
 	@Getter(AccessLevel.PROTECTED)
 	private final List<RepositoryActionListener> handlers;
 	
-	@Getter
+	@Getter(AccessLevel.PROTECTED)
 	private final PaginationTokenEncoder paginationTokenEncoder;
 	
 	@Getter(AccessLevel.PROTECTED)
@@ -306,11 +305,6 @@ public class DefaultMirageRepository<E, ID extends Serializable & Comparable<ID>
 			Collections.reverse(resultList);
 		}
 		return resultList;
-	}
-	
-	@Override
-	public Function<E, ID> getIdExtractor() {
-		return entityInformation::getId;
 	}
 	
 	// BatchReadableRepository

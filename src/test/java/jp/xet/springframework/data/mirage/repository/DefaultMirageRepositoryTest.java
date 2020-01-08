@@ -50,6 +50,8 @@ public class DefaultMirageRepositoryTest {
 	
 	private RepositoryFactorySupport factory;
 	
+	ChunkFactory<User, String> chunkFactory = new ChunkFactory<>();
+	
 	
 	@Before
 	public void setUp() throws Exception {
@@ -114,7 +116,7 @@ public class DefaultMirageRepositoryTest {
 		assertThat(actual).contains(new User("bar", "barpass"));
 		assertThat(actual).contains(new User("baz", "bazpass"));
 		
-		Chunk<User> chunk = ChunkFactory.from(repo).createChunk(actual, chunkable);
+		Chunk<User> chunk = chunkFactory.createChunk(actual, chunkable);
 		assertThat(chunk.getPaginationToken()).isNotNull();
 	}
 	
@@ -134,7 +136,7 @@ public class DefaultMirageRepositoryTest {
 		assertThat(actual).contains(new User("bar", "barpass"));
 		assertThat(actual).contains(new User("baz", "bazpass"));
 		
-		Chunk<User> chunk = ChunkFactory.from(repo).createChunk(actual, chunkable);
+		Chunk<User> chunk = chunkFactory.createChunk(actual, chunkable);
 		assertThat(chunk.getPaginationToken()).isNotNull();
 	}
 	
@@ -147,7 +149,7 @@ public class DefaultMirageRepositoryTest {
 		List<User> actual = repo.findAll(chunkable);
 		// verify
 		assertThat(actual).isEmpty();
-		Chunk<User> chunk = ChunkFactory.from(repo).createChunk(actual, chunkable);
+		Chunk<User> chunk = chunkFactory.createChunk(actual, chunkable);
 		assertThat(chunk.getPaginationToken()).isNull();
 	}
 }

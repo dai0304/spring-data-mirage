@@ -64,6 +64,8 @@ public class AutonumEntityRepositoryTest {
 	@Autowired
 	AutonumEntityRepository repo;
 	
+	ChunkFactory<AutonumEntity, String> chunkFactory = new ChunkFactory<>();
+	
 	// ReadableRepository
 	
 	
@@ -329,7 +331,7 @@ public class AutonumEntityRepositoryTest {
 		// verify
 		assertThat(list).hasSize(2)
 			.extracting("str").containsExactly("foo", "bar");
-		Chunk<AutonumEntity> chunk = ChunkFactory.from(repo).createChunk(list, chunkable);
+		Chunk<AutonumEntity> chunk = chunkFactory.createChunk(list, chunkable);
 		
 		// exercise
 		list = repo.findAll(chunk.nextChunkable());
@@ -358,7 +360,7 @@ public class AutonumEntityRepositoryTest {
 		// verify
 		assertThat(list).hasSize(2)
 			.extracting("str").containsExactly("garply", "grault");
-		Chunk<AutonumEntity> chunk = ChunkFactory.from(repo).createChunk(list, chunkable);
+		Chunk<AutonumEntity> chunk = chunkFactory.createChunk(list, chunkable);
 		
 		// exercise
 		list = repo.findAll(chunk.nextChunkable());

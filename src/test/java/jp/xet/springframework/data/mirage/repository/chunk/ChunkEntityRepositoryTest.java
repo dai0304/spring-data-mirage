@@ -53,6 +53,8 @@ public class ChunkEntityRepositoryTest {
 	@Autowired
 	ChunkEntityRepository repo;
 	
+	ChunkFactory<ChunkEntity, String> chunkFactory = new ChunkFactory<>();
+	
 	// ChunkableRepository
 	
 	
@@ -70,7 +72,7 @@ public class ChunkEntityRepositoryTest {
 			List<ChunkEntity> list = repo.findAll(requestAsc);
 			resultAsc.addAll(list);
 			
-			Chunk<ChunkEntity> chunk = ChunkFactory.from(repo).createChunk(list, requestAsc);
+			Chunk<ChunkEntity> chunk = chunkFactory.createChunk(list, requestAsc);
 			String paginationToken = chunk.getPaginationToken();
 			log.info("token: {}", paginationToken);
 			requestAsc = chunk.hasNext() ? chunk.nextChunkable() : null; // NOPMD
@@ -91,7 +93,7 @@ public class ChunkEntityRepositoryTest {
 		
 		Chunkable requestAsc = new ChunkRequest(8);
 		List<ChunkEntity> list1 = repo.findAll(requestAsc);
-		Chunk<ChunkEntity> chunk1 = ChunkFactory.from(repo).createChunk(list1, requestAsc);
+		Chunk<ChunkEntity> chunk1 = chunkFactory.createChunk(list1, requestAsc);
 		assertThat(chunk1.hasContent()).isTrue();
 		assertThat(chunk1.isFirst()).isTrue();
 		assertThat(chunk1.isLast()).isFalse();
@@ -106,7 +108,7 @@ public class ChunkEntityRepositoryTest {
 		assertThat(chunk1.getContent().get(7)).isEqualTo(new ChunkEntity("007", 7));
 		
 		List<ChunkEntity> list2 = repo.findAll(chunk1.nextChunkable());
-		Chunk<ChunkEntity> chunk2 = ChunkFactory.from(repo).createChunk(list2, chunk1.nextChunkable());
+		Chunk<ChunkEntity> chunk2 = chunkFactory.createChunk(list2, chunk1.nextChunkable());
 		assertThat(chunk2.hasContent()).isTrue();
 		assertThat(chunk2.isFirst()).isFalse();
 		assertThat(chunk2.isLast()).isFalse();
@@ -121,7 +123,7 @@ public class ChunkEntityRepositoryTest {
 		assertThat(chunk2.getContent().get(7)).isEqualTo(new ChunkEntity("015", 15));
 		
 		List<ChunkEntity> list3 = repo.findAll(chunk2.nextChunkable());
-		Chunk<ChunkEntity> chunk3 = ChunkFactory.from(repo).createChunk(list3, chunk2.nextChunkable());
+		Chunk<ChunkEntity> chunk3 = chunkFactory.createChunk(list3, chunk2.nextChunkable());
 		assertThat(chunk3.hasContent()).isTrue();
 		assertThat(chunk3.isFirst()).isFalse();
 		assertThat(chunk3.isLast()).isTrue();
@@ -136,7 +138,7 @@ public class ChunkEntityRepositoryTest {
 		assertThat(chunk3.getContent().get(3)).isEqualTo(new ChunkEntity("019", 19));
 		
 		List<ChunkEntity> list2again = repo.findAll(chunk3.previousChunkable());
-		Chunk<ChunkEntity> chunk2again = ChunkFactory.from(repo).createChunk(list2again, chunk3.previousChunkable());
+		Chunk<ChunkEntity> chunk2again = chunkFactory.createChunk(list2again, chunk3.previousChunkable());
 		assertThat(chunk2again.hasContent()).isTrue();
 		assertThat(chunk2again.isFirst()).isFalse();
 		assertThat(chunk2again.isLast()).isFalse();
@@ -152,7 +154,7 @@ public class ChunkEntityRepositoryTest {
 		
 		List<ChunkEntity> list1again = repo.findAll(chunk2again.previousChunkable());
 		Chunk<ChunkEntity> chunk1again =
-				ChunkFactory.from(repo).createChunk(list1again, chunk2again.previousChunkable());
+				chunkFactory.createChunk(list1again, chunk2again.previousChunkable());
 		assertThat(chunk1again.hasContent()).isTrue();
 		assertThat(chunk1again.isFirst()).isFalse();
 		assertThat(chunk1again.isLast()).isFalse();
@@ -167,7 +169,7 @@ public class ChunkEntityRepositoryTest {
 		assertThat(chunk1again.getContent().get(7)).isEqualTo(new ChunkEntity("007", 7));
 		
 		List<ChunkEntity> list0 = repo.findAll(chunk1again.previousChunkable());
-		Chunk<ChunkEntity> chunk0 = ChunkFactory.from(repo).createChunk(list0, chunk1again.previousChunkable());
+		Chunk<ChunkEntity> chunk0 = chunkFactory.createChunk(list0, chunk1again.previousChunkable());
 		assertThat(chunk0.hasContent()).isFalse();
 		assertThat(chunk0.isFirst()).isFalse();
 		assertThat(chunk0.isLast()).isTrue();
@@ -179,7 +181,7 @@ public class ChunkEntityRepositoryTest {
 		assertThat(chunk0.getContent()).hasSize(0);
 		
 		List<ChunkEntity> list1again2 = repo.findAll(chunk0.nextChunkable());
-		Chunk<ChunkEntity> chunk1again2 = ChunkFactory.from(repo).createChunk(list1again2, chunk0.nextChunkable());
+		Chunk<ChunkEntity> chunk1again2 = chunkFactory.createChunk(list1again2, chunk0.nextChunkable());
 		assertThat(chunk1again2.hasContent()).isTrue();
 		assertThat(chunk1again2.isFirst()).isTrue();
 		assertThat(chunk1again2.isLast()).isFalse();
@@ -203,7 +205,7 @@ public class ChunkEntityRepositoryTest {
 		
 		Chunkable requestAsc = new ChunkRequest(20);
 		List<ChunkEntity> list1 = repo.findAll(requestAsc);
-		Chunk<ChunkEntity> chunk1 = ChunkFactory.from(repo).createChunk(list1, requestAsc);
+		Chunk<ChunkEntity> chunk1 = chunkFactory.createChunk(list1, requestAsc);
 		assertThat(chunk1.hasContent()).isTrue();
 		assertThat(chunk1.isFirst()).isTrue();
 		assertThat(chunk1.isLast()).isFalse();
@@ -218,7 +220,7 @@ public class ChunkEntityRepositoryTest {
 		assertThat(chunk1.getContent().get(19)).isEqualTo(new ChunkEntity("019", 19));
 		
 		List<ChunkEntity> list2 = repo.findAll(chunk1.nextChunkable());
-		Chunk<ChunkEntity> chunk2 = ChunkFactory.from(repo).createChunk(list2, chunk1.nextChunkable());
+		Chunk<ChunkEntity> chunk2 = chunkFactory.createChunk(list2, chunk1.nextChunkable());
 		assertThat(chunk2.hasContent()).isFalse();
 		assertThat(chunk2.isFirst()).isFalse();
 		assertThat(chunk2.isLast()).isTrue();
@@ -230,7 +232,7 @@ public class ChunkEntityRepositoryTest {
 		assertThat(chunk2.getContent()).isEmpty();
 		
 		List<ChunkEntity> list1again = repo.findAll(chunk2.previousChunkable());
-		Chunk<ChunkEntity> chunk1again = ChunkFactory.from(repo).createChunk(list1again, chunk2.previousChunkable());
+		Chunk<ChunkEntity> chunk1again = chunkFactory.createChunk(list1again, chunk2.previousChunkable());
 		assertThat(chunk1again.hasContent()).isTrue();
 		assertThat(chunk1again.isFirst()).isTrue();
 		assertThat(chunk1again.isLast()).isFalse();
@@ -254,7 +256,7 @@ public class ChunkEntityRepositoryTest {
 		
 		Chunkable requestAsc = new ChunkRequest(30);
 		List<ChunkEntity> list = repo.findAll(requestAsc);
-		Chunk<ChunkEntity> chunk = ChunkFactory.from(repo).createChunk(list, requestAsc);
+		Chunk<ChunkEntity> chunk = chunkFactory.createChunk(list, requestAsc);
 		assertThat(chunk.hasContent()).isTrue();
 		assertThat(chunk.isFirst()).isTrue();
 		assertThat(chunk.isLast()).isTrue();
@@ -281,7 +283,7 @@ public class ChunkEntityRepositoryTest {
 		Chunkable requestDesc = new ChunkRequest(8, Direction.DESC);
 		do {
 			List<ChunkEntity> list = repo.findAll(requestDesc);
-			Chunk<ChunkEntity> chunk = ChunkFactory.from(repo).createChunk(list, requestDesc);
+			Chunk<ChunkEntity> chunk = chunkFactory.createChunk(list, requestDesc);
 			resultDesc.addAll(chunk.getContent());
 			String paginationToken = chunk.getPaginationToken();
 			log.info("token: {}", paginationToken);
@@ -303,7 +305,7 @@ public class ChunkEntityRepositoryTest {
 		
 		Chunkable requestAsc = new ChunkRequest(8, Direction.DESC);
 		List<ChunkEntity> list1 = repo.findAll(requestAsc);
-		Chunk<ChunkEntity> chunk1 = ChunkFactory.from(repo).createChunk(list1, requestAsc);
+		Chunk<ChunkEntity> chunk1 = chunkFactory.createChunk(list1, requestAsc);
 		assertThat(chunk1.hasContent()).isTrue();
 		assertThat(chunk1.isFirst()).isTrue();
 		assertThat(chunk1.isLast()).isFalse();
@@ -318,7 +320,7 @@ public class ChunkEntityRepositoryTest {
 		assertThat(chunk1.getContent().get(7)).isEqualTo(new ChunkEntity("012", 12));
 		
 		List<ChunkEntity> list2 = repo.findAll(chunk1.nextChunkable());
-		Chunk<ChunkEntity> chunk2 = ChunkFactory.from(repo).createChunk(list2, chunk1.nextChunkable());
+		Chunk<ChunkEntity> chunk2 = chunkFactory.createChunk(list2, chunk1.nextChunkable());
 		assertThat(chunk2.hasContent()).isTrue();
 		assertThat(chunk2.isFirst()).isFalse();
 		assertThat(chunk2.isLast()).isFalse();
@@ -333,7 +335,7 @@ public class ChunkEntityRepositoryTest {
 		assertThat(chunk2.getContent().get(7)).isEqualTo(new ChunkEntity("004", 4));
 		
 		List<ChunkEntity> list3 = repo.findAll(chunk2.nextChunkable());
-		Chunk<ChunkEntity> chunk3 = ChunkFactory.from(repo).createChunk(list3, chunk2.nextChunkable());
+		Chunk<ChunkEntity> chunk3 = chunkFactory.createChunk(list3, chunk2.nextChunkable());
 		assertThat(chunk3.hasContent()).isTrue();
 		assertThat(chunk3.isFirst()).isFalse();
 		assertThat(chunk3.isLast()).isTrue();
@@ -348,7 +350,7 @@ public class ChunkEntityRepositoryTest {
 		assertThat(chunk3.getContent().get(3)).isEqualTo(new ChunkEntity("000", 0));
 		
 		List<ChunkEntity> list2again = repo.findAll(chunk3.previousChunkable());
-		Chunk<ChunkEntity> chunk2again = ChunkFactory.from(repo).createChunk(list2again, chunk3.previousChunkable());
+		Chunk<ChunkEntity> chunk2again = chunkFactory.createChunk(list2again, chunk3.previousChunkable());
 		assertThat(chunk2again.hasContent()).isTrue();
 		assertThat(chunk2again.isFirst()).isFalse();
 		assertThat(chunk2again.isLast()).isFalse();
@@ -364,7 +366,7 @@ public class ChunkEntityRepositoryTest {
 		
 		List<ChunkEntity> list1again = repo.findAll(chunk2again.previousChunkable());
 		Chunk<ChunkEntity> chunk1again =
-				ChunkFactory.from(repo).createChunk(list1again, chunk2again.previousChunkable());
+				chunkFactory.createChunk(list1again, chunk2again.previousChunkable());
 		assertThat(chunk1again.hasContent()).isTrue();
 		assertThat(chunk1again.isFirst()).isFalse();
 		assertThat(chunk1again.isLast()).isFalse();
@@ -379,7 +381,7 @@ public class ChunkEntityRepositoryTest {
 		assertThat(chunk1again.getContent().get(7)).isEqualTo(new ChunkEntity("012", 12));
 		
 		List<ChunkEntity> list0 = repo.findAll(chunk1again.previousChunkable());
-		Chunk<ChunkEntity> chunk0 = ChunkFactory.from(repo).createChunk(list0, chunk1again.previousChunkable());
+		Chunk<ChunkEntity> chunk0 = chunkFactory.createChunk(list0, chunk1again.previousChunkable());
 		assertThat(chunk0.hasContent()).isFalse();
 		assertThat(chunk0.isFirst()).isFalse();
 		assertThat(chunk0.isLast()).isTrue();
@@ -391,7 +393,7 @@ public class ChunkEntityRepositoryTest {
 		assertThat(chunk0.getContent()).hasSize(0);
 		
 		List<ChunkEntity> list1again2 = repo.findAll(chunk0.nextChunkable());
-		Chunk<ChunkEntity> chunk1again2 = ChunkFactory.from(repo).createChunk(list1again2, chunk0.nextChunkable());
+		Chunk<ChunkEntity> chunk1again2 = chunkFactory.createChunk(list1again2, chunk0.nextChunkable());
 		assertThat(chunk1again2.hasContent()).isTrue();
 		assertThat(chunk1again2.isFirst()).isTrue();
 		assertThat(chunk1again2.isLast()).isFalse();
@@ -415,7 +417,7 @@ public class ChunkEntityRepositoryTest {
 		
 		Chunkable requestAsc = new ChunkRequest(20, Direction.DESC);
 		List<ChunkEntity> list1 = repo.findAll(requestAsc);
-		Chunk<ChunkEntity> chunk1 = ChunkFactory.from(repo).createChunk(list1, requestAsc);
+		Chunk<ChunkEntity> chunk1 = chunkFactory.createChunk(list1, requestAsc);
 		assertThat(chunk1.hasContent()).isTrue();
 		assertThat(chunk1.isFirst()).isTrue();
 		assertThat(chunk1.isLast()).isFalse();
@@ -430,7 +432,7 @@ public class ChunkEntityRepositoryTest {
 		assertThat(chunk1.getContent().get(19)).isEqualTo(new ChunkEntity("000", 0));
 		
 		List<ChunkEntity> list2 = repo.findAll(chunk1.nextChunkable());
-		Chunk<ChunkEntity> chunk2 = ChunkFactory.from(repo).createChunk(list2, chunk1.nextChunkable());
+		Chunk<ChunkEntity> chunk2 = chunkFactory.createChunk(list2, chunk1.nextChunkable());
 		assertThat(chunk2.hasContent()).isFalse();
 		assertThat(chunk2.isFirst()).isFalse();
 		assertThat(chunk2.isLast()).isTrue();
@@ -442,7 +444,7 @@ public class ChunkEntityRepositoryTest {
 		assertThat(chunk2.getContent()).isEmpty();
 		
 		List<ChunkEntity> list1again = repo.findAll(chunk2.previousChunkable());
-		Chunk<ChunkEntity> chunk1again = ChunkFactory.from(repo).createChunk(list1again, chunk2.previousChunkable());
+		Chunk<ChunkEntity> chunk1again = chunkFactory.createChunk(list1again, chunk2.previousChunkable());
 		assertThat(chunk1again.hasContent()).isTrue();
 		assertThat(chunk1again.isFirst()).isTrue();
 		assertThat(chunk1again.isLast()).isFalse();
@@ -466,7 +468,7 @@ public class ChunkEntityRepositoryTest {
 		
 		Chunkable requestAsc = new ChunkRequest(30, Direction.DESC);
 		List<ChunkEntity> list = repo.findAll(requestAsc);
-		Chunk<ChunkEntity> chunk = ChunkFactory.from(repo).createChunk(list, requestAsc);
+		Chunk<ChunkEntity> chunk = chunkFactory.createChunk(list, requestAsc);
 		assertThat(chunk.hasContent()).isTrue();
 		assertThat(chunk.isFirst()).isTrue();
 		assertThat(chunk.isLast()).isTrue();
