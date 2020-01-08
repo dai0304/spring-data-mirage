@@ -20,6 +20,7 @@ import java.util.List;
 import org.springframework.data.repository.query.Param;
 
 import jp.xet.sparwings.spring.data.chunk.Chunk;
+import jp.xet.sparwings.spring.data.chunk.Chunkable;
 import jp.xet.sparwings.spring.data.repository.ChunkableRepository;
 import jp.xet.sparwings.spring.data.repository.PageableRepository;
 import jp.xet.sparwings.spring.data.repository.ScannableRepository;
@@ -65,6 +66,6 @@ public interface EntityRepository extends ScannableRepository<Entity, Long>, Ups
 	 *
 	 * @return the entities found
 	 */
-	Chunk<Entity> findChunk();
+	Chunk<Entity> findChunk(Chunkable chunkable);
 	
 }

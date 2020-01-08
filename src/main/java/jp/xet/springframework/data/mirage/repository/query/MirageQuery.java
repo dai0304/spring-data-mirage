@@ -352,12 +352,20 @@ public class MirageQuery implements RepositoryQuery {
 			return resultList;
 		}
 		
-		String firstKey = Objects
-			.toString(getId((chunkable == null || chunkable.getPaginationToken() == null || resultList.isEmpty()) ? null
-					: resultList.get(0)));
-		String lastKey = Objects.toString(getId(resultList.isEmpty() ? null : resultList.get(resultList.size() - 1)));
-		String pt = encoder.encode(firstKey, lastKey);
+		String pt = computePaginationToken(resultList, chunkable);
 		return new ChunkImpl<>(resultList, pt, chunkable);
+	}
+	
+	private String computePaginationToken(List<?> resultList, Chunkable chunkable) {
+		if (resultList.isEmpty()) {
+			return null;
+		}
+		String firstKey = null;
+		if (chunkable != null && chunkable.getPaginationToken() != null) {
+			firstKey = Objects.toString(getId(resultList.get(0)));
+		}
+		String lastKey = Objects.toString(getId(resultList.get(resultList.size() - 1)));
+		return encoder.encode(firstKey, lastKey);
 	}
 	
 	private Object processPageQuery(SqlResource sqlResource, Map<String, Object> parameterMap,
