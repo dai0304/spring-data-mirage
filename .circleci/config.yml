@@ -25,6 +25,9 @@ jobs:
       - run:
           name: Run tests
           command: ./gradlew check jacocoTestReport
+      - run:
+          name: Run build
+          command: ./gradlew build
       - store_artifacts:
           name: Store artifacts
           path: build/reports
@@ -35,7 +38,7 @@ jobs:
           name: Deploy to JFrog Bintray
           command: |
             if [ -n "${CIRCLE_TAG}" -a -n "${BINTRAY_USER}" ]; then
-              ./gradlew build bintrayUpload
+              ./gradlew bintrayUpload
             fi
       - save_cache:
           key: v0-{{ .Branch }}-{{ checksum ".circleci/config.yml" }}-{{ checksum "build.gradle" }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
