@@ -84,7 +84,7 @@ dependencyManagement {
 dependencies {
 	implementation "org.slf4j:slf4j-api"
 	implementation "com.google.guava:guava:$guavaVersion"
-	implementation "org.springframework.data:spring-data-commons"
+	implementation "org.springframework.data:spring-data-commons:$springDataCommonsVersion"
 	implementation "com.miragesql:miragesql:$mirageVersion"
 	implementation "com.miragesql:miragesql-integration:$mirageVersion"
 	compileOnly "org.springframework:spring-context"
