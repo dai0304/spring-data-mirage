@@ -19,6 +19,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
@@ -160,13 +161,26 @@ public class EntityRepositoryTest {
 	public void test_create_and_findChunk() {
 		assertThat(repo.count(), is(0L));
 		Entity foo = repo.create(new Entity("foo"));
-		assertThat(repo.count(), is(1L));
-		Chunk<Entity> chunk = repo.findChunk();
-		assertThat(chunk.getContent().size(), is(1));
+		Entity bar = repo.create(new Entity("bar"));
+		Entity baz = repo.create(new Entity("baz"));
+		assertThat(repo.count(), is(3L));
+		Chunk<Entity> chunk1 = repo.findChunk(new ChunkRequest(1));
+		assertThat(chunk1.getContent().size(), is(1));
 		
-		Entity foundFoo = chunk.iterator().next();
-		assertThat(foundFoo.getId(), is(foo.getId()));
-		assertThat(foundFoo.getStr(), is("foo"));
+		Entity foundBar = chunk1.iterator().next();
+		assertThat(foundBar.getId(), is(bar.getId()));
+		assertThat(foundBar.getStr(), is("bar"));
+		
+		Chunk<Entity> chunk2 = repo.findChunk(chunk1.nextChunkable());
+		assertThat(chunk2.getContent().size(), is(1));
+		
+		Entity foundBaz = chunk2.iterator().next();
+		assertThat(foundBaz.getId(), is(baz.getId()));
+		assertThat(foundBaz.getStr(), is("baz"));
+		
+		Chunk<Entity> chunk3 = repo.findChunk(chunk2.nextChunkable());
+		assertThat(chunk3.getContent().isEmpty(), is(true));
+		assertThat(chunk3.getPaginationToken(), is(nullValue()));
 	}
 	
 	@Test
