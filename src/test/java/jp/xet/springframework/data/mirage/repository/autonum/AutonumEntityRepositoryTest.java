@@ -64,7 +64,7 @@ public class AutonumEntityRepositoryTest {
 	@Autowired
 	AutonumEntityRepository repo;
 	
-	ChunkFactory<AutonumEntity, String> chunkFactory = new ChunkFactory<>();
+	ChunkFactory chunkFactory = new ChunkFactory();
 	
 	// ReadableRepository
 	

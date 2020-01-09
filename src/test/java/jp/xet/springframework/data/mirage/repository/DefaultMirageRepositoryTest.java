@@ -50,7 +50,7 @@ public class DefaultMirageRepositoryTest {
 	
 	private RepositoryFactorySupport factory;
 	
-	ChunkFactory<User, String> chunkFactory = new ChunkFactory<>();
+	ChunkFactory chunkFactory = new ChunkFactory();
 	
 	
 	@Before

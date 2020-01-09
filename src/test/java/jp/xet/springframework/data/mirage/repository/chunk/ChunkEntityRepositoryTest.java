@@ -53,7 +53,7 @@ public class ChunkEntityRepositoryTest {
 	@Autowired
 	ChunkEntityRepository repo;
 	
-	ChunkFactory<ChunkEntity, String> chunkFactory = new ChunkFactory<>();
+	ChunkFactory chunkFactory = new ChunkFactory();
 	
 	// ChunkableRepository
 	
