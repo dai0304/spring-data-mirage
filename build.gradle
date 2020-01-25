@@ -89,7 +89,7 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'com.h2database:h2'
 	testImplementation 'ch.qos.logback:logback-classic'
-	testImplementation 'org.polycreo:polycreo-chunks:1.0.0-rc16'
+	testImplementation 'org.polycreo:polycreo-chunks:1.0.0-rc17'
 
 	pmd 'net.sourceforge.pmd:pmd-java:6.16.0'
 	pmd 'org.ow2.asm:asm:7.1'
