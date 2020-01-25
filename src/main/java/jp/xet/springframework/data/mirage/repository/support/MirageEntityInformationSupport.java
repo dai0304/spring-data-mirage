@@ -23,6 +23,9 @@ import org.springframework.data.annotation.Version;
 import org.springframework.data.repository.core.EntityInformation;
 import org.springframework.data.repository.core.support.AbstractEntityInformation;
 
+import org.polycreo.id.DefaultIdExtractor;
+import org.polycreo.id.IdExtractor;
+
 import com.miragesql.miragesql.SqlManager;
 import com.miragesql.miragesql.naming.NameConverter;
 import com.miragesql.miragesql.util.MirageUtil;
@@ -50,6 +53,8 @@ public class MirageEntityInformationSupport<T, ID extends Serializable, C>
 	
 	private final NameConverter nameConverter;
 	
+	private IdExtractor idExtractor = new DefaultIdExtractor();
+	
 	
 	/**
 	 * Creates a new {@link MirageEntityInformationSupport} with the given domain class.
@@ -73,25 +78,9 @@ public class MirageEntityInformationSupport<T, ID extends Serializable, C>
 	
 	@Override
 	public ID getId(T entity) {
-		Class<?> c = getJavaType();
-		while (c != null && c != Object.class) {
-			Field[] declaredFields = c.getDeclaredFields();
-			for (Field field : declaredFields) {
-				Id idAnnotation = field.getAnnotation(Id.class);
-				if (idAnnotation != null) {
-					field.setAccessible(true);
-					try {
-						@SuppressWarnings("unchecked")
-						ID id = (ID) field.get(entity);
-						return id;
-					} catch (Exception e) { // NOPMD
-						// NOPMD ignore
-					}
-				}
-			}
-			c = c.getSuperclass();
-		}
-		return null;
+		@SuppressWarnings("unchecked")
+		ID id = (ID) idExtractor.getId(entity);
+		return id;
 	}
 	
 	@Override

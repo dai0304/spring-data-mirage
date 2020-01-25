@@ -70,6 +70,8 @@ dependencies {
 	api 'com.miragesql:miragesql:2.1.0'
 	api 'com.miragesql:miragesql-integration:2.1.0'
 	api 'org.polycreo:polycreo-repositories:1.0.0-rc20'
+	api 'org.polycreo:polycreo-chunkrequests:1.0.0-rc5'
+	implementation 'org.polycreo:polycreo-id:1.0.0-rc1'
 
 	implementation 'org.slf4j:slf4j-api'
 	implementation 'com.google.guava:guava:24.1-jre'
