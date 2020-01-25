@@ -240,9 +240,10 @@ public class MirageQuery implements RepositoryQuery { // NOPMD God class
 		}) {
 			String simpleName = clazz.getSimpleName();
 			String args = getArgsPartOfSignature(mirageQueryMethod.asMethod());
+			String nameWithMethodName = simpleName + "_" + mirageQueryMethod.getName();
 			candidates.addAll(Arrays.asList(
-					new SqlResourceCandidate(clazz, simpleName + "_" + mirageQueryMethod.getName() + args + ".sql"),
-					new SqlResourceCandidate(clazz, simpleName + "_" + mirageQueryMethod.getName() + ".sql"),
+					new SqlResourceCandidate(clazz, nameWithMethodName + args + ".sql"),
+					new SqlResourceCandidate(clazz, nameWithMethodName + ".sql"),
 					new SqlResourceCandidate(clazz, simpleName + ".sql")));
 		}
 		return candidates.toArray(new SqlResourceCandidate[0]);

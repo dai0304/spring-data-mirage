@@ -421,8 +421,8 @@ public class DefaultMirageRepository<E, ID extends Serializable & Comparable<ID>
 		if (condition == null || condition.equals(actualCondition)) {
 			return update(clone);
 		} else {
-			String message =
-					String.format(Locale.ENGLISH, "expected is %s, but actual is %s", condition, actualCondition);
+			String message = String.format(Locale.ENGLISH, "expected is %s, but actual is %s",
+					condition, actualCondition);
 			throw new OptimisticLockingFailureException(message);
 		}
 	}
@@ -440,8 +440,8 @@ public class DefaultMirageRepository<E, ID extends Serializable & Comparable<ID>
 		if (condition == null || condition.equals(actualCondition)) {
 			deleteById(id);
 		} else {
-			String message =
-					String.format(Locale.ENGLISH, "expected is %s, but actual is %s", condition, actualCondition);
+			String message = String.format(Locale.ENGLISH, "expected is %s, but actual is %s",
+					condition, actualCondition);
 			throw new OptimisticLockingFailureException(message);
 		}
 	}
@@ -933,7 +933,8 @@ public class DefaultMirageRepository<E, ID extends Serializable & Comparable<ID>
 			List<String> orders = new ArrayList<String>();
 			Sort sort = pageable.getSort();
 			for (Order order : sort) {
-				orders.add(String.format(Locale.ENGLISH, "%s %s", order.getProperty(), order.getDirection().name()));
+				orders.add(String.format(Locale.ENGLISH, "%s %s",
+						order.getProperty(), order.getDirection().name()));
 			}
 			if (orders.isEmpty() == false) {
 				params.put("orders", join(orders));
@@ -948,8 +949,9 @@ public class DefaultMirageRepository<E, ID extends Serializable & Comparable<ID>
 		}
 		List<String> list = new ArrayList<String>();
 		for (Order order : sort) {
-			String orderDefinition =
-					String.format(Locale.ENGLISH, "%s %s", order.getProperty(), order.getDirection()).trim();
+			String orderDefinition = String.format(Locale.ENGLISH, "%s %s",
+					order.getProperty(), order.getDirection())
+				.trim();
 			if (orderDefinition.isEmpty() == false) {
 				list.add(orderDefinition);
 			}

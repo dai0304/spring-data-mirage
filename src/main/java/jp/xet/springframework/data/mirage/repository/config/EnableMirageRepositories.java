@@ -46,7 +46,8 @@ public @interface EnableMirageRepositories {
 	
 	/**
 	 * Alias for the {@link #basePackages()} attribute. Allows for more concise annotation declarations e.g.:
-	 * {@code @EnableMirageRepositories("org.my.pkg")} instead of {@code @EnableMirageRepositories(basePackages="org.my.pkg")}.
+	 * {@code @EnableMirageRepositories("org.my.pkg")} instead of
+	 * {@code @EnableMirageRepositories(basePackages="org.my.pkg")}.
 	 */
 	String[] value() default {};
 	
