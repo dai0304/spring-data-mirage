@@ -17,7 +17,7 @@
     <!-- モデルがWeb層やconfigに依存してはいけない -->
     <disallow pkg="org.springframework.web.servlet"/>
     <disallow pkg="org.springframework.security.oauth2.provider"/>
-    <disallow pkg="org.ws2ten1.httpexceptions"/>
+    <disallow pkg="org.polycreo.httpexceptions"/>
     <disallow pkg="@@your-package@@.web"/>
   </subpackage>
 

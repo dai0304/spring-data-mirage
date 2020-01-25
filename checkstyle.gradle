@@ -1,5 +1,5 @@
 checkstyle {
-	toolVersion = "8.20"
+	toolVersion = "8.27"
 	showViolations = true
 	configFile = rootProject.file("${rootProject.projectDir}/config/checkstyle/checkstyle.xml")
 }
