@@ -1,6 +1,6 @@
 pmd {
 	consoleOutput = true
-	toolVersion = "6.4.0"
+	toolVersion = "6.20.0"
 }
 
 pmdMain {
