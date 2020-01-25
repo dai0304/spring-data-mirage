@@ -33,8 +33,8 @@ import org.springframework.data.repository.query.QueryLookupStrategy;
 import org.springframework.data.repository.query.QueryLookupStrategy.Key;
 import org.springframework.data.repository.query.QueryMethodEvaluationContextProvider;
 
-import org.ws2ten1.chunkrequests.PaginationTokenEncoder;
-import org.ws2ten1.chunkrequests.SimplePaginationTokenEncoder;
+import org.polycreo.chunkrequests.PaginationTokenEncoder;
+import org.polycreo.chunkrequests.SimplePaginationTokenEncoder;
 
 import com.miragesql.miragesql.SqlManager;
 import com.miragesql.miragesql.naming.DefaultNameConverter;

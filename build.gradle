@@ -52,7 +52,8 @@ apply plugin: 'io.spring.dependency-management'
 repositories {
 	jcenter()
 	mavenCentral()
-	maven { url 'http://dl.bintray.com/ws2ten1/maven-release' }
+	maven { url 'http://dl.bintray.com/polycreo/maven' }
+	maven { url 'https://jitpack.io' }
 }
 
 configurations {
@@ -68,7 +69,7 @@ dependencyManagement {
 dependencies {
 	api 'com.miragesql:miragesql:2.1.0'
 	api 'com.miragesql:miragesql-integration:2.1.0'
-	api 'org.ws2ten1:ws2ten1-repositories:1.0.0-rc17'
+	api 'org.polycreo:polycreo-repositories:1.0.0-rc20'
 
 	implementation 'org.slf4j:slf4j-api'
 	implementation 'com.google.guava:guava:24.1-jre'
@@ -86,7 +87,7 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'com.h2database:h2'
 	testImplementation 'ch.qos.logback:logback-classic'
-	testImplementation 'org.ws2ten1:ws2ten1-chunks:1.0.0-rc14'
+	testImplementation 'org.polycreo:polycreo-chunks:1.0.0-rc16'
 
 	pmd 'net.sourceforge.pmd:pmd-java:6.16.0'
 	pmd 'org.ow2.asm:asm:7.1'

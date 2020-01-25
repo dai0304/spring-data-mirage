@@ -19,7 +19,7 @@ import java.util.Optional;
 
 import org.springframework.data.repository.query.Param;
 
-import org.ws2ten1.repositories.UpsertableRepository;
+import org.polycreo.repositories.UpsertableRepository;
 
 import jp.xet.springframework.data.mirage.repository.chunk.ChunkEntity;
 

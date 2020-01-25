@@ -17,7 +17,7 @@ package jp.xet.springframework.data.mirage.repository.query;
 
 import org.springframework.data.repository.query.ParameterAccessor;
 
-import org.ws2ten1.chunkrequests.Chunkable;
+import org.polycreo.chunkrequests.Chunkable;
 
 /**
  * TODO for daisuke

@@ -30,11 +30,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.ws2ten1.chunkrequests.ChunkRequest;
-import org.ws2ten1.chunkrequests.Chunkable;
-import org.ws2ten1.chunkrequests.Direction;
-import org.ws2ten1.chunks.Chunk;
-import org.ws2ten1.chunks.ChunkFactory;
+import org.polycreo.chunkrequests.ChunkRequest;
+import org.polycreo.chunkrequests.Chunkable;
+import org.polycreo.chunkrequests.Direction;
+import org.polycreo.chunks.Chunk;
+import org.polycreo.chunks.ChunkFactory;
 
 import com.google.common.collect.Ordering;
 
@@ -53,7 +53,7 @@ public class ChunkEntityRepositoryTest {
 	@Autowired
 	ChunkEntityRepository repo;
 	
-	ChunkFactory<ChunkEntity, String> chunkFactory = new ChunkFactory<>();
+	ChunkFactory chunkFactory = new ChunkFactory();
 	
 	// ChunkableRepository
 	

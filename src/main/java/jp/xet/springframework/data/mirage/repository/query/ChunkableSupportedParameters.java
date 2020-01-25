@@ -23,7 +23,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.data.repository.query.DefaultParameters;
 import org.springframework.data.repository.query.Parameters;
 
-import org.ws2ten1.chunkrequests.Chunkable;
+import org.polycreo.chunkrequests.Chunkable;
 
 /**
  * TODO for daisuke

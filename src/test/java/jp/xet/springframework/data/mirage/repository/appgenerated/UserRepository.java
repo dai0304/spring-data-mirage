@@ -15,19 +15,19 @@
  */
 package jp.xet.springframework.data.mirage.repository.appgenerated;
 
-import org.ws2ten1.repositories.BatchCreatableRepository;
-import org.ws2ten1.repositories.BatchDeletableRepository;
-import org.ws2ten1.repositories.BatchReadableRepository;
-import org.ws2ten1.repositories.BatchUpsertableRepository;
-import org.ws2ten1.repositories.ChunkableRepository;
-import org.ws2ten1.repositories.CreatableRepository;
-import org.ws2ten1.repositories.DeletableRepository;
-import org.ws2ten1.repositories.LockableReadableRepository;
-import org.ws2ten1.repositories.PageableRepository;
-import org.ws2ten1.repositories.ScannableRepository;
-import org.ws2ten1.repositories.TruncatableRepository;
-import org.ws2ten1.repositories.UpdatableRepository;
-import org.ws2ten1.repositories.UpsertableRepository;
+import org.polycreo.repositories.BatchCreatableRepository;
+import org.polycreo.repositories.BatchDeletableRepository;
+import org.polycreo.repositories.BatchReadableRepository;
+import org.polycreo.repositories.BatchUpsertableRepository;
+import org.polycreo.repositories.ChunkableRepository;
+import org.polycreo.repositories.CreatableRepository;
+import org.polycreo.repositories.DeletableRepository;
+import org.polycreo.repositories.LockableReadableRepository;
+import org.polycreo.repositories.PageableRepository;
+import org.polycreo.repositories.ScannableRepository;
+import org.polycreo.repositories.TruncatableRepository;
+import org.polycreo.repositories.UpdatableRepository;
+import org.polycreo.repositories.UpsertableRepository;
 
 /**
  * Repository interface for {@link User}.

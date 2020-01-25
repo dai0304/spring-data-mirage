@@ -15,8 +15,8 @@
  */
 package jp.xet.springframework.data.mirage.repository.preprocess;
 
-import org.ws2ten1.repositories.ChunkableRepository;
-import org.ws2ten1.repositories.CreatableRepository;
+import org.polycreo.repositories.ChunkableRepository;
+import org.polycreo.repositories.CreatableRepository;
 
 /**
  * Repository interface for {@link PreProcessEntity}.

@@ -15,8 +15,8 @@
  */
 package jp.xet.springframework.data.mirage.repository.chunk;
 
-import org.ws2ten1.repositories.ChunkableRepository;
-import org.ws2ten1.repositories.UpsertableRepository;
+import org.polycreo.repositories.ChunkableRepository;
+import org.polycreo.repositories.UpsertableRepository;
 
 /**
  * Repository interface for {@link ChunkEntity}.

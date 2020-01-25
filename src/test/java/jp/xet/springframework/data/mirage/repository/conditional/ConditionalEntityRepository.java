@@ -15,10 +15,10 @@
  */
 package jp.xet.springframework.data.mirage.repository.conditional;
 
-import org.ws2ten1.repositories.ConditionalDeletableRepository;
-import org.ws2ten1.repositories.ConditionalUpdatableRepository;
-import org.ws2ten1.repositories.CreatableRepository;
-import org.ws2ten1.repositories.ReadableRepository;
+import org.polycreo.repositories.ConditionalDeletableRepository;
+import org.polycreo.repositories.ConditionalUpdatableRepository;
+import org.polycreo.repositories.CreatableRepository;
+import org.polycreo.repositories.ReadableRepository;
 
 /**
  * Repository interface for {@link ConditionalEntity}.

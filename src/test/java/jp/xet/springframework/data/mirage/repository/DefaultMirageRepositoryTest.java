@@ -29,9 +29,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.ws2ten1.chunkrequests.ChunkRequest;
-import org.ws2ten1.chunks.Chunk;
-import org.ws2ten1.chunks.ChunkFactory;
+import org.polycreo.chunkrequests.ChunkRequest;
+import org.polycreo.chunks.Chunk;
+import org.polycreo.chunks.ChunkFactory;
 
 import com.miragesql.miragesql.SqlManager;
 
@@ -50,7 +50,7 @@ public class DefaultMirageRepositoryTest {
 	
 	private RepositoryFactorySupport factory;
 	
-	ChunkFactory<User, String> chunkFactory = new ChunkFactory<>();
+	ChunkFactory chunkFactory = new ChunkFactory();
 	
 	
 	@Before

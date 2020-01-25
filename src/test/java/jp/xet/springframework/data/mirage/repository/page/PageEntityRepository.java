@@ -15,8 +15,8 @@
  */
 package jp.xet.springframework.data.mirage.repository.page;
 
-import org.ws2ten1.repositories.PageableRepository;
-import org.ws2ten1.repositories.UpsertableRepository;
+import org.polycreo.repositories.PageableRepository;
+import org.polycreo.repositories.UpsertableRepository;
 
 /**
  * Repository interface for {@link PageEntity}.

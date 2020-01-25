@@ -29,8 +29,8 @@ import org.springframework.data.repository.core.support.RepositoryFactorySupport
 import org.springframework.data.repository.core.support.TransactionalRepositoryFactoryBeanSupport;
 import org.springframework.util.Assert;
 
-import org.ws2ten1.chunkrequests.PaginationTokenEncoder;
-import org.ws2ten1.chunkrequests.SimplePaginationTokenEncoder;
+import org.polycreo.chunkrequests.PaginationTokenEncoder;
+import org.polycreo.chunkrequests.SimplePaginationTokenEncoder;
 
 import com.miragesql.miragesql.SqlManager;
 import com.miragesql.miragesql.naming.NameConverter;

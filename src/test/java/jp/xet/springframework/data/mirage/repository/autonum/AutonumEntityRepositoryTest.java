@@ -41,11 +41,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.ws2ten1.chunkrequests.ChunkRequest;
-import org.ws2ten1.chunkrequests.Chunkable;
-import org.ws2ten1.chunkrequests.Direction;
-import org.ws2ten1.chunks.Chunk;
-import org.ws2ten1.chunks.ChunkFactory;
+import org.polycreo.chunkrequests.ChunkRequest;
+import org.polycreo.chunkrequests.Chunkable;
+import org.polycreo.chunkrequests.Direction;
+import org.polycreo.chunks.Chunk;
+import org.polycreo.chunks.ChunkFactory;
 
 import jp.xet.springframework.data.mirage.repository.MirageConfiguration;
 
@@ -64,7 +64,7 @@ public class AutonumEntityRepositoryTest {
 	@Autowired
 	AutonumEntityRepository repo;
 	
-	ChunkFactory<AutonumEntity, String> chunkFactory = new ChunkFactory<>();
+	ChunkFactory chunkFactory = new ChunkFactory();
 	
 	// ReadableRepository
 	

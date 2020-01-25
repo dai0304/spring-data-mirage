@@ -23,7 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.query.Parameter;
 
-import org.ws2ten1.chunkrequests.Chunkable;
+import org.polycreo.chunkrequests.Chunkable;
 
 /**
  * TODO for daisuke

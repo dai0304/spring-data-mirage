@@ -19,12 +19,12 @@ import java.util.List;
 
 import org.springframework.data.repository.query.Param;
 
-import org.ws2ten1.repositories.BatchReadableRepository;
-import org.ws2ten1.repositories.ChunkableRepository;
-import org.ws2ten1.repositories.CrudRepository;
-import org.ws2ten1.repositories.PageableRepository;
-import org.ws2ten1.repositories.ScannableRepository;
-import org.ws2ten1.repositories.UpsertableRepository;
+import org.polycreo.repositories.BatchReadableRepository;
+import org.polycreo.repositories.ChunkableRepository;
+import org.polycreo.repositories.CrudRepository;
+import org.polycreo.repositories.PageableRepository;
+import org.polycreo.repositories.ScannableRepository;
+import org.polycreo.repositories.UpsertableRepository;
 
 import jp.xet.springframework.data.mirage.repository.query.StaticParam;
 
