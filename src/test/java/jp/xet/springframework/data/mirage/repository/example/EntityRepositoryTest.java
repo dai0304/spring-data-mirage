@@ -166,13 +166,19 @@ public class EntityRepositoryTest {
 		assertThat(repo.count(), is(3L));
 		Chunk<Entity> chunk1 = repo.findChunk(new ChunkRequest(1));
 		assertThat(chunk1.getContent().size(), is(1));
+		assertThat(chunk1.getPaginationToken(), is(notNullValue()));
 		
 		Entity foundBar = chunk1.iterator().next();
 		assertThat(foundBar.getId(), is(bar.getId()));
 		assertThat(foundBar.getStr(), is("bar"));
 		
+		Chunk<Entity> chunk0 = repo.findChunk(chunk1.prevChunkable());
+		assertThat(chunk0.getContent().size(), is(0));
+		assertThat(chunk0.getPaginationToken(), is(nullValue()));
+		
 		Chunk<Entity> chunk2 = repo.findChunk(chunk1.nextChunkable());
 		assertThat(chunk2.getContent().size(), is(1));
+		assertThat(chunk2.getPaginationToken(), is(notNullValue()));
 		
 		Entity foundBaz = chunk2.iterator().next();
 		assertThat(foundBaz.getId(), is(baz.getId()));
