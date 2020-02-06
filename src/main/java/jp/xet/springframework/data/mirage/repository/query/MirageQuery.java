@@ -360,10 +360,7 @@ public class MirageQuery implements RepositoryQuery {
 		if (resultList.isEmpty()) {
 			return null;
 		}
-		String firstKey = null;
-		if (chunkable != null && chunkable.getPaginationToken() != null) {
-			firstKey = Objects.toString(getId(resultList.get(0)));
-		}
+		String firstKey = Objects.toString(getId(resultList.get(0)));
 		String lastKey = Objects.toString(getId(resultList.get(resultList.size() - 1)));
 		return encoder.encode(firstKey, lastKey);
 	}
