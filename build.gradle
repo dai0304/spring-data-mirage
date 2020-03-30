@@ -97,7 +97,7 @@ dependencies {
 	testImplementation "ch.qos.logback:logback-classic"
 
 	pmd 'net.sourceforge.pmd:pmd-java:6.16.0'
-	pmd 'org.ow2.asm:asm:7.1'
+	pmd 'org.ow2.asm:asm:8.0'
 }
 
 bootJar {
