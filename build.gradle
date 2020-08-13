@@ -15,7 +15,7 @@ buildscript {
 
 plugins {
 	id 'java-library'
-	id 'org.springframework.boot' version '2.1.5.RELEASE'
+	id 'org.springframework.boot' version '2.3.3.RELEASE'
 	id 'maven-publish'
 	id "com.jfrog.bintray" version "1.8.4"
 }
